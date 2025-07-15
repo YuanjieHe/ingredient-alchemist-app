@@ -11,8 +11,7 @@ import { toast } from 'sonner';
 import heroImage from '@/assets/kitchen-hero.jpg';
 
 const Index = () => {
-  const [step, setStep] = useState<'apiKey' | 'ingredients' | 'preferences' | 'generating' | 'recipes'>('apiKey');
-  const [apiKey, setApiKey] = useState('');
+  const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'recipes'>('ingredients');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
   const [mealDays, setMealDays] = useState(3);
@@ -20,14 +19,9 @@ const Index = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  const recipeService = new RecipeService();
-
-  const handleApiKeySubmit = (key: string) => {
-    setApiKey(key);
-    recipeService.setApiKey(key);
-    setStep('ingredients');
-    toast.success('API key connected successfully!');
-  };
+  // Hardcoded API key - provided by the service
+  const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
+  const recipeService = new RecipeService(API_KEY);
 
   const handleContinueToPreferences = () => {
     if (ingredients.length === 0) {
@@ -52,7 +46,7 @@ const Index = () => {
         skillLevel,
         mealDays,
         allowShopping,
-        apiKey
+        apiKey: API_KEY
       });
 
       setRecipes(generatedRecipes);
@@ -75,9 +69,6 @@ const Index = () => {
 
   const renderContent = () => {
     switch (step) {
-      case 'apiKey':
-        return <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />;
-
       case 'ingredients':
         return (
           <div className="space-y-6">
@@ -154,7 +145,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-warm">
       {/* Hero Section */}
-      {step === 'apiKey' && (
+      {step === 'ingredients' && (
         <div className="relative h-64 mb-8 overflow-hidden">
           <img 
             src={heroImage} 
@@ -171,7 +162,7 @@ const Index = () => {
       )}
 
       {/* Navigation Header */}
-      {step !== 'apiKey' && (
+      {(step === 'preferences' || step === 'generating' || step === 'recipes') && (
         <div className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
@@ -180,8 +171,8 @@ const Index = () => {
                 <h1 className="text-xl font-bold text-foreground">CookSmart AI</h1>
               </div>
               <div className="flex items-center space-x-4 text-sm">
-                <div className={`px-3 py-1 rounded-full ${step === 'ingredients' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  1. Ingredients
+                <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground">
+                  1. Ingredients ✓
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'preferences' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                   2. Preferences
