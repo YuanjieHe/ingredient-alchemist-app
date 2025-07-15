@@ -58,7 +58,7 @@ export class RecipeService {
       hasApiKey: !!request.apiKey
     });
 
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = this.createPrompt(request);
     
     console.log('Generated prompt:', prompt);
