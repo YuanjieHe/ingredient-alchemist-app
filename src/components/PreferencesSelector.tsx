@@ -99,236 +99,230 @@ export const PreferencesSelector = ({
   const dayOptions = [1, 2, 3, 5, 7];
 
   return (
-    <div className="w-full p-8 space-y-8">
-      <div className="text-center space-y-3">
-        <h3 className="text-2xl font-bold text-foreground">
-          {t('cookingPreferences')}
-        </h3>
-        <p className="text-lg text-muted-foreground">
-          {t('cookingPreferencesDesc')}
-        </p>
-      </div>
+    <Card className="w-full animate-fade-in">
+      <CardContent className="p-6 space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            {t('cookingPreferences')}
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {t('cookingPreferencesDesc')}
+          </p>
+        </div>
 
-      {/* Number of People */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Users className="w-4 h-4 text-white" />
+        {/* Number of People */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Users className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('howManyPeople')}</h4>
           </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('howManyPeople')}</h4>
+          <div className="flex flex-wrap gap-2">
+            {peopleOptions.map((count) => (
+              <Badge
+                key={count}
+                variant={peopleCount === count ? "default" : "secondary"}
+                className={`
+                  cursor-pointer px-4 py-2 text-sm transition-all duration-200
+                  ${peopleCount === count 
+                    ? 'bg-primary text-primary-foreground shadow-primary' 
+                    : 'bg-cooking-warm text-foreground hover:bg-cooking-spice hover:text-white'
+                  }
+                `}
+                onClick={() => onPeopleCountChange(count)}
+              >
+                {count} {count === 1 ? t('person') : t('people')}
+              </Badge>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          {peopleOptions.map((count) => (
-            <button
-              key={count}
-              onClick={() => onPeopleCountChange(count)}
-              className={`
-                px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105
-                ${peopleCount === count 
-                  ? 'bg-primary text-white shadow-button' 
-                  : 'bg-soft-white text-foreground hover:bg-soft-blue border border-border'
-                }
-              `}
-            >
-              {count} {count === 1 ? t('person') : t('people')}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Meal Type */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Coffee className="w-4 h-4 text-white" />
+        {/* Meal Type */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Coffee className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('whatMeal')}</h4>
           </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('whatMeal')}</h4>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {mealTypeOptions.map((meal) => (
-            <button
-              key={meal.value}
-              onClick={() => onMealTypeChange(meal.value)}
-              className={`
-                rounded-2xl p-6 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-                ${mealType === meal.value 
-                  ? 'bg-gradient-blue text-white shadow-elegant' 
-                  : 'bg-soft-white hover:bg-soft-blue border border-border'
-                }
-              `}
-            >
-              <div className="text-center space-y-3">
-                <div className="text-3xl">{meal.emoji}</div>
-                <div className="font-semibold text-lg">{meal.label}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {mealTypeOptions.map((meal) => (
+              <div
+                key={meal.value}
+                onClick={() => onMealTypeChange(meal.value)}
+                className={`
+                  cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-warm
+                  ${mealType === meal.value 
+                    ? 'border-primary bg-cooking-cream shadow-primary' 
+                    : 'border-border bg-card hover:border-primary/50'
+                  }
+                `}
+              >
+                <div className="text-center space-y-2">
+                  <div className="text-2xl">{meal.emoji}</div>
+                  <div className="font-medium">{meal.label}</div>
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Occasion Type */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Calendar className="w-4 h-4 text-white" />
+            ))}
           </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('whatsOccasion')}</h4>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {occasionOptions.map((occasion) => (
-            <button
-              key={occasion.value}
-              onClick={() => onOccasionTypeChange(occasion.value)}
-              className={`
-                rounded-2xl p-6 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-                ${occasionType === occasion.value 
-                  ? 'bg-gradient-blue text-white shadow-elegant' 
-                  : 'bg-soft-white hover:bg-soft-blue border border-border'
-                }
-              `}
-            >
-              <div className="text-center space-y-3">
-                <div className="text-3xl">{occasion.emoji}</div>
-                <div className="font-semibold text-lg">{occasion.label}</div>
-                <div className="text-sm opacity-80">{occasion.description}</div>
+
+        {/* Occasion Type */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('whatsOccasion')}</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {occasionOptions.map((occasion) => (
+              <div
+                key={occasion.value}
+                onClick={() => onOccasionTypeChange(occasion.value)}
+                className={`
+                  cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-warm
+                  ${occasionType === occasion.value 
+                    ? 'border-primary bg-cooking-cream shadow-primary' 
+                    : 'border-border bg-card hover:border-primary/50'
+                  }
+                `}
+              >
+                <div className="text-center space-y-2">
+                  <div className="text-2xl">{occasion.emoji}</div>
+                  <div className="font-medium">{occasion.label}</div>
+                  <div className="text-xs text-muted-foreground">{occasion.description}</div>
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Cuisine Type */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Globe className="w-4 h-4 text-white" />
+            ))}
           </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('whatCuisine')}</h4>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {cuisineOptions.map((cuisine) => (
-            <button
-              key={cuisine.value}
-              onClick={() => onCuisineTypeChange(cuisine.value)}
+
+        {/* Cuisine Type */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Globe className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('whatCuisine')}</h4>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {cuisineOptions.map((cuisine) => (
+              <div
+                key={cuisine.value}
+                onClick={() => onCuisineTypeChange(cuisine.value)}
+                className={`
+                  cursor-pointer rounded-lg border-2 p-3 transition-all duration-200 hover:shadow-warm
+                  ${cuisineType === cuisine.value 
+                    ? 'border-primary bg-cooking-cream shadow-primary' 
+                    : 'border-border bg-card hover:border-primary/50'
+                  }
+                `}
+              >
+                <div className="text-center space-y-1">
+                  <div className="text-xl">{cuisine.emoji}</div>
+                  <div className="text-sm font-medium">{cuisine.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skill Level */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <ChefHat className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('cookingSkillLevel')}</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {skillLevels.map((level) => (
+              <div
+                key={level.value}
+                onClick={() => onSkillLevelChange(level.value)}
+                className={`
+                  cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-warm
+                  ${skillLevel === level.value 
+                    ? 'border-primary bg-cooking-cream shadow-primary' 
+                    : 'border-border bg-card hover:border-primary/50'
+                  }
+                `}
+              >
+                <div className="text-center space-y-2">
+                  <div className="text-2xl">{level.emoji}</div>
+                  <div className="font-medium">{level.label}</div>
+                  <div className="text-xs text-muted-foreground">{level.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Meal Planning Days */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Clock className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('planMealsDays')}</h4>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {dayOptions.map((days) => (
+              <Badge
+                key={days}
+                variant={mealDays === days ? "default" : "secondary"}
+                className={`
+                  cursor-pointer px-4 py-2 text-sm transition-all duration-200
+                  ${mealDays === days 
+                    ? 'bg-primary text-primary-foreground shadow-primary' 
+                    : 'bg-cooking-warm text-foreground hover:bg-cooking-spice hover:text-white'
+                  }
+                `}
+                onClick={() => onMealDaysChange(days)}
+              >
+                {days} {days === 1 ? t('day') : t('days')}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Shopping Preference */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <ShoppingCart className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-foreground">{t('shoppingPreference')}</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              onClick={() => onAllowShoppingChange(false)}
               className={`
-                rounded-xl p-4 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-                ${cuisineType === cuisine.value 
-                  ? 'bg-primary text-white shadow-button' 
-                  : 'bg-soft-white hover:bg-soft-blue border border-border'
+                cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-warm
+                ${!allowShopping 
+                  ? 'border-primary bg-cooking-cream shadow-primary' 
+                  : 'border-border bg-card hover:border-primary/50'
                 }
               `}
             >
               <div className="text-center space-y-2">
-                <div className="text-2xl">{cuisine.emoji}</div>
-                <div className="text-sm font-medium">{cuisine.label}</div>
+                <div className="text-2xl">🏠</div>
+                <div className="font-medium">{t('useWhatIHave')}</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('useWhatIHaveDesc')}
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Skill Level */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <ChefHat className="w-4 h-4 text-white" />
-          </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('cookingSkillLevel')}</h4>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {skillLevels.map((level) => (
-            <button
-              key={level.value}
-              onClick={() => onSkillLevelChange(level.value)}
+            </div>
+            
+            <div
+              onClick={() => onAllowShoppingChange(true)}
               className={`
-                rounded-2xl p-6 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-                ${skillLevel === level.value 
-                  ? 'bg-gradient-blue text-white shadow-elegant' 
-                  : 'bg-soft-white hover:bg-soft-blue border border-border'
+                cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-warm
+                ${allowShopping 
+                  ? 'border-primary bg-cooking-cream shadow-primary' 
+                  : 'border-border bg-card hover:border-primary/50'
                 }
               `}
             >
-              <div className="text-center space-y-3">
-                <div className="text-3xl">{level.emoji}</div>
-                <div className="font-semibold text-lg">{level.label}</div>
-                <div className="text-sm opacity-80">{level.description}</div>
+              <div className="text-center space-y-2">
+                <div className="text-2xl">🛒</div>
+                <div className="font-medium">{t('iCanShop')}</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('iCanShopDesc')}
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Meal Planning Days */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Clock className="w-4 h-4 text-white" />
-          </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('planMealsDays')}</h4>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {dayOptions.map((days) => (
-            <button
-              key={days}
-              onClick={() => onMealDaysChange(days)}
-              className={`
-                px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105
-                ${mealDays === days 
-                  ? 'bg-primary text-white shadow-button' 
-                  : 'bg-soft-white text-foreground hover:bg-soft-blue border border-border'
-                }
-              `}
-            >
-              {days} {days === 1 ? t('day') : t('days')}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Shopping Preference */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 text-white" />
-          </div>
-          <h4 className="text-lg font-semibold text-foreground">{t('shoppingPreference')}</h4>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
-            onClick={() => onAllowShoppingChange(false)}
-            className={`
-              rounded-2xl p-6 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-              ${!allowShopping 
-                ? 'bg-gradient-blue text-white shadow-elegant' 
-                : 'bg-soft-white hover:bg-soft-blue border border-border'
-              }
-            `}
-          >
-            <div className="text-center space-y-3">
-              <div className="text-3xl">🏠</div>
-              <div className="font-semibold text-lg">{t('useWhatIHave')}</div>
-              <div className="text-sm opacity-80">{t('useWhatIHaveDesc')}</div>
             </div>
-          </button>
-          
-          <button
-            onClick={() => onAllowShoppingChange(true)}
-            className={`
-              rounded-2xl p-6 transition-all duration-200 hover:shadow-card transform hover:scale-[1.02]
-              ${allowShopping 
-                ? 'bg-gradient-blue text-white shadow-elegant' 
-                : 'bg-soft-white hover:bg-soft-blue border border-border'
-              }
-            `}
-          >
-            <div className="text-center space-y-3">
-              <div className="text-3xl">🛒</div>
-              <div className="font-semibold text-lg">{t('iCanShop')}</div>
-              <div className="text-sm opacity-80">{t('iCanShopDesc')}</div>
-            </div>
-          </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
