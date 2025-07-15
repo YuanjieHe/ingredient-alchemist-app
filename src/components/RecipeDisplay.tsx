@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Dish {
   name: string;
@@ -44,6 +45,7 @@ interface RecipeDisplayProps {
 }
 
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
+  const { t } = useLanguage();
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -59,12 +61,12 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const handleSave = (recipe: Recipe) => {
     onSaveRecipe?.(recipe);
-    toast.success('Meal combination saved to favorites!');
+    toast.success(t('savedToFavorites'));
   };
 
   const handleShare = (recipe: Recipe) => {
     onShareRecipe?.(recipe);
-    toast.success('Meal combination link copied to clipboard!');
+    toast.success(t('linkCopied'));
   };
 
   const getDishIcon = (type: string) => {
@@ -78,17 +80,17 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const getDishTypeText = (type: string) => {
     switch (type) {
-      case 'main': return 'Main';
-      case 'side': return 'Side';
-      case 'soup': return 'Soup';
-      default: return 'Dish';
+      case 'main': return t('main');
+      case 'side': return t('side');
+      case 'soup': return t('soup');
+      default: return t('dish');
     }
   };
 
   if (recipes.length === 0) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-xl text-muted-foreground">No meal combinations generated yet</h2>
+        <h2 className="text-xl text-muted-foreground">{t('noMealCombinations')}</h2>
       </div>
     );
   }
@@ -97,10 +99,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          Your Meal Plan Combinations 🍽️
+          {t('yourMealPlanCombinations')}
         </h2>
         <p className="text-muted-foreground">
-          We've created {recipes.length} balanced meal combination{recipes.length === 1 ? '' : 's'} for you
+          {t('balancedMealCreated')} {recipes.length} {recipes.length === 1 ? t('balancedMealCombinations') : t('balancedMealCombinationsPlural')} {t('forYou')}
         </p>
       </div>
 
@@ -136,15 +138,15 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge className={getDifficultyColor(recipe.difficulty)}>
                   <ChefHat className="w-3 h-3 mr-1" />
-                  {recipe.difficulty === 'beginner' ? 'Beginner' : recipe.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                  {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
                 </Badge>
                 <Badge variant="secondary">
                   <Clock className="w-3 h-3 mr-1" />
-                  {recipe.prepTime + recipe.cookTime} min
+                  {recipe.prepTime + recipe.cookTime} {t('min')}
                 </Badge>
                 <Badge variant="secondary">
                   <Users className="w-3 h-3 mr-1" />
-                  {recipe.servings} servings
+                  {recipe.servings} {t('servings')}
                 </Badge>
               </div>
             </CardHeader>
@@ -155,7 +157,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
                     <Coffee className="w-4 h-4 mr-2 text-primary" />
-                    Meal Combination
+                    {t('mealCombination')}
                   </h4>
                   <div className="grid gap-3">
                     {recipe.dishes.map((dish, index) => (
@@ -182,7 +184,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
               <div>
                 <h4 className="font-semibold mb-3 flex items-center">
                   <Utensils className="w-4 h-4 mr-2 text-primary" />
-                  Required Ingredients
+                  {t('requiredIngredients')}
                 </h4>
                 <div className="grid gap-2">
                   {recipe.ingredients.map((ingredient, index) => (
@@ -208,7 +210,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                         <span className="text-muted-foreground">{ingredient.amount}</span>
                         {ingredient.needed && (
                           <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
-                            Need to buy
+                            {t('needToBuy')}
                           </Badge>
                         )}
                       </div>
@@ -221,7 +223,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               {/* Cooking Instructions */}
               <div>
-                <h4 className="font-semibold mb-3">Cooking Instructions</h4>
+                <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
                 <ol className="space-y-3">
                   {recipe.instructions.map((step, index) => (
                     <li key={index} className="flex space-x-3">
@@ -239,7 +241,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">💡 Cooking Tips</h4>
+                    <h4 className="font-semibold mb-3">{t('cookingTips')}</h4>
                     <ul className="space-y-2">
                       {recipe.tips.map((tip, index) => (
                         <li key={index} className="text-sm bg-cooking-cream p-3 rounded-md">
@@ -256,23 +258,23 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">Nutrition (per serving)</h4>
+                    <h4 className="font-semibold mb-3">{t('nutritionPerServing')}</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.calories}</div>
-                        <div className="text-xs text-muted-foreground">Calories</div>
+                        <div className="text-xs text-muted-foreground">{t('calories')}</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.protein}</div>
-                        <div className="text-xs text-muted-foreground">Protein</div>
+                        <div className="text-xs text-muted-foreground">{t('protein')}</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.carbs}</div>
-                        <div className="text-xs text-muted-foreground">Carbs</div>
+                        <div className="text-xs text-muted-foreground">{t('carbs')}</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.fat}</div>
-                        <div className="text-xs text-muted-foreground">Fat</div>
+                        <div className="text-xs text-muted-foreground">{t('fat')}</div>
                       </div>
                     </div>
                   </div>

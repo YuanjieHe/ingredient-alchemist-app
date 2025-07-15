@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChefHat, Clock, ShoppingCart, Users, Coffee, Globe, Calendar } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PreferencesSelectorProps {
   skillLevel: string;
@@ -35,23 +36,24 @@ export const PreferencesSelector = ({
   cuisineType,
   onCuisineTypeChange,
 }: PreferencesSelectorProps) => {
+  const { t } = useLanguage();
   const skillLevels = [
     { 
       value: 'beginner', 
-      label: 'Beginner', 
-      description: 'Simple recipes with basic techniques',
+      label: t('beginner'), 
+      description: t('beginnerDesc'),
       emoji: '🌱'
     },
     { 
       value: 'intermediate', 
-      label: 'Intermediate', 
-      description: 'Some cooking experience required',
+      label: t('intermediate'), 
+      description: t('intermediateDesc'),
       emoji: '👩‍🍳'
     },
     { 
       value: 'advanced', 
-      label: 'Advanced', 
-      description: 'Complex techniques and ingredients',
+      label: t('advanced'), 
+      description: t('advancedDesc'),
       emoji: '⭐'
     },
   ];
@@ -59,39 +61,39 @@ export const PreferencesSelector = ({
   const peopleOptions = [1, 2, 3, 4, 5, 6, 8, 10];
 
   const mealTypeOptions = [
-    { value: 'breakfast', label: 'Breakfast', emoji: '🌅' },
-    { value: 'brunch', label: 'Brunch', emoji: '🥐' },
-    { value: 'lunch', label: 'Lunch', emoji: '🌞' },
-    { value: 'dinner', label: 'Dinner', emoji: '🌙' },
-    { value: 'snack', label: 'Snack', emoji: '🍪' },
+    { value: 'breakfast', label: t('breakfast'), emoji: '🌅' },
+    { value: 'brunch', label: t('brunch'), emoji: '🥐' },
+    { value: 'lunch', label: t('lunch'), emoji: '🌞' },
+    { value: 'dinner', label: t('dinner'), emoji: '🌙' },
+    { value: 'snack', label: t('snack'), emoji: '🍪' },
   ];
 
   const occasionOptions = [
     { 
       value: 'daily', 
-      label: 'Daily Meal', 
-      description: 'Regular everyday cooking',
+      label: t('dailyMeal'), 
+      description: t('dailyMealDesc'),
       emoji: '🏠'
     },
     { 
       value: 'gathering', 
-      label: 'Gathering/Party', 
-      description: 'Special occasion or entertaining guests',
+      label: t('gatheringParty'), 
+      description: t('gatheringPartyDesc'),
       emoji: '🎉'
     },
   ];
 
   const cuisineOptions = [
-    { value: 'chinese', label: 'Chinese', emoji: '🥢' },
-    { value: 'american', label: 'American', emoji: '🍔' },
-    { value: 'korean', label: 'Korean', emoji: '🥘' },
-    { value: 'japanese', label: 'Japanese', emoji: '🍱' },
-    { value: 'italian', label: 'Italian', emoji: '🍝' },
-    { value: 'mexican', label: 'Mexican', emoji: '🌮' },
-    { value: 'indian', label: 'Indian', emoji: '🍛' },
-    { value: 'thai', label: 'Thai', emoji: '🍜' },
-    { value: 'mediterranean', label: 'Mediterranean', emoji: '🫒' },
-    { value: 'fusion', label: 'Fusion/Mixed', emoji: '🌍' },
+    { value: 'chinese', label: t('chinese'), emoji: '🥢' },
+    { value: 'american', label: t('american'), emoji: '🍔' },
+    { value: 'korean', label: t('korean'), emoji: '🥘' },
+    { value: 'japanese', label: t('japanese'), emoji: '🍱' },
+    { value: 'italian', label: t('italian'), emoji: '🍝' },
+    { value: 'mexican', label: t('mexican'), emoji: '🌮' },
+    { value: 'indian', label: t('indian'), emoji: '🍛' },
+    { value: 'thai', label: t('thai'), emoji: '🍜' },
+    { value: 'mediterranean', label: t('mediterranean'), emoji: '🫒' },
+    { value: 'fusion', label: t('fusion'), emoji: '🌍' },
   ];
 
   const dayOptions = [1, 2, 3, 5, 7];
@@ -101,10 +103,10 @@ export const PreferencesSelector = ({
       <CardContent className="p-6 space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            Tell us about your cooking preferences 👩‍🍳
+            {t('cookingPreferences')}
           </h3>
           <p className="text-muted-foreground text-sm">
-            This helps us create the perfect meal combinations for you
+            {t('cookingPreferencesDesc')}
           </p>
         </div>
 
@@ -112,7 +114,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Users className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">How many people are eating?</h4>
+            <h4 className="font-medium text-foreground">{t('howManyPeople')}</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {peopleOptions.map((count) => (
@@ -128,7 +130,7 @@ export const PreferencesSelector = ({
                 `}
                 onClick={() => onPeopleCountChange(count)}
               >
-                {count} {count === 1 ? 'person' : 'people'}
+                {count} {count === 1 ? t('person') : t('people')}
               </Badge>
             ))}
           </div>
@@ -138,7 +140,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Coffee className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">What meal are you planning?</h4>
+            <h4 className="font-medium text-foreground">{t('whatMeal')}</h4>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {mealTypeOptions.map((meal) => (
@@ -166,7 +168,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">What's the occasion?</h4>
+            <h4 className="font-medium text-foreground">{t('whatsOccasion')}</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {occasionOptions.map((occasion) => (
@@ -195,7 +197,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Globe className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">What cuisine do you prefer?</h4>
+            <h4 className="font-medium text-foreground">{t('whatCuisine')}</h4>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {cuisineOptions.map((cuisine) => (
@@ -223,7 +225,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <ChefHat className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">Cooking Skill Level</h4>
+            <h4 className="font-medium text-foreground">{t('cookingSkillLevel')}</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {skillLevels.map((level) => (
@@ -252,7 +254,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Clock className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">Plan meals for how many days?</h4>
+            <h4 className="font-medium text-foreground">{t('planMealsDays')}</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {dayOptions.map((days) => (
@@ -268,7 +270,7 @@ export const PreferencesSelector = ({
                 `}
                 onClick={() => onMealDaysChange(days)}
               >
-                {days} {days === 1 ? 'day' : 'days'}
+                {days} {days === 1 ? t('day') : t('days')}
               </Badge>
             ))}
           </div>
@@ -278,7 +280,7 @@ export const PreferencesSelector = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <ShoppingCart className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">Shopping preference</h4>
+            <h4 className="font-medium text-foreground">{t('shoppingPreference')}</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div
@@ -293,9 +295,9 @@ export const PreferencesSelector = ({
             >
               <div className="text-center space-y-2">
                 <div className="text-2xl">🏠</div>
-                <div className="font-medium">Use what I have</div>
+                <div className="font-medium">{t('useWhatIHave')}</div>
                 <div className="text-xs text-muted-foreground">
-                  Only recipes with my current ingredients
+                  {t('useWhatIHaveDesc')}
                 </div>
               </div>
             </div>
@@ -312,9 +314,9 @@ export const PreferencesSelector = ({
             >
               <div className="text-center space-y-2">
                 <div className="text-2xl">🛒</div>
-                <div className="font-medium">I can shop</div>
+                <div className="font-medium">{t('iCanShop')}</div>
                 <div className="text-xs text-muted-foreground">
-                  Include recipes that need a few extra items
+                  {t('iCanShopDesc')}
                 </div>
               </div>
             </div>

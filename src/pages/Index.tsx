@@ -10,8 +10,11 @@ import { RecipeService, Recipe } from '@/services/recipeService';
 import { ChefHat, Sparkles, ArrowRight, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import heroImage from '@/assets/kitchen-hero.jpg';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 const Index = () => {
+  const { t } = useLanguage();
   const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'preview' | 'recipes'>('ingredients');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
@@ -30,7 +33,7 @@ const Index = () => {
 
   const handleContinueToPreferences = () => {
     if (ingredients.length === 0) {
-      toast.error('Please add at least one ingredient');
+      toast.error(t('addIngredients'));
       return;
     }
     setStep('preferences');
@@ -38,7 +41,7 @@ const Index = () => {
 
   const handleGenerateRecipes = async () => {
     if (ingredients.length === 0) {
-      toast.error('Please add some ingredients first');
+      toast.error(t('addIngredientsFirst'));
       return;
     }
 
@@ -60,10 +63,10 @@ const Index = () => {
 
       setRecipes(generatedRecipes);
       setStep('preview');
-      toast.success('Recipes generated successfully!');
+      toast.success(t('recipesGenerated'));
     } catch (error) {
       console.error('Error generating recipes:', error);
-      toast.error('Failed to generate recipes. Please try again.');
+      toast.error(t('recipesGenerationFailed'));
       setStep('preferences');
     } finally {
       setIsGenerating(false);
@@ -92,7 +95,7 @@ const Index = () => {
             {ingredients.length > 0 && (
               <div className="flex justify-end">
                 <Button onClick={handleContinueToPreferences} size="lg">
-                  Continue to Preferences
+                  {t('continueToPreferences')}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -121,11 +124,11 @@ const Index = () => {
             />
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep('ingredients')}>
-                Back to Ingredients
+                {t('backToIngredients')}
               </Button>
               <Button onClick={handleGenerateRecipes} size="lg" variant="spice">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate My Meal Plans!
+                {t('generateMealPlans')}
               </Button>
             </div>
           </div>
@@ -138,9 +141,9 @@ const Index = () => {
               <div className="mx-auto w-16 h-16 bg-cooking-warm rounded-full flex items-center justify-center animate-pulse">
                 <ChefHat className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold">Creating your meal plans...</h3>
+              <h3 className="text-xl font-semibold">{t('creatingMealPlans')}</h3>
               <p className="text-muted-foreground">
-                Our AI chef is analyzing your ingredients and preferences to create the perfect meal combinations for you!
+                {t('aiChefAnalyzing')}
               </p>
               <div className="flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -154,10 +157,10 @@ const Index = () => {
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                We recommend these delicious meal combinations! 🍽️
+                {t('recommendMeals')}
               </h2>
               <p className="text-muted-foreground">
-                Found {recipes.length} perfect meal {recipes.length === 1 ? 'plan' : 'plans'} for you
+                {t('foundFor')} {recipes.length} {recipes.length === 1 ? t('foundMealPlans') : t('foundMealPlansPlural')}
               </p>
             </div>
 
@@ -172,15 +175,15 @@ const Index = () => {
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="secondary">
                             <Clock className="w-3 h-3 mr-1" />
-                            {recipe.prepTime + recipe.cookTime} min
+                            {recipe.prepTime + recipe.cookTime} {t('min')}
                           </Badge>
                           <Badge variant="secondary">
                             <Users className="w-3 h-3 mr-1" />
-                            {recipe.servings} servings
+                            {recipe.servings} {t('servings')}
                           </Badge>
                           <Badge className="bg-cooking-herb text-white">
                             <ChefHat className="w-3 h-3 mr-1" />
-                            {recipe.difficulty === 'beginner' ? 'Beginner' : recipe.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                            {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
                           </Badge>
                         </div>
                       </div>
@@ -195,11 +198,11 @@ const Index = () => {
 
             <div className="flex justify-center space-x-4">
               <Button variant="outline" onClick={() => setStep('preferences')}>
-                Regenerate Plans
+                {t('regeneratePlans')}
               </Button>
               <Button onClick={handleViewFullRecipes} size="lg" variant="spice">
                 <Sparkles className="w-4 h-4 mr-2" />
-                View Detailed Recipes
+                {t('viewDetailedRecipes')}
               </Button>
             </div>
           </div>
@@ -210,13 +213,13 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Button variant="outline" onClick={() => setStep('preview')}>
-                ← Back to Preview
+                {t('backToPreview')}
               </Button>
             </div>
             <RecipeDisplay recipes={recipes} />
             <div className="flex justify-center">
               <Button onClick={handleStartOver} variant="outline">
-                Create New Meal Plans
+                {t('createNewMealPlans')}
               </Button>
             </div>
           </div>
@@ -236,8 +239,13 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <div className="text-center text-white space-y-2">
-              <h1 className="text-4xl md:text-5xl font-bold">CookSmart AI</h1>
-              <p className="text-lg md:text-xl opacity-90">Your friendly kitchen companion</p>
+              <div className="flex items-center justify-center space-x-4 mb-2">
+                <h1 className="text-4xl md:text-5xl font-bold">{t('appTitle')}</h1>
+              </div>
+              <p className="text-lg md:text-xl opacity-90">{t('appSubtitle')}</p>
+              <div className="pt-4">
+                <LanguageToggle />
+              </div>
             </div>
           </div>
         </div>
@@ -250,18 +258,19 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <ChefHat className="w-6 h-6 text-primary" />
-                <h1 className="text-xl font-bold text-foreground">CookSmart AI</h1>
+                <h1 className="text-xl font-bold text-foreground">{t('appTitle')}</h1>
               </div>
               <div className="flex items-center space-x-4 text-sm">
                 <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground">
-                  1. Ingredients ✓
+                  {t('step1')}
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'preferences' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  2. Preferences
+                  {t('step2')}
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'recipes' || step === 'generating' || step === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  3. Meal Plans
+                  {t('step3')}
                 </div>
+                <LanguageToggle />
               </div>
             </div>
           </div>
