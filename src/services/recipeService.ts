@@ -37,6 +37,10 @@ export interface RecipeRequest {
   skillLevel: string;
   mealDays: number;
   allowShopping: boolean;
+  peopleCount: number;
+  mealType: string;
+  occasionType: string;
+  cuisineType: string;
   apiKey: string;
 }
 
@@ -107,66 +111,73 @@ export class RecipeService {
   }
 
   private createPrompt(request: RecipeRequest): string {
-    const { ingredients, skillLevel, mealDays, allowShopping } = request;
+    const { ingredients, skillLevel, mealDays, allowShopping, peopleCount, mealType, occasionType, cuisineType } = request;
 
     return `
-你是一位专业的中餐烹饪助手，帮助家庭主妇规划${mealDays}天的完整餐食。每顿饭应该包含营养均衡的搭配组合。
+You are a professional cooking assistant helping home cooks create perfect meal combinations. Create ${mealDays} complete meal plans.
 
-现有食材: ${ingredients.join(', ')}
+AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
 
-要求:
-- 烹饪技能水平: ${skillLevel === 'beginner' ? '初级(简单易做)' : skillLevel === 'intermediate' ? '中级(有一定技巧)' : '高级(复杂技法)'}
-- 规划天数: ${mealDays} 天
-- 是否可购买额外食材: ${allowShopping ? '是(可推荐1-3样常见食材)' : '否(仅使用现有食材)'}
+MEAL REQUIREMENTS:
+- Number of people: ${peopleCount}
+- Meal type: ${mealType} (breakfast/lunch/dinner/brunch/snack)
+- Occasion: ${occasionType} (daily meal or gathering/party)
+- Cuisine preference: ${cuisineType}
+- Skill level: ${skillLevel}
+- Planning for: ${mealDays} days
+- Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
 
-搭配原则:
-1. 每顿饭包含完整搭配: 主菜 + 配菜/素菜 + 汤/粥(可选)
-2. 营养均衡: 荤素搭配，有蛋白质、蔬菜、主食
-3. 色彩丰富: 注意菜品颜色搭配
-4. 适合家庭: 制作简单，适合忙碌的家庭主妇
-5. 充分利用现有食材，减少浪费
+MEAL PLANNING PRINCIPLES:
+1. Create complete meal combinations for ${peopleCount} people
+2. Match the ${mealType} meal type and ${occasionType} occasion style
+3. Follow ${cuisineType} cuisine preferences and cooking traditions
+4. Include balanced dish combinations: main dish + side dish + soup/beverage (when appropriate)
+5. Use primarily available ingredients, minimize waste
+6. Match the ${skillLevel} skill level with appropriate techniques
+7. Consider nutritional balance, colors, and flavors
+8. Provide practical cooking coordination tips
 
-请按以下JSON格式回复餐食搭配:
+Please respond with meal plans in this JSON format:
 {
   "recipes": [
     {
       "id": "meal-day-1",
-      "title": "第一天午餐搭配",
-      "description": "营养均衡的家常搭配，荤素搭配，适合全家享用",
+      "title": "Day 1 ${mealType} Combination",
+      "description": "Balanced ${cuisineType} meal perfect for ${occasionType}, serving ${peopleCount}",
       "prepTime": 30,
       "cookTime": 45,
-      "servings": 4,
+      "servings": ${peopleCount},
       "difficulty": "${skillLevel}",
-      "mealType": "lunch",
+      "mealType": "${mealType}",
       "dishes": [
         {
-          "name": "主菜名称",
+          "name": "Main Dish Name",
           "type": "main",
-          "description": "主菜简介"
+          "description": "Main dish description"
         },
         {
-          "name": "配菜名称", 
+          "name": "Side Dish Name", 
           "type": "side",
-          "description": "配菜简介"
+          "description": "Side dish description"
         },
         {
-          "name": "汤品名称",
+          "name": "Soup/Beverage Name",
           "type": "soup",
-          "description": "汤品简介"
+          "description": "Soup or beverage description"
         }
       ],
       "ingredients": [
-        {"item": "食材名称", "amount": "分量", "needed": false, "usedIn": "主菜"},
-        {"item": "需购买的食材", "amount": "分量", "needed": true, "usedIn": "配菜"}
+        {"item": "ingredient name", "amount": "quantity", "needed": false, "usedIn": "main dish"},
+        {"item": "ingredient to buy", "amount": "quantity", "needed": true, "usedIn": "side dish"}
       ],
       "instructions": [
-        "第1步: 详细制作步骤",
-        "第2步: 详细制作步骤",
-        "第3步: 所有菜品的协调制作顺序"
+        "Step 1: Detailed cooking instructions",
+        "Step 2: Detailed cooking instructions",
+        "Step 3: Coordination of all dishes and timing"
       ],
       "tips": [
-        "搭配小贴士1: 如何协调制作时间",
-        "搭配小贴士2: 营养搭配建议"
+        "Cooking tip 1: How to coordinate timing",
+        "Cooking tip 2: Nutritional balance suggestions"
       ],
       "nutritionInfo": {
         "calories": 650,
@@ -178,13 +189,14 @@ export class RecipeService {
   ]
 }
 
-注意事项:
-- 优先使用现有食材作为主要成分
-- 每个搭配要考虑制作时间的协调性
-- 提供实用的搭配技巧和营养建议
-- 菜品名称要具体且诱人
-- 适合中国家庭的口味偏好
-- 考虑不同年龄段的营养需求
+Important Guidelines:
+- Prioritize available ingredients as main components
+- Consider cooking time coordination for all dishes
+- Provide practical meal combination tips and nutritional advice
+- Use specific and appealing dish names
+- Match ${cuisineType} cuisine flavor profiles and cooking methods
+- Consider dietary needs for ${occasionType} occasions
+- Adapt portion sizes and complexity for ${peopleCount} people
     `;
   }
 
@@ -262,8 +274,8 @@ export class RecipeService {
     return [
       {
         id: 'mock-1',
-        title: '今日午餐搭配',
-        description: '营养均衡的家常搭配，适合全家享用',
+        title: 'Today\'s Lunch Combination',
+        description: 'Balanced meal combination perfect for the whole family',
         prepTime: 20,
         cookTime: 35,
         servings: 4,
@@ -271,40 +283,40 @@ export class RecipeService {
         mealType: 'lunch',
         dishes: [
           {
-            name: '家常炒' + (ingredients[0] || '时蔬'),
+            name: 'Stir-fried ' + (ingredients[0] || 'vegetables'),
             type: 'main',
-            description: '简单易做的家常主菜'
+            description: 'Simple and delicious main dish'
           },
           {
-            name: '清爽小菜',
+            name: 'Fresh side salad',
             type: 'side', 
-            description: '解腻的配菜'
+            description: 'Light and refreshing side dish'
           },
           {
-            name: '营养汤品',
+            name: 'Nutritious soup',
             type: 'soup',
-            description: '温暖的汤品'
+            description: 'Warming and healthy soup'
           }
         ],
         ingredients: [
-          { item: ingredients[0] || '蔬菜', amount: '300g', needed: false, usedIn: '主菜' },
-          { item: ingredients[1] || '肉类', amount: '200g', needed: false, usedIn: '主菜' },
-          { item: '生抽', amount: '2勺', needed: allowShopping, usedIn: '调料' },
-          { item: '蒜', amount: '3瓣', needed: false, usedIn: '主菜' },
-          { item: '油', amount: '适量', needed: false, usedIn: '烹饪' }
+          { item: ingredients[0] || 'vegetables', amount: '300g', needed: false, usedIn: 'main dish' },
+          { item: ingredients[1] || 'protein', amount: '200g', needed: false, usedIn: 'main dish' },
+          { item: 'soy sauce', amount: '2 tbsp', needed: allowShopping, usedIn: 'seasoning' },
+          { item: 'garlic', amount: '3 cloves', needed: false, usedIn: 'main dish' },
+          { item: 'oil', amount: 'as needed', needed: false, usedIn: 'cooking' }
         ],
         instructions: [
-          '准备所有食材，清洗切好',
-          '先煮汤，小火慢炖',
-          '热锅下油，爆香蒜蓉',
-          '下主料炒制，调味',
-          '准备配菜，简单调味',
-          '所有菜品协调上桌'
+          'Prepare all ingredients, wash and cut as needed',
+          'Start with the soup, simmer on low heat',
+          'Heat wok with oil, add minced garlic until fragrant',
+          'Add main ingredients and stir-fry, season to taste',
+          'Prepare the side dish with simple seasoning',
+          'Coordinate all dishes to serve together'
         ],
         tips: [
-          '可以先做汤，再做主菜和配菜',
-          '注意营养搭配，荤素均衡',
-          '根据家人喜好调整口味'
+          'Cook soup first, then main and side dishes',
+          'Balance nutrition with protein, vegetables, and carbs',
+          'Adjust seasoning according to family preferences'
         ],
         nutritionInfo: {
           calories: 580,

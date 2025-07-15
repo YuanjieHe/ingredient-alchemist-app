@@ -17,6 +17,10 @@ const Index = () => {
   const [skillLevel, setSkillLevel] = useState('beginner');
   const [mealDays, setMealDays] = useState(3);
   const [allowShopping, setAllowShopping] = useState(false);
+  const [peopleCount, setPeopleCount] = useState(4);
+  const [mealType, setMealType] = useState('lunch');
+  const [occasionType, setOccasionType] = useState('daily');
+  const [cuisineType, setCuisineType] = useState('chinese');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -47,6 +51,10 @@ const Index = () => {
         skillLevel,
         mealDays,
         allowShopping,
+        peopleCount,
+        mealType,
+        occasionType,
+        cuisineType,
         apiKey: API_KEY
       });
 
@@ -102,6 +110,14 @@ const Index = () => {
               onMealDaysChange={setMealDays}
               allowShopping={allowShopping}
               onAllowShoppingChange={setAllowShopping}
+              peopleCount={peopleCount}
+              onPeopleCountChange={setPeopleCount}
+              mealType={mealType}
+              onMealTypeChange={setMealType}
+              occasionType={occasionType}
+              onOccasionTypeChange={setOccasionType}
+              cuisineType={cuisineType}
+              onCuisineTypeChange={setCuisineType}
             />
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep('ingredients')}>
@@ -109,7 +125,7 @@ const Index = () => {
               </Button>
               <Button onClick={handleGenerateRecipes} size="lg" variant="spice">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate My Recipes!
+                Generate My Meal Plans!
               </Button>
             </div>
           </div>
@@ -122,9 +138,9 @@ const Index = () => {
               <div className="mx-auto w-16 h-16 bg-cooking-warm rounded-full flex items-center justify-center animate-pulse">
                 <ChefHat className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold">Creating your recipes...</h3>
+              <h3 className="text-xl font-semibold">Creating your meal plans...</h3>
               <p className="text-muted-foreground">
-                Our AI chef is analyzing your ingredients and preferences to create the perfect meals for you!
+                Our AI chef is analyzing your ingredients and preferences to create the perfect meal combinations for you!
               </p>
               <div className="flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -138,10 +154,10 @@ const Index = () => {
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                我们为您推荐这些美味菜品！ 🍽️
+                We recommend these delicious meal combinations! 🍽️
               </h2>
               <p className="text-muted-foreground">
-                找到了 {recipes.length} 道适合您的食谱
+                Found {recipes.length} perfect meal {recipes.length === 1 ? 'plan' : 'plans'} for you
               </p>
             </div>
 
@@ -156,15 +172,15 @@ const Index = () => {
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="secondary">
                             <Clock className="w-3 h-3 mr-1" />
-                            {recipe.prepTime + recipe.cookTime} 分钟
+                            {recipe.prepTime + recipe.cookTime} min
                           </Badge>
                           <Badge variant="secondary">
                             <Users className="w-3 h-3 mr-1" />
-                            {recipe.servings} 人份
+                            {recipe.servings} servings
                           </Badge>
                           <Badge className="bg-cooking-herb text-white">
                             <ChefHat className="w-3 h-3 mr-1" />
-                            {recipe.difficulty === 'beginner' ? '初级' : recipe.difficulty === 'intermediate' ? '中级' : '高级'}
+                            {recipe.difficulty === 'beginner' ? 'Beginner' : recipe.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
                           </Badge>
                         </div>
                       </div>
@@ -179,11 +195,11 @@ const Index = () => {
 
             <div className="flex justify-center space-x-4">
               <Button variant="outline" onClick={() => setStep('preferences')}>
-                重新生成
+                Regenerate Plans
               </Button>
               <Button onClick={handleViewFullRecipes} size="lg" variant="spice">
                 <Sparkles className="w-4 h-4 mr-2" />
-                查看详细食谱
+                View Detailed Recipes
               </Button>
             </div>
           </div>
@@ -194,13 +210,13 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Button variant="outline" onClick={() => setStep('preview')}>
-                ← 返回菜品预览
+                ← Back to Preview
               </Button>
             </div>
             <RecipeDisplay recipes={recipes} />
             <div className="flex justify-center">
               <Button onClick={handleStartOver} variant="outline">
-                制作新的食谱
+                Create New Meal Plans
               </Button>
             </div>
           </div>
@@ -238,13 +254,13 @@ const Index = () => {
               </div>
               <div className="flex items-center space-x-4 text-sm">
                 <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground">
-                  1. 食材 ✓
+                  1. Ingredients ✓
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'preferences' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  2. 偏好设置
+                  2. Preferences
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'recipes' || step === 'generating' || step === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  3. 食谱
+                  3. Meal Plans
                 </div>
               </div>
             </div>

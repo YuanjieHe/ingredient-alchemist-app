@@ -59,12 +59,12 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const handleSave = (recipe: Recipe) => {
     onSaveRecipe?.(recipe);
-    toast.success('餐食搭配已保存到收藏！');
+    toast.success('Meal combination saved to favorites!');
   };
 
   const handleShare = (recipe: Recipe) => {
     onShareRecipe?.(recipe);
-    toast.success('餐食搭配链接已复制到剪贴板！');
+    toast.success('Meal combination link copied to clipboard!');
   };
 
   const getDishIcon = (type: string) => {
@@ -78,17 +78,17 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const getDishTypeText = (type: string) => {
     switch (type) {
-      case 'main': return '主菜';
-      case 'side': return '配菜';
-      case 'soup': return '汤品';
-      default: return '菜品';
+      case 'main': return 'Main';
+      case 'side': return 'Side';
+      case 'soup': return 'Soup';
+      default: return 'Dish';
     }
   };
 
   if (recipes.length === 0) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-xl text-muted-foreground">还没有生成餐食搭配</h2>
+        <h2 className="text-xl text-muted-foreground">No meal combinations generated yet</h2>
       </div>
     );
   }
@@ -97,10 +97,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          您的餐食搭配方案 🍽️
+          Your Meal Plan Combinations 🍽️
         </h2>
         <p className="text-muted-foreground">
-          为您推荐了 {recipes.length} 套营养均衡的餐食搭配
+          We've created {recipes.length} balanced meal combination{recipes.length === 1 ? '' : 's'} for you
         </p>
       </div>
 
@@ -136,15 +136,15 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge className={getDifficultyColor(recipe.difficulty)}>
                   <ChefHat className="w-3 h-3 mr-1" />
-                  {recipe.difficulty === 'beginner' ? '初级' : recipe.difficulty === 'intermediate' ? '中级' : '高级'}
+                  {recipe.difficulty === 'beginner' ? 'Beginner' : recipe.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
                 </Badge>
                 <Badge variant="secondary">
                   <Clock className="w-3 h-3 mr-1" />
-                  {recipe.prepTime + recipe.cookTime} 分钟
+                  {recipe.prepTime + recipe.cookTime} min
                 </Badge>
                 <Badge variant="secondary">
                   <Users className="w-3 h-3 mr-1" />
-                  {recipe.servings} 人份
+                  {recipe.servings} servings
                 </Badge>
               </div>
             </CardHeader>
@@ -155,7 +155,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
                     <Coffee className="w-4 h-4 mr-2 text-primary" />
-                    餐食搭配
+                    Meal Combination
                   </h4>
                   <div className="grid gap-3">
                     {recipe.dishes.map((dish, index) => (
@@ -182,7 +182,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
               <div>
                 <h4 className="font-semibold mb-3 flex items-center">
                   <Utensils className="w-4 h-4 mr-2 text-primary" />
-                  所需食材
+                  Required Ingredients
                 </h4>
                 <div className="grid gap-2">
                   {recipe.ingredients.map((ingredient, index) => (
@@ -208,7 +208,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                         <span className="text-muted-foreground">{ingredient.amount}</span>
                         {ingredient.needed && (
                           <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
-                            需要购买
+                            Need to buy
                           </Badge>
                         )}
                       </div>
@@ -219,9 +219,9 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* 制作步骤 */}
+              {/* Cooking Instructions */}
               <div>
-                <h4 className="font-semibold mb-3">制作步骤</h4>
+                <h4 className="font-semibold mb-3">Cooking Instructions</h4>
                 <ol className="space-y-3">
                   {recipe.instructions.map((step, index) => (
                     <li key={index} className="flex space-x-3">
@@ -234,12 +234,12 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 </ol>
               </div>
 
-              {/* 搭配小贴士 */}
+              {/* Cooking Tips */}
               {recipe.tips && recipe.tips.length > 0 && (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">💡 搭配小贴士</h4>
+                    <h4 className="font-semibold mb-3">💡 Cooking Tips</h4>
                     <ul className="space-y-2">
                       {recipe.tips.map((tip, index) => (
                         <li key={index} className="text-sm bg-cooking-cream p-3 rounded-md">
@@ -251,28 +251,28 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                 </>
               )}
 
-              {/* 营养信息 */}
+              {/* Nutrition Information */}
               {recipe.nutritionInfo && (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">营养成分 (每人份)</h4>
+                    <h4 className="font-semibold mb-3">Nutrition (per serving)</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.calories}</div>
-                        <div className="text-xs text-muted-foreground">卡路里</div>
+                        <div className="text-xs text-muted-foreground">Calories</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.protein}</div>
-                        <div className="text-xs text-muted-foreground">蛋白质</div>
+                        <div className="text-xs text-muted-foreground">Protein</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.carbs}</div>
-                        <div className="text-xs text-muted-foreground">碳水</div>
+                        <div className="text-xs text-muted-foreground">Carbs</div>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-md">
                         <div className="font-bold text-primary">{recipe.nutritionInfo.fat}</div>
-                        <div className="text-xs text-muted-foreground">脂肪</div>
+                        <div className="text-xs text-muted-foreground">Fat</div>
                       </div>
                     </div>
                   </div>
