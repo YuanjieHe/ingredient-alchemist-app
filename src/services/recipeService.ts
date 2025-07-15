@@ -1,5 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export interface Dish {
+  name: string;
+  type: 'main' | 'side' | 'soup';
+  description: string;
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -8,10 +14,13 @@ export interface Recipe {
   cookTime: number;
   servings: number;
   difficulty: string;
+  mealType?: string;
+  dishes?: Dish[];
   ingredients: Array<{
     item: string;
     amount: string;
     needed?: boolean;
+    usedIn?: string;
   }>;
   instructions: string[];
   tips?: string[];
@@ -101,57 +110,81 @@ export class RecipeService {
     const { ingredients, skillLevel, mealDays, allowShopping } = request;
 
     return `
-You are a friendly cooking assistant helping a home cook plan meals. Create ${mealDays} delicious, practical recipes.
+你是一位专业的中餐烹饪助手，帮助家庭主妇规划${mealDays}天的完整餐食。每顿饭应该包含营养均衡的搭配组合。
 
-AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
+现有食材: ${ingredients.join(', ')}
 
-REQUIREMENTS:
-- Skill level: ${skillLevel}
-- Planning for: ${mealDays} days
-- Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
+要求:
+- 烹饪技能水平: ${skillLevel === 'beginner' ? '初级(简单易做)' : skillLevel === 'intermediate' ? '中级(有一定技巧)' : '高级(复杂技法)'}
+- 规划天数: ${mealDays} 天
+- 是否可购买额外食材: ${allowShopping ? '是(可推荐1-3样常见食材)' : '否(仅使用现有食材)'}
 
-INSTRUCTIONS:
-1. Create recipes that use primarily the available ingredients
-2. Match the specified skill level (${skillLevel})
-3. If shopping is allowed, you may suggest 1-3 additional common ingredients per recipe
-4. Include prep/cook times, servings, and clear instructions
-5. Add helpful cooking tips
-6. Include basic nutrition information
+搭配原则:
+1. 每顿饭包含完整搭配: 主菜 + 配菜/素菜 + 汤/粥(可选)
+2. 营养均衡: 荤素搭配，有蛋白质、蔬菜、主食
+3. 色彩丰富: 注意菜品颜色搭配
+4. 适合家庭: 制作简单，适合忙碌的家庭主妇
+5. 充分利用现有食材，减少浪费
 
-Please respond with recipes in this JSON format:
+请按以下JSON格式回复餐食搭配:
 {
   "recipes": [
     {
-      "id": "unique-id",
-      "title": "Recipe Name",
-      "description": "Brief appetizing description",
-      "prepTime": 15,
-      "cookTime": 30,
+      "id": "meal-day-1",
+      "title": "第一天午餐搭配",
+      "description": "营养均衡的家常搭配，荤素搭配，适合全家享用",
+      "prepTime": 30,
+      "cookTime": 45,
       "servings": 4,
       "difficulty": "${skillLevel}",
+      "mealType": "lunch",
+      "dishes": [
+        {
+          "name": "主菜名称",
+          "type": "main",
+          "description": "主菜简介"
+        },
+        {
+          "name": "配菜名称", 
+          "type": "side",
+          "description": "配菜简介"
+        },
+        {
+          "name": "汤品名称",
+          "type": "soup",
+          "description": "汤品简介"
+        }
+      ],
       "ingredients": [
-        {"item": "ingredient name", "amount": "1 cup", "needed": false},
-        {"item": "ingredient to buy", "amount": "2 tbsp", "needed": true}
+        {"item": "食材名称", "amount": "分量", "needed": false, "usedIn": "主菜"},
+        {"item": "需购买的食材", "amount": "分量", "needed": true, "usedIn": "配菜"}
       ],
       "instructions": [
-        "Step 1 instruction",
-        "Step 2 instruction"
+        "第1步: 详细制作步骤",
+        "第2步: 详细制作步骤",
+        "第3步: 所有菜品的协调制作顺序"
       ],
       "tips": [
-        "Helpful tip 1",
-        "Helpful tip 2"
+        "搭配小贴士1: 如何协调制作时间",
+        "搭配小贴士2: 营养搭配建议"
       ],
       "nutritionInfo": {
-        "calories": 350,
-        "protein": "25g",
-        "carbs": "30g",
-        "fat": "12g"
+        "calories": 650,
+        "protein": "35g", 
+        "carbs": "45g",
+        "fat": "18g"
       }
     }
   ]
 }
 
-Make the recipes appealing to home cooks, especially busy families. Focus on practical, delicious meals that bring joy to cooking!
+注意事项:
+- 优先使用现有食材作为主要成分
+- 每个搭配要考虑制作时间的协调性
+- 提供实用的搭配技巧和营养建议
+- 菜品名称要具体且诱人
+- 适合中国家庭的口味偏好
+- 考虑不同年龄段的营养需求
     `;
   }
 
@@ -183,10 +216,12 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
         id: recipe.id || `recipe-${Date.now()}-${index}`,
         title: recipe.title || 'Untitled Recipe',
         description: recipe.description || '',
-        prepTime: recipe.prepTime || 15,
-        cookTime: recipe.cookTime || 30,
+        prepTime: recipe.prepTime || 30,
+        cookTime: recipe.cookTime || 45,
         servings: recipe.servings || 4,
         difficulty: recipe.difficulty || 'beginner',
+        mealType: recipe.mealType || 'lunch',
+        dishes: recipe.dishes || [],
         ingredients: this.processIngredients(recipe.ingredients || [], availableIngredients),
         instructions: recipe.instructions || [],
         tips: recipe.tips || [],
@@ -205,7 +240,7 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
     }
   }
 
-  private processIngredients(ingredients: any[], availableIngredients: string[]): Array<{item: string, amount: string, needed?: boolean}> {
+  private processIngredients(ingredients: any[], availableIngredients: string[]): Array<{item: string, amount: string, needed?: boolean, usedIn?: string}> {
     return ingredients.map(ing => {
       const ingredient = typeof ing === 'string' ? { item: ing, amount: '1 unit' } : ing;
       const isAvailable = availableIngredients.some(available => 
@@ -216,7 +251,8 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
       return {
         item: ingredient.item,
         amount: ingredient.amount,
-        needed: !isAvailable
+        needed: !isAvailable,
+        usedIn: ingredient.usedIn
       };
     });
   }
@@ -226,37 +262,55 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
     return [
       {
         id: 'mock-1',
-        title: 'Quick & Easy Stir Fry',
-        description: 'A delicious and healthy stir fry using your available ingredients',
-        prepTime: 10,
-        cookTime: 15,
+        title: '今日午餐搭配',
+        description: '营养均衡的家常搭配，适合全家享用',
+        prepTime: 20,
+        cookTime: 35,
         servings: 4,
         difficulty: 'beginner',
+        mealType: 'lunch',
+        dishes: [
+          {
+            name: '家常炒' + (ingredients[0] || '时蔬'),
+            type: 'main',
+            description: '简单易做的家常主菜'
+          },
+          {
+            name: '清爽小菜',
+            type: 'side', 
+            description: '解腻的配菜'
+          },
+          {
+            name: '营养汤品',
+            type: 'soup',
+            description: '温暖的汤品'
+          }
+        ],
         ingredients: [
-          { item: ingredients[0] || 'Mixed vegetables', amount: '2 cups', needed: false },
-          { item: ingredients[1] || 'Protein', amount: '1 lb', needed: false },
-          { item: 'Soy sauce', amount: '3 tbsp', needed: allowShopping },
-          { item: 'Garlic', amount: '3 cloves', needed: false },
-          { item: 'Oil', amount: '2 tbsp', needed: false }
+          { item: ingredients[0] || '蔬菜', amount: '300g', needed: false, usedIn: '主菜' },
+          { item: ingredients[1] || '肉类', amount: '200g', needed: false, usedIn: '主菜' },
+          { item: '生抽', amount: '2勺', needed: allowShopping, usedIn: '调料' },
+          { item: '蒜', amount: '3瓣', needed: false, usedIn: '主菜' },
+          { item: '油', amount: '适量', needed: false, usedIn: '烹饪' }
         ],
         instructions: [
-          'Heat oil in a large pan or wok over high heat',
-          'Add garlic and cook for 30 seconds until fragrant',
-          'Add protein and cook until almost done',
-          'Add vegetables and stir fry for 3-5 minutes',
-          'Add soy sauce and toss everything together',
-          'Cook for another 2 minutes and serve hot'
+          '准备所有食材，清洗切好',
+          '先煮汤，小火慢炖',
+          '热锅下油，爆香蒜蓉',
+          '下主料炒制，调味',
+          '准备配菜，简单调味',
+          '所有菜品协调上桌'
         ],
         tips: [
-          'Make sure your pan is very hot before adding ingredients',
-          'Cut all ingredients into similar sizes for even cooking',
-          'Don\'t overcrowd the pan - cook in batches if needed'
+          '可以先做汤，再做主菜和配菜',
+          '注意营养搭配，荤素均衡',
+          '根据家人喜好调整口味'
         ],
         nutritionInfo: {
-          calories: 285,
-          protein: '22g',
-          carbs: '18g',
-          fat: '14g'
+          calories: 580,
+          protein: '28g',
+          carbs: '35g',
+          fat: '15g'
         }
       }
     ];
