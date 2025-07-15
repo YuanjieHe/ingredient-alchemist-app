@@ -46,22 +46,54 @@ export class RecipeService {
 
   async generateRecipes(request: RecipeRequest): Promise<Recipe[]> {
     if (!this.genAI) {
+      console.error('API key not set in RecipeService');
       throw new Error('API key not set');
     }
 
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    console.log('Starting recipe generation with request:', {
+      ingredients: request.ingredients,
+      skillLevel: request.skillLevel,
+      mealDays: request.mealDays,
+      allowShopping: request.allowShopping,
+      hasApiKey: !!request.apiKey
+    });
 
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
     const prompt = this.createPrompt(request);
+    
+    console.log('Generated prompt:', prompt);
 
     try {
+      console.log('Calling Gemini API...');
       const result = await model.generateContent(prompt);
+      console.log('Gemini API response received');
+      
       const response = await result.response;
       const text = response.text();
       
+      console.log('Raw Gemini response:', text);
+      
       return this.parseRecipeResponse(text, request.ingredients, request.allowShopping);
     } catch (error) {
-      console.error('Error generating recipes:', error);
-      throw new Error('Failed to generate recipes. Please try again.');
+      console.error('Detailed error generating recipes:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        apiKeyExists: !!this.genAI
+      });
+      
+      // Check if it's an API key issue
+      if (error instanceof Error && error.message.includes('API_KEY')) {
+        throw new Error('Invalid API key. Please check your Google AI Studio API key.');
+      }
+      
+      // Check if it's a quota issue
+      if (error instanceof Error && error.message.includes('quota')) {
+        throw new Error('API quota exceeded. Please check your Google AI Studio usage limits.');
+      }
+      
+      // Generic error with more context
+      throw new Error(`Failed to generate recipes: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -125,18 +157,27 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
 
   private parseRecipeResponse(response: string, availableIngredients: string[], allowShopping: boolean): Recipe[] {
     try {
+      console.log('Parsing recipe response, length:', response.length);
+      
       // Clean the response to extract JSON
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('No valid JSON found in response. Raw response:', response);
         throw new Error('No valid JSON found in response');
       }
 
       const jsonStr = jsonMatch[0];
+      console.log('Extracted JSON string:', jsonStr);
+      
       const data = JSON.parse(jsonStr);
+      console.log('Parsed JSON data:', data);
 
       if (!data.recipes || !Array.isArray(data.recipes)) {
+        console.error('Invalid recipe format. Data structure:', data);
         throw new Error('Invalid recipe format');
       }
+
+      console.log(`Successfully parsed ${data.recipes.length} recipes`);
 
       return data.recipes.map((recipe: any, index: number) => ({
         id: recipe.id || `recipe-${Date.now()}-${index}`,
@@ -152,8 +193,14 @@ Make the recipes appealing to home cooks, especially busy families. Focus on pra
         nutritionInfo: recipe.nutritionInfo
       }));
     } catch (error) {
-      console.error('Error parsing recipe response:', error);
+      console.error('Error parsing recipe response:', {
+        error: error,
+        responsePreview: response.substring(0, 500),
+        responseLength: response.length
+      });
+      
       // Return mock recipes as fallback
+      console.log('Falling back to mock recipes');
       return this.getMockRecipes(availableIngredients, allowShopping);
     }
   }
