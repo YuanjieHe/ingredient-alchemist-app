@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { IngredientInput } from '@/components/IngredientInput';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import heroImage from '@/assets/kitchen-hero.jpg';
 
 const Index = () => {
-  const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'recipes'>('ingredients');
+  const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'preview' | 'recipes'>('ingredients');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
   const [mealDays, setMealDays] = useState(3);
@@ -50,7 +51,7 @@ const Index = () => {
       });
 
       setRecipes(generatedRecipes);
-      setStep('recipes');
+      setStep('preview');
       toast.success('Recipes generated successfully!');
     } catch (error) {
       console.error('Error generating recipes:', error);
@@ -65,6 +66,10 @@ const Index = () => {
     setIngredients([]);
     setRecipes([]);
     setStep('ingredients');
+  };
+
+  const handleViewFullRecipes = () => {
+    setStep('recipes');
   };
 
   const renderContent = () => {
@@ -128,13 +133,74 @@ const Index = () => {
           </Card>
         );
 
+      case 'preview':
+        return (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                我们为您推荐这些美味菜品！ 🍽️
+              </h2>
+              <p className="text-muted-foreground">
+                找到了 {recipes.length} 道适合您的食谱
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {recipes.map((recipe, index) => (
+                <Card key={recipe.id} className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold mb-2">{recipe.title}</h3>
+                        <p className="text-muted-foreground mb-3">{recipe.description}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {recipe.prepTime + recipe.cookTime} 分钟
+                          </Badge>
+                          <Badge variant="secondary">
+                            <Users className="w-3 h-3 mr-1" />
+                            {recipe.servings} 人份
+                          </Badge>
+                          <Badge className="bg-cooking-herb text-white">
+                            <ChefHat className="w-3 h-3 mr-1" />
+                            {recipe.difficulty === 'beginner' ? '初级' : recipe.difficulty === 'intermediate' ? '中级' : '高级'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-4xl ml-4">
+                        {index === 0 ? '🍗' : index === 1 ? '🥗' : index === 2 ? '🍜' : '🍽️'}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex justify-center space-x-4">
+              <Button variant="outline" onClick={() => setStep('preferences')}>
+                重新生成
+              </Button>
+              <Button onClick={handleViewFullRecipes} size="lg" variant="spice">
+                <Sparkles className="w-4 h-4 mr-2" />
+                查看详细食谱
+              </Button>
+            </div>
+          </div>
+        );
+
       case 'recipes':
         return (
           <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Button variant="outline" onClick={() => setStep('preview')}>
+                ← 返回菜品预览
+              </Button>
+            </div>
             <RecipeDisplay recipes={recipes} />
             <div className="flex justify-center">
               <Button onClick={handleStartOver} variant="outline">
-                Create New Recipes
+                制作新的食谱
               </Button>
             </div>
           </div>
@@ -162,7 +228,7 @@ const Index = () => {
       )}
 
       {/* Navigation Header */}
-      {(step === 'preferences' || step === 'generating' || step === 'recipes') && (
+      {(step === 'preferences' || step === 'generating' || step === 'preview' || step === 'recipes') && (
         <div className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
@@ -172,13 +238,13 @@ const Index = () => {
               </div>
               <div className="flex items-center space-x-4 text-sm">
                 <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground">
-                  1. Ingredients ✓
+                  1. 食材 ✓
                 </div>
                 <div className={`px-3 py-1 rounded-full ${step === 'preferences' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  2. Preferences
+                  2. 偏好设置
                 </div>
-                <div className={`px-3 py-1 rounded-full ${step === 'recipes' || step === 'generating' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                  3. Recipes
+                <div className={`px-3 py-1 rounded-full ${step === 'recipes' || step === 'generating' || step === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  3. 食谱
                 </div>
               </div>
             </div>
