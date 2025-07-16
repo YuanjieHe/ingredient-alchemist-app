@@ -23,6 +23,15 @@ export interface Recipe {
     usedIn?: string;
   }>;
   instructions: string[];
+  detailedSteps?: Array<{
+    stepNumber: number;
+    title: string;
+    description: string;
+    duration: string;
+    tips?: string;
+    imagePrompt?: string;
+    imageUrl?: string;
+  }>;
   tips?: string[];
   nutritionInfo?: {
     calories: number;
@@ -86,7 +95,7 @@ export class RecipeService {
       
       console.log('Raw Gemini response:', text);
       
-      return this.parseRecipeResponse(text, request.ingredients, request.allowShopping);
+      return await this.parseRecipeResponse(text, request.ingredients, request.allowShopping);
     } catch (error) {
       console.error('Detailed error generating recipes:', {
         error: error,
@@ -176,6 +185,24 @@ Please respond with meal plans in this JSON format:
         "Step 2: Detailed cooking instructions",
         "Step 3: Coordination of all dishes and timing"
       ],
+      "detailedSteps": [
+        {
+          "stepNumber": 1,
+          "title": "Preparation Phase",
+          "description": "Detailed step-by-step description of what to do, including exact measurements, techniques, and timing. Be very specific about cutting techniques, temperatures, and cooking methods.",
+          "duration": "5-10 minutes",
+          "tips": "Pro tip for this specific step",
+          "imagePrompt": "A realistic cooking photo showing the preparation stage with ingredients laid out on a clean kitchen counter, proper lighting, professional food photography style"
+        },
+        {
+          "stepNumber": 2,
+          "title": "Cooking Phase",
+          "description": "Very detailed cooking instructions with specific temperatures, timing, and visual cues to look for. Include what the food should look, smell, and sound like.",
+          "duration": "15-20 minutes",
+          "tips": "Important cooking tip for this step",
+          "imagePrompt": "A realistic cooking photo showing the cooking process in action, with proper lighting and professional food photography style"
+        }
+      ],
       "tips": [
         "Cooking tip 1: How to coordinate timing",
         "Cooking tip 2: Nutritional balance suggestions"
@@ -190,6 +217,16 @@ Please respond with meal plans in this JSON format:
   ]
 }
 
+CRITICAL INSTRUCTIONS FOR DETAILED STEPS:
+- Generate 6-10 detailed cooking steps with specific techniques, temperatures, and timing
+- Each step should include a descriptive title, detailed instructions (100-200 words), estimated duration, and helpful tips
+- Include visual cues like "until golden brown", "when it sizzles", "soft to touch"
+- Provide specific measurements, temperatures (°C), and timing for each step
+- Add professional cooking tips for each step
+- Generate detailed image prompts for each step showing the cooking process
+- Make instructions so detailed that a beginner could follow them successfully
+- Include coordination between different dishes being prepared simultaneously
+
 Important Guidelines:
 - Prioritize available ingredients as main components
 - Consider cooking time coordination for all dishes
@@ -201,7 +238,7 @@ Important Guidelines:
     `;
   }
 
-  private parseRecipeResponse(response: string, availableIngredients: string[], allowShopping: boolean): Recipe[] {
+  private async parseRecipeResponse(response: string, availableIngredients: string[], allowShopping: boolean): Promise<Recipe[]> {
     try {
       console.log('Parsing recipe response, length:', response.length);
       
@@ -225,7 +262,7 @@ Important Guidelines:
 
       console.log(`Successfully parsed ${data.recipes.length} recipes`);
 
-      return data.recipes.map((recipe: any, index: number) => ({
+      const parsedRecipes = data.recipes.map((recipe: any, index: number) => ({
         id: recipe.id || `recipe-${Date.now()}-${index}`,
         title: recipe.title || 'Untitled Recipe',
         description: recipe.description || '',
@@ -237,9 +274,15 @@ Important Guidelines:
         dishes: recipe.dishes || [],
         ingredients: this.processIngredients(recipe.ingredients || [], availableIngredients),
         instructions: recipe.instructions || [],
+        detailedSteps: recipe.detailedSteps || [],
         tips: recipe.tips || [],
         nutritionInfo: recipe.nutritionInfo
       }));
+
+      // Generate images for detailed steps
+      await this.generateStepImages(parsedRecipes);
+      
+      return parsedRecipes;
     } catch (error) {
       console.error('Error parsing recipe response:', {
         error: error,
@@ -250,6 +293,21 @@ Important Guidelines:
       // Return mock recipes as fallback
       console.log('Falling back to mock recipes');
       return this.getMockRecipes(availableIngredients, allowShopping);
+    }
+  }
+
+  private async generateStepImages(recipes: Recipe[]): Promise<void> {
+    // For now, we'll skip image generation and just add placeholder URLs
+    // In a real implementation, you would call an image generation API here
+    for (const recipe of recipes) {
+      if (recipe.detailedSteps) {
+        for (const step of recipe.detailedSteps) {
+          if (step.imagePrompt) {
+            // For now, use a placeholder. In production, generate images using AI
+            step.imageUrl = `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center`;
+          }
+        }
+      }
     }
   }
 

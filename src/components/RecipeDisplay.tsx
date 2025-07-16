@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee } from 'lucide-react';
+import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -29,6 +29,15 @@ interface Recipe {
     usedIn?: string;
   }>;
   instructions: string[];
+  detailedSteps?: Array<{
+    stepNumber: number;
+    title: string;
+    description: string;
+    duration: string;
+    tips?: string;
+    imagePrompt?: string;
+    imageUrl?: string;
+  }>;
   tips?: string[];
   nutritionInfo?: {
     calories: number;
@@ -221,20 +230,68 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* Cooking Instructions */}
-              <div>
-                <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
-                <ol className="space-y-3">
-                  {recipe.instructions.map((step, index) => (
-                    <li key={index} className="flex space-x-3">
-                      <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                        {index + 1}
-                      </div>
-                      <p className="text-sm leading-relaxed">{step}</p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+              {/* Detailed Cooking Steps */}
+              {recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
+                <div className="space-y-6">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    {t('detailedCookingSteps')}
+                  </h4>
+                  <div className="space-y-6">
+                    {recipe.detailedSteps.map((step, index) => (
+                      <Card key={index} className="p-4 bg-muted/30">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
+                              {step.stepNumber}
+                            </span>
+                            <div>
+                              <h5 className="font-semibold">{step.title}</h5>
+                              <span className="text-sm text-muted-foreground">{step.duration}</span>
+                            </div>
+                          </div>
+                          
+                          {step.imageUrl && (
+                            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
+                              <img 
+                                src={step.imageUrl} 
+                                alt={`Step ${step.stepNumber}: ${step.title}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          <p className="text-sm leading-relaxed">{step.description}</p>
+                          
+                          {step.tips && (
+                            <div className="bg-cooking-cream p-3 rounded-lg">
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-medium">💡 {t('tip')}: </span>
+                                {step.tips}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* Fallback to basic instructions */
+                <div>
+                  <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
+                  <ol className="space-y-3">
+                    {recipe.instructions.map((step, index) => (
+                      <li key={index} className="flex space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                          {index + 1}
+                        </div>
+                        <p className="text-sm leading-relaxed">{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
 
               {/* Cooking Tips */}
               {recipe.tips && recipe.tips.length > 0 && (
