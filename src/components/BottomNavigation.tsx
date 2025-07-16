@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, Package, User, LogOut } from 'lucide-react';
+import { ChefHat, Package, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
