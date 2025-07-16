@@ -52,13 +52,6 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Custom cooking app colors
-				cooking: {
-					warm: 'hsl(var(--cooking-warm))',
-					spice: 'hsl(var(--cooking-spice))',
-					herb: 'hsl(var(--cooking-herb))',
-					cream: 'hsl(var(--cooking-cream))'
-				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -76,13 +69,14 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			backgroundImage: {
-				'gradient-warm': 'var(--gradient-warm)',
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-fresh': 'var(--gradient-fresh)'
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)'
 			},
 			boxShadow: {
-				'warm': 'var(--shadow-warm)',
-				'primary': 'var(--shadow-primary)'
+				'elegant': 'var(--shadow-elegant)',
+				'large': 'var(--shadow-large)',
+				'glow': 'var(--shadow-glow)'
 			},
 			keyframes: {
 				'accordion-down': {

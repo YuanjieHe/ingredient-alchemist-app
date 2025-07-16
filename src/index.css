@@ -2,133 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Warm, modern design system for cooking app - targeting housewives with friendly, cozy vibes
-All colors MUST be HSL.
-*/
+/* Modern, elegant design system for AI cooking app */
 
 @layer base {
   :root {
-    /* Warm cream and soft whites for backgrounds */
-    --background: 35 25% 97%;
-    --foreground: 25 40% 15%;
+    /* Modern neutral backgrounds */
+    --background: 220 15% 98%;
+    --foreground: 220 13% 9%;
 
-    /* Soft warm cards with subtle warmth */
-    --card: 35 20% 98%;
-    --card-foreground: 25 40% 15%;
+    /* Clean white cards */
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 9%;
 
-    /* Slightly warmer popover */
-    --popover: 35 25% 98%;
-    --popover-foreground: 25 40% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 9%;
 
-    /* Warm terracotta/orange as primary - friendly and appetizing */
-    --primary: 18 85% 60%;
+    /* Sophisticated orange-red primary */
+    --primary: 15 88% 55%;
     --primary-foreground: 0 0% 100%;
 
-    /* Soft sage green for secondary - fresh ingredient feel */
-    --secondary: 140 20% 85%;
-    --secondary-foreground: 25 40% 15%;
+    /* Elegant gray secondary */
+    --secondary: 220 12% 95%;
+    --secondary-foreground: 220 13% 9%;
 
-    /* Light warm neutral for muted elements */
-    --muted: 35 15% 92%;
-    --muted-foreground: 25 15% 45%;
+    /* Refined muted colors */
+    --muted: 220 12% 95%;
+    --muted-foreground: 220 8% 46%;
 
-    /* Soft peach accent color */
-    --accent: 25 50% 88%;
-    --accent-foreground: 25 40% 15%;
+    /* Subtle accent */
+    --accent: 220 12% 95%;
+    --accent-foreground: 220 13% 9%;
 
-    /* Warm red for destructive actions */
-    --destructive: 0 75% 55%;
+    /* Warning colors */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Subtle warm borders */
-    --border: 35 20% 88%;
-    --input: 35 20% 88%;
-    --ring: 18 85% 60%;
+    /* Clean borders */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 15 88% 55%;
 
-    /* Custom cooking app colors */
-    --cooking-warm: 35 40% 90%;
-    --cooking-spice: 30 70% 65%;
-    --cooking-herb: 140 35% 70%;
-    --cooking-cream: 40 30% 95%;
+    /* Modern gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(15, 88%, 55%), hsl(25, 95%, 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(15, 88%, 55%), hsl(220, 13%, 15%));
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(220, 12%, 98%));
 
-    /* Gradients for beautiful effects */
-    --gradient-warm: linear-gradient(135deg, hsl(35, 40%, 90%), hsl(25, 50%, 88%));
-    --gradient-primary: linear-gradient(135deg, hsl(18, 85%, 60%), hsl(30, 70%, 65%));
-    --gradient-fresh: linear-gradient(135deg, hsl(140, 35%, 70%), hsl(140, 20%, 85%));
+    /* Elegant shadows */
+    --shadow-elegant: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 0 1px rgb(255 255 255), 0 4px 25px 0 rgb(15 88 55 / 0.15);
 
-    /* Shadows with warm tones */
-    --shadow-warm: 0 4px 12px hsla(35, 40%, 60%, 0.15);
-    --shadow-primary: 0 8px 25px hsla(18, 85%, 60%, 0.25);
-
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    /* Dark mode with warm, cozy evening kitchen vibes */
-    --background: 25 15% 8%;
-    --foreground: 35 25% 95%;
+    /* Modern dark theme */
+    --background: 220 18% 8%;
+    --foreground: 220 8% 98%;
 
-    --card: 25 20% 10%;
-    --card-foreground: 35 25% 95%;
+    --card: 220 15% 10%;
+    --card-foreground: 220 8% 98%;
 
-    --popover: 25 20% 10%;
-    --popover-foreground: 35 25% 95%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 220 8% 98%;
 
-    /* Softer orange for dark mode - like candlelight */
-    --primary: 18 75% 55%;
+    --primary: 15 88% 55%;
     --primary-foreground: 0 0% 100%;
 
-    /* Darker sage green */
-    --secondary: 140 15% 20%;
-    --secondary-foreground: 35 25% 95%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 220 8% 98%;
 
-    /* Dark warm neutral */
-    --muted: 25 15% 15%;
-    --muted-foreground: 35 15% 65%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 8% 63%;
 
-    /* Dark peach accent */
-    --accent: 25 25% 18%;
-    --accent-foreground: 35 25% 95%;
+    --accent: 220 15% 15%;
+    --accent-foreground: 220 8% 98%;
 
-    /* Warm red for dark mode */
-    --destructive: 0 70% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Dark warm borders */
-    --border: 25 15% 18%;
-    --input: 25 15% 18%;
-    --ring: 18 75% 55%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 15 88% 55%;
 
-    /* Dark mode cooking colors */
-    --cooking-warm: 25 20% 15%;
-    --cooking-spice: 30 60% 50%;
-    --cooking-herb: 140 25% 25%;
-    --cooking-cream: 25 15% 12%;
+    --gradient-primary: linear-gradient(135deg, hsl(15, 88%, 55%), hsl(25, 95%, 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(15, 88%, 55%), hsl(220, 18%, 8%));
+    --gradient-card: linear-gradient(145deg, hsl(220, 15%, 10%), hsl(220, 15%, 12%));
 
-    /* Dark gradients */
-    --gradient-warm: linear-gradient(135deg, hsl(25, 20%, 15%), hsl(25, 25%, 18%));
-    --gradient-primary: linear-gradient(135deg, hsl(18, 75%, 55%), hsl(30, 60%, 50%));
-    --gradient-fresh: linear-gradient(135deg, hsl(140, 25%, 25%), hsl(140, 15%, 20%));
+    --shadow-elegant: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-glow: 0 0 0 1px rgb(220 15 18), 0 4px 25px 0 rgb(15 88 55 / 0.25);
 
-    /* Dark shadows */
-    --shadow-warm: 0 4px 12px hsla(0, 0%, 0%, 0.3);
-    --shadow-primary: 0 8px 25px hsla(18, 75%, 55%, 0.2);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
