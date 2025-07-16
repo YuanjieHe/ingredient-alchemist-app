@@ -127,15 +127,16 @@ MEAL REQUIREMENTS:
 - Planning for: ${mealDays} days
 - Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
 
-MEAL PLANNING PRINCIPLES:
-1. Create complete meal combinations for ${peopleCount} people
-2. Match the ${mealType} meal type and ${occasionType} occasion style
-3. Follow ${cuisineType} cuisine preferences and cooking traditions
-4. Include balanced dish combinations: main dish + side dish + soup/beverage (when appropriate)
-5. Use primarily available ingredients, minimize waste
-6. Match the ${skillLevel} skill level with appropriate techniques
-7. Consider nutritional balance, colors, and flavors
-8. Provide practical cooking coordination tips
+CRITICAL MEAL PLANNING PRINCIPLES:
+1. **SMART INGREDIENT SELECTION**: You MUST NOT use all available ingredients in each meal. Select only 3-6 ingredients that work well together and make culinary sense
+2. **LOGICAL COMBINATIONS**: Choose ingredients that complement each other in flavor, texture, and cooking method
+3. **CUISINE CONSISTENCY**: Ensure selected ingredients align with ${cuisineType} cuisine traditions
+4. **NUTRITIONAL BALANCE**: Select ingredients that provide protein, vegetables, and carbohydrates in proper proportions
+5. Create complete meal combinations for ${peopleCount} people
+6. Match the ${mealType} meal type and ${occasionType} occasion style
+7. Include balanced dish combinations: main dish + side dish + soup/beverage (when appropriate)
+8. Match the ${skillLevel} skill level with appropriate techniques
+9. Consider cooking coordination and timing
 
 Please respond with meal plans in this JSON format:
 {
