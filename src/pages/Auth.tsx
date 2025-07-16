@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
 
@@ -47,13 +47,18 @@ const Auth = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success(t('signUpSuccess') || '注册成功，请查看邮箱确认');
+        toast.success(t('signUpSuccess') || '注册成功');
+        navigate('/');
       }
     } catch (error) {
       toast.error(t('signUpError') || '注册失败');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSkip = () => {
+    navigate('/');
   };
 
   return (
@@ -153,6 +158,17 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+            
+            <div className="mt-6 text-center">
+              <Button 
+                variant="ghost" 
+                onClick={handleSkip}
+                className="w-full text-muted-foreground"
+              >
+                <ArrowRight className="w-4 h-4 mr-2" />
+                {t('skipLogin') || '跳过登录，直接体验'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

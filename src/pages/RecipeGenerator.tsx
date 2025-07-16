@@ -38,7 +38,10 @@ const RecipeGenerator = () => {
   }, [user]);
 
   const fetchBankIngredients = async () => {
-    if (!user) return;
+    if (!user) {
+      setBankIngredients([]);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -122,37 +125,56 @@ const RecipeGenerator = () => {
       case 'ingredients':
         return (
           <div className="space-y-6">
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">{t('ingredientsBank') || '食材银行'}</h3>
-                <Badge variant="secondary">{bankIngredients.length}</Badge>
-              </div>
-              {bankIngredients.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {bankIngredients.slice(0, 6).map((ingredient, index) => (
-                      <Badge key={index} variant="outline">{ingredient}</Badge>
-                    ))}
-                    {bankIngredients.length > 6 && (
-                      <Badge variant="outline">+{bankIngredients.length - 6}</Badge>
-                    )}
+            {user && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">{t('ingredientsBank') || '食材银行'}</h3>
+                  <Badge variant="secondary">{bankIngredients.length}</Badge>
+                </div>
+                {bankIngredients.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {bankIngredients.slice(0, 6).map((ingredient, index) => (
+                        <Badge key={index} variant="outline">{ingredient}</Badge>
+                      ))}
+                      {bankIngredients.length > 6 && (
+                        <Badge variant="outline">+{bankIngredients.length - 6}</Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadBankIngredients}
+                      className="w-full"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      {t('useBankIngredients') || '使用银行食材'}
+                    </Button>
                   </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    {t('noBankIngredients') || '食材银行为空，请先添加食材'}
+                  </p>
+                )}
+              </Card>
+            )}
+
+            {!user && (
+              <Card className="p-4 bg-muted/50">
+                <div className="text-center space-y-2">
+                  <p className="text-muted-foreground">
+                    {t('guestMode') || '您正在访客模式下使用'}
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={loadBankIngredients}
-                    className="w-full"
+                    onClick={() => window.location.href = '/auth'}
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    {t('useBankIngredients') || '使用银行食材'}
+                    {t('loginToSaveIngredients') || '登录以保存食材'}
                   </Button>
                 </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  {t('noBankIngredients') || '食材银行为空，请先添加食材'}
-                </p>
-              )}
-            </Card>
+              </Card>
+            )}
 
             <IngredientInput 
               ingredients={ingredients} 

@@ -24,6 +24,24 @@ const IngredientsBank = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
+  if (!user) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-8 text-center space-y-4">
+            <h2 className="text-2xl font-bold">{t('loginRequired') || '需要登录'}</h2>
+            <p className="text-muted-foreground">
+              {t('loginToAccessBank') || '请登录以访问您的食材银行'}
+            </p>
+            <Button onClick={() => window.location.href = '/auth'}>
+              {t('goToLogin') || '前往登录'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   useEffect(() => {
     if (user) {
       fetchIngredients();
