@@ -1,12 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, Package, LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { ChefHat, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
 
 const BottomNavigation = () => {
   const { t } = useLanguage();
-  const { signOut } = useAuth();
   const location = useLocation();
 
   const navItems = [
@@ -21,10 +18,6 @@ const BottomNavigation = () => {
       label: t('ingredientsBank') || '食材银行',
     },
   ];
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
@@ -48,16 +41,6 @@ const BottomNavigation = () => {
             </Link>
           );
         })}
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSignOut}
-          className="flex flex-col items-center space-y-1 py-2 px-3 text-muted-foreground hover:text-foreground"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="text-xs font-medium">{t('signOut') || '退出'}</span>
-        </Button>
       </div>
     </div>
   );
