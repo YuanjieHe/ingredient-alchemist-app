@@ -5,44 +5,140 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ChefHat, ArrowRight, Package, ShoppingCart, X } from 'lucide-react';
+import { ChefHat, ArrowRight, Package, ShoppingCart, X, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const IngredientsBank = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [bankIngredients, setBankIngredients] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load ingredients from localStorage on mount
+  // Load ingredients from both localStorage and database
   useEffect(() => {
-    const saved = localStorage.getItem('ingredientsBank');
-    if (saved) {
-      setBankIngredients(JSON.parse(saved));
-    }
+    loadIngredients();
   }, []);
 
-  // Save to localStorage whenever bank changes
-  useEffect(() => {
-    localStorage.setItem('ingredientsBank', JSON.stringify(bankIngredients));
-  }, [bankIngredients]);
+  const loadIngredients = async () => {
+    setIsLoading(true);
+    try {
+      // Try to load from database first
+      const { data, error } = await supabase
+        .from('ingredients_bank')
+        .select('name, category')
+        .order('created_at', { ascending: false });
 
-  const handleAddToBank = (newIngredients: string[]) => {
+      if (error) {
+        console.log('Database access requires authentication, using localStorage fallback');
+        // Fallback to localStorage
+        const saved = localStorage.getItem('ingredientsBank');
+        if (saved) {
+          setBankIngredients(JSON.parse(saved));
+        }
+      } else {
+        // Successfully loaded from database
+        const ingredientNames = data?.map(item => item.name) || [];
+        setBankIngredients(ingredientNames);
+        // Also save to localStorage as backup
+        localStorage.setItem('ingredientsBank', JSON.stringify(ingredientNames));
+      }
+    } catch (error) {
+      console.log('Error loading ingredients:', error);
+      // Fallback to localStorage
+      const saved = localStorage.getItem('ingredientsBank');
+      if (saved) {
+        setBankIngredients(JSON.parse(saved));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveIngredientToDatabase = async (ingredient: string, category: string = 'other') => {
+    try {
+      const { error } = await supabase
+        .from('ingredients_bank')
+        .insert([
+          { 
+            name: ingredient, 
+            category: category,
+            user_id: 'anonymous' // This will fail due to RLS, but we'll handle gracefully
+          }
+        ]);
+
+      if (error) {
+        console.log('Database save requires authentication, using localStorage only');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log('Error saving to database:', error);
+      return false;
+    }
+  };
+
+  const removeIngredientFromDatabase = async (ingredient: string) => {
+    try {
+      const { error } = await supabase
+        .from('ingredients_bank')
+        .delete()
+        .eq('name', ingredient);
+
+      if (error) {
+        console.log('Database removal requires authentication');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log('Error removing from database:', error);
+      return false;
+    }
+  };
+
+  const handleAddToBank = async (newIngredients: string[]) => {
     // Add only new ingredients to avoid duplicates
     const uniqueIngredients = newIngredients.filter(ing => 
       !bankIngredients.some(existing => existing.toLowerCase() === ing.toLowerCase())
     );
     
     if (uniqueIngredients.length > 0) {
-      setBankIngredients([...bankIngredients, ...uniqueIngredients]);
-      toast.success(`${t('added') || '已添加'} ${uniqueIngredients.length} ${t('ingredientsToBank') || '种食材到银行'}`);
+      // Update local state immediately
+      const updatedIngredients = [...bankIngredients, ...uniqueIngredients];
+      setBankIngredients(updatedIngredients);
+      
+      // Save to localStorage
+      localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+      
+      // Try to save to database
+      let dbSaveCount = 0;
+      for (const ingredient of uniqueIngredients) {
+        const saved = await saveIngredientToDatabase(ingredient);
+        if (saved) dbSaveCount++;
+      }
+      
+      if (dbSaveCount > 0) {
+        toast.success(`${t('added') || '已添加'} ${uniqueIngredients.length} ${t('ingredientsToBank') || '种食材到银行'} (${t('savedToDatabase') || '已保存到数据库'})`);
+      } else {
+        toast.success(`${t('added') || '已添加'} ${uniqueIngredients.length} ${t('ingredientsToBank') || '种食材到银行'} (${t('localStorageOnly') || '仅本地存储'})`);
+      }
     }
   };
 
-  const removeFromBank = (ingredient: string) => {
-    setBankIngredients(bankIngredients.filter(item => item !== ingredient));
+  const removeFromBank = async (ingredient: string) => {
+    // Update local state immediately
+    const updatedIngredients = bankIngredients.filter(item => item !== ingredient);
+    setBankIngredients(updatedIngredients);
     setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
+    
+    // Update localStorage
+    localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+    
+    // Try to remove from database
+    await removeIngredientFromDatabase(ingredient);
+    
     toast.success(`${t('removed') || '已移除'} ${ingredient}`);
   };
 
@@ -79,6 +175,23 @@ const IngredientsBank = () => {
         <h1 className="text-3xl font-bold text-foreground">{t('ingredientsBank') || '食材银行'}</h1>
         <p className="text-muted-foreground">{t('manageFoodInventory') || '管理您的食物库存'}</p>
       </div>
+
+      {/* Authentication Notice */}
+      <Card className="shadow-lg border-orange-200 bg-orange-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+            <div className="space-y-2">
+              <h3 className="font-semibold text-orange-800">
+                {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
+              </h3>
+              <p className="text-sm text-orange-700">
+                {t('authNoticeMessage') || '当前食材将保存到本地存储。要在设备间同步和永久保存，需要启用用户认证功能。'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Add New Ingredients Section */}
       <Card className="shadow-lg">
