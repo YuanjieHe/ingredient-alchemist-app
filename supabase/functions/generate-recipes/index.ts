@@ -30,26 +30,25 @@ serve(async (req) => {
       cuisineType 
     } = await req.json();
 
-    // Create a detailed prompt for recipe generation
-    const prompt = `As a professional chef, create ${mealDays} detailed recipes for ${mealType} meals using these ingredients: ${ingredients.join(', ')}.
+    // Create a detailed prompt for recipe generation that focuses on Chinese cooking techniques
+    const prompt = `As a master Chinese chef (师傅), create ${mealDays} exciting and authentic ${cuisineType} recipes for ${mealType}, expertly using these ingredients: ${ingredients.join(', ')}.
 
-Requirements:
-- Skill level: ${skillLevel}
+KEY REQUIREMENTS:
+- Skill level: ${skillLevel} (provide detailed wok techniques and heat control instructions)
 - Serves: ${peopleCount} people
-- Cuisine type: ${cuisineType}
+- Focus: Authentic ${cuisineType} cooking methods and flavors
 - Occasion: ${occasionType}
-- ${allowShopping ? 'Can suggest additional ingredients to buy' : 'Must use only provided ingredients'}
+- ${allowShopping ? 'Can suggest essential Chinese ingredients to enhance the dish' : 'Must use only provided ingredients creatively'}
 
-For each recipe, provide:
-1. Recipe title
-2. Brief description (1-2 sentences)
-3. Prep time (minutes)
-4. Cook time (minutes)
-5. Difficulty level (beginner/intermediate/advanced)
-6. Detailed ingredients list with measurements
-7. Step-by-step cooking instructions with detailed explanations
-8. Cooking tips and tricks
-9. Serving suggestions
+REQUIRED DETAILS:
+1. Chinese name and English translation
+2. Cultural significance and regional origin
+3. Essential wok and knife techniques
+4. Precise heat control instructions
+5. Timing for wok hei and ingredient additions
+6. Specific seasoning combinations
+7. Traditional plating methods
+8. Texture and aroma indicators
 
 Format the response as a JSON array with this exact structure:
 [
@@ -103,12 +102,12 @@ Important: Respond ONLY with valid JSON. No other text.`;
         messages: [
           { 
             role: 'system', 
-            content: 'You are a professional chef and cooking instructor. Generate detailed, practical recipes that are easy to follow. Always respond with valid JSON only.' 
+            content: 'You are a master Chinese chef (师傅) with expertise in regional Chinese cuisines. Create exciting, authentic recipes with detailed wok techniques and traditional cooking methods. Focus on creating dishes with exceptional flavors, proper wok hei, and perfect texture combinations. Always respond with valid JSON only.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: 4000,
+        temperature: 0.8,
+        max_tokens: 6000,
       }),
     });
 
