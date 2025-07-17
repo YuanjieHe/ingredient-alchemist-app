@@ -90,13 +90,21 @@ const IngredientsBank = () => {
 
   const removeIngredientFromDatabase = async (ingredient: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No authenticated user, skipping database removal');
+        return false;
+      }
+
       const { error } = await supabase
         .from('ingredients_bank')
         .delete()
-        .eq('name', ingredient);
+        .eq('name', ingredient)
+        .eq('user_id', user.id);
 
       if (error) {
-        console.log('Database removal requires authentication');
+        console.log('Database removal failed:', error.message);
         return false;
       }
       return true;
@@ -177,29 +185,34 @@ const IngredientsBank = () => {
     navigate('/');
   };
 
+  const getIngredientEmoji = (ingredient: string) => {
+    const lower = ingredient.toLowerCase();
+    if (lower.includes('chicken') || lower.includes('beef') || lower.includes('pork') || lower.includes('fish') || lower.includes('meat')) return '🍖';
+    if (lower.includes('rice')) return '🍚';
+    if (lower.includes('tomato')) return '🍅';
+    if (lower.includes('onion')) return '🧅';
+    if (lower.includes('garlic')) return '🧄';
+    if (lower.includes('potato')) return '🥔';
+    if (lower.includes('carrot')) return '🥕';
+    if (lower.includes('egg')) return '🥚';
+    if (lower.includes('milk') || lower.includes('cheese')) return '🥛';
+    if (lower.includes('bread')) return '🍞';
+    if (lower.includes('apple')) return '🍎';
+    if (lower.includes('banana')) return '🍌';
+    if (lower.includes('pepper')) return '🌶️';
+    if (lower.includes('corn')) return '🌽';
+    if (lower.includes('lettuce') || lower.includes('cabbage') || lower.includes('spinach')) return '🥬';
+    if (lower.includes('mushroom')) return '🍄';
+    if (lower.includes('avocado')) return '🥑';
+    return '🥬'; // Default vegetable emoji
+  };
+
   return (
     <div className="space-y-6 pb-20">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-foreground">{t('ingredientsBank') || '食材银行'}</h1>
         <p className="text-muted-foreground">{t('manageFoodInventory') || '管理您的食物库存'}</p>
       </div>
-
-      {/* Authentication Notice */}
-      <Card className="shadow-lg border-orange-200 bg-orange-50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-            <div className="space-y-2">
-              <h3 className="font-semibold text-orange-800">
-                {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
-              </h3>
-              <p className="text-sm text-orange-700">
-                {t('authNoticeMessage') || '当前食材将保存到本地存储。要在设备间同步和永久保存，需要启用用户认证功能。'}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Add New Ingredients Section */}
       <Card className="shadow-lg">
@@ -217,83 +230,150 @@ const IngredientsBank = () => {
         </CardContent>
       </Card>
 
-      <Separator />
-
-      {/* Current Inventory Section */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5" />
-              {t('currentInventory') || '当前库存'} 
-              <Badge variant="secondary">{bankIngredients.length}</Badge>
-            </CardTitle>
-            {bankIngredients.length > 0 && (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={selectAllIngredients}>
-                  {t('selectAll') || '全选'}
-                </Button>
-                <Button variant="outline" size="sm" onClick={clearSelection}>
-                  {t('clearSelection') || '清空选择'}
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {bankIngredients.length === 0 ? (
-            <div className="text-center py-8 space-y-2">
-              <p className="text-muted-foreground">{t('emptyInventory') || '库存为空'}</p>
-              <p className="text-sm text-muted-foreground">{t('addIngredientsFirst') || '请先添加食材到您的银行'}</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
+      {/* Real-time Inventory Display - Shows immediately when ingredients are added */}
+      {bankIngredients.length > 0 && (
+        <>
+          <Separator />
+          <Card className="shadow-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/10">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-4 h-4 bg-green-400 rounded-full animate-ping opacity-75"></div>
+                  </div>
+                  <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {t('yourCurrentInventory') || '您当前的库存'}
+                  </span>
+                  <Badge variant="default" className="bg-gradient-to-r from-primary to-secondary text-white font-bold px-3 py-1 text-sm">
+                    {bankIngredients.length} {t('items') || '项'}
+                  </Badge>
+                </div>
+                {bankIngredients.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={selectAllIngredients} className="text-xs">
+                      <Package className="w-3 h-3 mr-1" />
+                      {t('selectAll') || '全选'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={clearSelection} className="text-xs">
+                      {t('clearSelection') || '清空'}
+                    </Button>
+                  </div>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {bankIngredients.map((ingredient, index) => (
-                  <Badge
+                  <div
                     key={index}
-                    variant={selectedIngredients.includes(ingredient) ? "default" : "secondary"}
-                    className={`cursor-pointer transition-all hover:scale-105 px-3 py-2 ${
+                    className={`relative group cursor-pointer transition-all duration-300 hover:scale-110 ${
                       selectedIngredients.includes(ingredient) 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted hover:bg-cooking-warm hover:text-foreground'
+                        ? 'transform scale-105 z-10' 
+                        : ''
                     }`}
                     onClick={() => toggleIngredientSelection(ingredient)}
                   >
-                    {ingredient}
+                    <div className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                      selectedIngredients.includes(ingredient)
+                        ? 'bg-gradient-to-br from-primary to-secondary text-white border-primary shadow-lg shadow-primary/25'
+                        : 'bg-card hover:bg-gradient-to-br hover:from-cooking-warm hover:to-cooking-spice border-border hover:border-primary/50 hover:text-white'
+                    }`}>
+                      <div className="text-3xl mb-2 animate-bounce">
+                        {getIngredientEmoji(ingredient)}
+                      </div>
+                      <div className="text-xs font-semibold break-words leading-tight">
+                        {ingredient}
+                      </div>
+                      {selectedIngredients.includes(ingredient) && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      )}
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFromBank(ingredient);
                       }}
-                      className="ml-2 hover:text-destructive transition-colors"
+                      className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-xs shadow-lg"
                     >
                       <X className="w-3 h-3" />
                     </button>
-                  </Badge>
+                  </div>
                 ))}
               </div>
 
               {selectedIngredients.length > 0 && (
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="text-center space-y-3">
-                    <p className="text-green-800 font-medium">
-                      {t('selectedForCooking') || '已选择用于烹饪'}: {selectedIngredients.length} {t('ingredients') || '种食材'}
-                    </p>
+                <div className="mt-6 p-6 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-2 border-green-300 rounded-xl shadow-lg">
+                  <div className="text-center space-y-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="relative">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                        <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      </div>
+                      <p className="text-green-800 font-bold text-lg">
+                        {t('selectedForCooking') || '已选择用于烹饪'}: {selectedIngredients.length} {t('ingredients') || '种食材'}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-center max-h-20 overflow-y-auto">
+                      {selectedIngredients.map((ingredient, index) => (
+                        <Badge key={index} className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-300 font-medium">
+                          {getIngredientEmoji(ingredient)} {ingredient}
+                        </Badge>
+                      ))}
+                    </div>
                     <Button 
                       onClick={handleCookWithSelected}
                       size="lg"
-                      className="w-full sm:w-auto"
+                      className="w-full sm:w-auto bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                     >
-                      <ChefHat className="w-4 h-4 mr-2" />
+                      <ChefHat className="w-5 h-5 mr-2" />
                       {t('cookWithSelected') || '用选中食材烹饪'}
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Empty State */}
+      {bankIngredients.length === 0 && (
+        <>
+          <Separator />
+          <Card className="shadow-lg border-dashed border-2 border-muted-foreground/20">
+            <CardContent className="p-12 text-center space-y-4">
+              <div className="text-6xl opacity-50">📦</div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-muted-foreground">
+                  {t('emptyInventory') || '库存为空'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t('addIngredientsFirst') || '请先添加食材到您的银行'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Authentication Notice */}
+      <Card className="shadow-lg border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+            <div className="space-y-2">
+              <h3 className="font-semibold text-orange-800">
+                {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
+              </h3>
+              <p className="text-sm text-orange-700">
+                {t('authNoticeMessage') || '当前食材将保存到本地存储。要在设备间同步和永久保存，需要启用用户认证功能。'}
+              </p>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>
