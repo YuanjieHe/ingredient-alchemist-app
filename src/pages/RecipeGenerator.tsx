@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,7 @@ import { IngredientInput } from '@/components/IngredientInput';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight, Clock, Users, RefreshCw } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -23,26 +23,9 @@ const RecipeGenerator = () => {
   const [cuisineType, setCuisineType] = useState('chinese');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [bankIngredients, setBankIngredients] = useState<string[]>([]);
   
   const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
   const recipeService = new RecipeService(API_KEY);
-
-  // Remove auth-dependent functionality for now
-  useEffect(() => {
-    // No bank ingredients without auth
-    setBankIngredients([]);
-  }, []);
-
-  const fetchBankIngredients = async () => {
-    // No fetching without auth
-    setBankIngredients([]);
-  };
-
-  const loadBankIngredients = () => {
-    setIngredients([...bankIngredients]);
-    toast.success(t('bankIngredientsLoaded') || '已加载食材银行中的食材');
-  };
 
   const handleContinueToPreferences = () => {
     if (ingredients.length === 0) {
