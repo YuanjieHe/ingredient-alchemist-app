@@ -177,13 +177,7 @@ const IngredientsBank = () => {
   };
 
   const handleCookWithSelected = () => {
-    if (selectedIngredients.length === 0) {
-      toast.error(t('selectIngredientsFirst') || '请先选择食材');
-      return;
-    }
-    
-    localStorage.setItem('selectedIngredients', JSON.stringify(selectedIngredients));
-    toast.success(`${t('selected') || '已选择'} ${selectedIngredients.length} ${t('ingredients') || '种食材'}`);
+    toast.success(t('navigatingToRecipeGenerator') || '正在跳转到食谱生成器');
     navigate('/');
   };
 

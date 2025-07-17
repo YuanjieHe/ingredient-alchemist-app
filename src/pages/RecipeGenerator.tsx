@@ -28,15 +28,14 @@ const RecipeGenerator = () => {
   const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
   const recipeService = new RecipeService(API_KEY);
 
-  // Load a default set of ingredients or get from localStorage
+  // Load ingredients from bank
   useEffect(() => {
-    const savedIngredients = localStorage.getItem('selectedIngredients');
-    if (savedIngredients) {
-      const parsedIngredients = JSON.parse(savedIngredients);
+    const bankIngredients = localStorage.getItem('ingredientsBank');
+    if (bankIngredients) {
+      const parsedIngredients = JSON.parse(bankIngredients);
       setIngredients(parsedIngredients);
-      localStorage.removeItem('selectedIngredients');
     } else {
-      // Set default ingredients if none provided
+      // Set default ingredients if bank is empty
       setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
     }
   }, []);
@@ -91,7 +90,7 @@ const RecipeGenerator = () => {
               {ingredients.length > 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
                   <p className="text-green-800 text-sm font-medium mb-2">
-                    {t('usingIngredients') || '使用食材'}: {ingredients.length} {t('items') || '项'}
+                    {t('usingIngredientsFromBank') || '使用食材银行中的食材'}: {ingredients.length} {t('items') || '项'}
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {ingredients.slice(0, 8).map((ingredient, index) => (
