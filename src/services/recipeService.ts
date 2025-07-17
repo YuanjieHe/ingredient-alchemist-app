@@ -84,6 +84,7 @@ export class RecipeService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${request.apiKey}` // Add authorization header
         },
         body: JSON.stringify({
           ingredients: request.ingredients,

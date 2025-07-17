@@ -54,36 +54,46 @@ Format the response as a JSON array with this exact structure:
 [
   {
     "id": "recipe1",
-    "title": "Recipe Title",
-    "description": "Brief description",
-    "prepTime": 15,
+    "title": "精致中式菜肴名称 (Elegant Chinese Dish Name)",
+    "description": "详细且吸引人的描述，包含菜肴起源和文化背景 (Detailed and engaging description with dish origin and cultural background)",
+    "prepTime": 20,
     "cookTime": 30,
     "servings": ${peopleCount},
     "difficulty": "${skillLevel}",
     "ingredients": [
-      "1 cup rice",
-      "2 chicken breasts"
+      {"item": "鸡肉 (chicken)", "amount": "300g，切丝", "usedIn": "主菜"},
+      {"item": "大蒜 (garlic)", "amount": "3瓣，切末", "usedIn": "调味"}
     ],
     "dishInstructions": [
       {
-        "dishName": "Main Recipe Name",
+        "dishName": "红烧鸡 (Braised Chicken)",
         "steps": [
           {
             "stepNumber": 1,
-            "title": "Step Title",
-            "description": "Detailed step description",
-            "duration": "5 minutes",
-            "tips": "Helpful tip for this step",
-            "imagePrompt": "A descriptive prompt for AI image generation of this step"
+            "title": "腌制鸡肉 (Marinate the Chicken)",
+            "description": "将鸡肉切成均匀的条状，加入料酒、酱油、盐和淀粉，用手抓匀，静置15分钟入味。这一步骤让鸡肉更加鲜嫩多汁，并为下一步的炒制做好准备。腌制时间不宜过长，以免鸡肉失去原有的口感。",
+            "duration": "15分钟",
+            "tips": "腌制时加入少量淀粉可以锁住肉汁，使成菜更加嫩滑。手法要轻柔，避免挤压肉质。",
+            "imagePrompt": "Chinese chef marinating chicken strips in a blue and white porcelain bowl with soy sauce and cooking wine, ingredients neatly arranged on bamboo cutting board"
+          },
+          {
+            "stepNumber": 2,
+            "title": "热锅控温 (Wok Heat Control)",
+            "description": "将炒锅置于大火上预热至冒烟，加入花生油至五成热（约160°C）。油温达到后，火力调至中高火，这是炒制中式菜肴的理想温度。油温过低会使食材吸油过多，油温过高则容易煳锅。通过观察油面的细微波纹来判断温度是否适中。",
+            "duration": "3分钟",
+            "tips": "专业厨师通过油面的波纹和轻微的烟雾判断油温。油温适中时，将木筷放入油中会出现细小气泡环绕。",
+            "imagePrompt": "Close-up of a traditional carbon steel wok being heated on high flame with slight smoke rising, Chinese kitchen setting, dramatic lighting"
           }
         ]
       }
     ],
     "coordinationTips": [
-      "Start the rice first as it takes longest to cook",
-      "Prep all vegetables while rice is cooking"
+      "先准备所有配料并分类摆放，这是'mise en place'的中式应用，确保炒菜过程顺畅",
+      "炒制过程中要掌握'翻炒'和'颠锅'技巧，这是获得正宗'锅气'的关键",
+      "遵循'热锅冷油'原则，确保锅温足够高再加油，防止食材粘锅",
+      "调味时遵循'鲜、香、辣、咸、甜'的平衡原则，体现中式烹饪的精髓"
     ],
-    "tags": ["quick", "healthy", "family-friendly"]
+    "tags": ["正宗中餐", "传统技法", "家常菜", "色香味俱全"]
   }
 ]
 
