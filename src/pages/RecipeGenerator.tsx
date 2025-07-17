@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';

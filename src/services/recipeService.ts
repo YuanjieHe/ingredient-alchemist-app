@@ -55,6 +55,8 @@ export interface RecipeRequest {
 
 export class RecipeService {
   private genAI: GoogleGenerativeAI | null = null;
+  private supabaseUrl = "https://jamywhzmeizbbobiuhcn.supabase.co";
+  private apiEndpoint = `${this.supabaseUrl}/functions/v1/generate-recipes`;
 
   constructor(apiKey?: string) {
     if (apiKey) {
@@ -67,24 +69,79 @@ export class RecipeService {
   }
 
   async generateRecipes(request: RecipeRequest): Promise<Recipe[]> {
-    if (!this.genAI) {
-      console.error('API key not set in RecipeService');
-      throw new Error('API key not set');
-    }
-
     console.log('Starting recipe generation with request:', {
       ingredients: request.ingredients,
       skillLevel: request.skillLevel,
       mealDays: request.mealDays,
-      allowShopping: request.allowShopping,
-      hasApiKey: !!request.apiKey
+      mealType: request.mealType,
+      cuisineType: request.cuisineType
     });
 
+    try {
+      // First try the new OpenAI-based edge function
+      console.log('Trying OpenAI-based recipe generation...');
+      const response = await fetch(this.apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ingredients: request.ingredients,
+          skillLevel: request.skillLevel,
+          mealDays: request.mealDays,
+          allowShopping: request.allowShopping,
+          peopleCount: request.peopleCount,
+          mealType: request.mealType,
+          occasionType: request.occasionType,
+          cuisineType: request.cuisineType
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('OpenAI-based generation successful');
+        
+        // Convert OpenAI format to our expected format
+        const convertedRecipes = data.recipes.map((recipe: any, index: number) => ({
+          id: recipe.id || `recipe-${Date.now()}-${index}`,
+          title: recipe.title || 'Untitled Recipe',
+          description: recipe.description || '',
+          prepTime: recipe.prepTime || 30,
+          cookTime: recipe.cookTime || 45,
+          servings: recipe.servings || request.peopleCount,
+          difficulty: recipe.difficulty || request.skillLevel,
+          mealType: recipe.mealType || request.mealType,
+          dishes: recipe.dishes || [],
+          ingredients: this.processIngredients(recipe.ingredients || [], request.ingredients),
+          instructions: recipe.instructions || [],
+          detailedSteps: recipe.dishInstructions?.[0]?.steps || [],
+          tips: recipe.coordinationTips || [],
+          nutritionInfo: recipe.nutritionInfo
+        }));
+        
+        return convertedRecipes;
+      } else {
+        const errorData = await response.json();
+        throw new Error(`OpenAI API failed: ${errorData.message || response.statusText}`);
+      }
+    } catch (openAIError) {
+      console.warn('OpenAI-based generation failed, falling back to Gemini:', openAIError);
+      
+      // Fallback to original Gemini approach
+      return this.generateWithGemini(request);
+    }
+  }
+
+  private async generateWithGemini(request: RecipeRequest): Promise<Recipe[]> {
+    if (!this.genAI) {
+      console.error('API key not set in RecipeService');
+      throw new Error('API key not set and OpenAI fallback failed');
+    }
+
+    console.log('Using Gemini fallback...');
     const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = this.createPrompt(request);
     
-    console.log('Generated prompt:', prompt);
-
     try {
       console.log('Calling Gemini API...');
       const result = await model.generateContent(prompt);
@@ -97,25 +154,11 @@ export class RecipeService {
       
       return await this.parseRecipeResponse(text, request.ingredients, request.allowShopping);
     } catch (error) {
-      console.error('Detailed error generating recipes:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        apiKeyExists: !!this.genAI
-      });
+      console.error('Gemini generation also failed:', error);
       
-      // Check if it's an API key issue
-      if (error instanceof Error && error.message.includes('API_KEY')) {
-        throw new Error('Invalid API key. Please check your Google AI Studio API key.');
-      }
-      
-      // Check if it's a quota issue
-      if (error instanceof Error && error.message.includes('quota')) {
-        throw new Error('API quota exceeded. Please check your Google AI Studio usage limits.');
-      }
-      
-      // Generic error with more context
-      throw new Error(`Failed to generate recipes: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Return mock recipes as final fallback
+      console.log('Falling back to mock recipes');
+      return this.getMockRecipes(request.ingredients, request.allowShopping);
     }
   }
 
