@@ -59,18 +59,26 @@ const IngredientsBank = () => {
 
   const saveIngredientToDatabase = async (ingredient: string, category: string = 'other') => {
     try {
+      // Check if user is authenticated first
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No authenticated user, skipping database save');
+        return false;
+      }
+
       const { error } = await supabase
         .from('ingredients_bank')
         .insert([
           { 
             name: ingredient, 
             category: category,
-            user_id: 'anonymous' // This will fail due to RLS, but we'll handle gracefully
+            user_id: user.id
           }
         ]);
 
       if (error) {
-        console.log('Database save requires authentication, using localStorage only');
+        console.log('Database save failed:', error.message);
         return false;
       }
       return true;
