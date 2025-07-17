@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { IngredientInput } from '@/components/IngredientInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ChefHat, ArrowRight, Package, ShoppingCart, X, AlertCircle } from 'lucide-react';
+import { ChefHat, ArrowRight, Package, ShoppingCart, X, AlertCircle, LogIn, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 const IngredientsBank = () => {
   const { t } = useLanguage();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [bankIngredients, setBankIngredients] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
@@ -360,20 +362,54 @@ const IngredientsBank = () => {
         </>
       )}
 
-      {/* Authentication Notice */}
-      <Card className="shadow-lg border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50">
+      {/* Authentication Status */}
+      <Card className={`shadow-lg ${user ? 'border-green-200 bg-gradient-to-r from-green-50 to-emerald-50' : 'border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50'}`}>
         <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-            <div className="space-y-2">
-              <h3 className="font-semibold text-orange-800">
-                {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
-              </h3>
-              <p className="text-sm text-orange-700">
-                {t('authNoticeMessage') || '当前食材将保存到本地存储。要在设备间同步和永久保存，需要启用用户认证功能。'}
-              </p>
+          {user ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <User className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-green-800">
+                    已登录：{user.email}
+                  </h3>
+                  <p className="text-sm text-green-700">
+                    食材将自动同步到云端数据库
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={signOut}
+                className="text-green-700 border-green-300 hover:bg-green-100"
+              >
+                退出登录
+              </Button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-orange-800">
+                    {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
+                  </h3>
+                  <p className="text-sm text-orange-700">
+                    {t('authNoticeMessage') || '当前食材将保存到本地存储。登录后可在设备间同步和永久保存。'}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate('/auth')}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                登录
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
