@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { IngredientInput } from '@/components/IngredientInput';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight, Clock, Users } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const RecipeGenerator = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'preview' | 'recipes'>('ingredients');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
@@ -26,6 +27,17 @@ const RecipeGenerator = () => {
   
   const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
   const recipeService = new RecipeService(API_KEY);
+
+  // Check for ingredients from localStorage on component mount
+  useEffect(() => {
+    const savedIngredients = localStorage.getItem('selectedIngredients');
+    if (savedIngredients) {
+      const parsedIngredients = JSON.parse(savedIngredients);
+      setIngredients(parsedIngredients);
+      setStep('preferences');
+      localStorage.removeItem('selectedIngredients'); // Clear after use
+    }
+  }, []);
 
   const handleContinueToPreferences = () => {
     if (ingredients.length === 0) {
@@ -83,19 +95,77 @@ const RecipeGenerator = () => {
     switch (step) {
       case 'ingredients':
         return (
-          <div className="space-y-6">
-            <IngredientInput 
-              ingredients={ingredients} 
-              onIngredientsChange={setIngredients} 
-            />
-            
-            {ingredients.length > 0 && (
-              <div className="flex justify-end">
-                <Button onClick={handleContinueToPreferences} size="lg">
-                  {t('continueToPreferences')}
+          <div className="space-y-8 text-center">
+            <div className="space-y-4">
+              <div className="mx-auto w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
+                <ChefHat className="w-12 h-12 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold text-foreground">{t('recipeGenerator') || 'AI 食谱生成器'}</h2>
+                <p className="text-lg text-muted-foreground">
+                  {t('welcomeMessage') || '欢迎使用智能食谱生成器！'}
+                </p>
+              </div>
+            </div>
+
+            <Card className="shadow-lg max-w-md mx-auto">
+              <CardContent className="p-8 space-y-6">
+                <div className="space-y-2">
+                  <Package className="w-8 h-8 text-primary mx-auto" />
+                  <h3 className="text-xl font-semibold">{t('startWithIngredients') || '首先添加您的食材'}</h3>
+                  <p className="text-muted-foreground text-sm">
+                    {t('addIngredientsDescription') || '前往食材银行添加您现有的食材，然后返回生成食谱'}
+                  </p>
+                </div>
+                
+                <Button 
+                  onClick={() => navigate('/ingredients')}
+                  size="lg"
+                  className="w-full"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  {t('goToIngredientsBank') || '前往食材银行'}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </div>
+              </CardContent>
+            </Card>
+
+            {ingredients.length > 0 && (
+              <Card className="shadow-lg max-w-md mx-auto bg-green-50 border-green-200">
+                <CardContent className="p-6 space-y-4">
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold text-green-800">
+                      {t('ingredientsReady') || '食材已准备好！'}
+                    </h3>
+                    <p className="text-green-600 text-sm">
+                      {t('foundIngredients') || '找到'} {ingredients.length} {t('ingredients') || '种食材'}
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {ingredients.slice(0, 6).map((ingredient, index) => (
+                      <Badge key={index} variant="secondary" className="bg-green-100 text-green-800">
+                        {ingredient}
+                      </Badge>
+                    ))}
+                    {ingredients.length > 6 && (
+                      <Badge variant="outline" className="border-green-300 text-green-600">
+                        +{ingredients.length - 6}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <Button 
+                    onClick={handleContinueToPreferences}
+                    size="lg"
+                    className="w-full"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {t('continueToPreferences') || '继续设置偏好'}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </div>
         );
