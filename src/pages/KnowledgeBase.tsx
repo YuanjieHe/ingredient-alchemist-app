@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Search, Edit, Trash2, ChefHat, Book } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, ChefHat, Book, Upload, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -41,9 +42,12 @@ const KnowledgeBase = () => {
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [dishIngredients, setDishIngredients] = useState<Ingredient[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // New dish form state
   const [newDish, setNewDish] = useState({
@@ -252,6 +256,178 @@ const KnowledgeBase = () => {
     fetchDishIngredients(dish.id);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.match(/\.(xlsx|xls)$/)) {
+      toast.error('请选择Excel文件 (.xlsx 或 .xls)');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error('Excel文件为空');
+      }
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i] as any;
+        setUploadProgress(Math.round((i / jsonData.length) * 100));
+
+        try {
+          const dishName = row['菜肴名称'] || row['name'];
+          if (!dishName) {
+            errorCount++;
+            continue;
+          }
+
+          // 映射菜系
+          const cuisineMap: { [key: string]: string } = {
+            '中式菜肴': 'chinese',
+            '日式料理': 'japanese',
+            '韩式料理': 'korean',
+            '泰式料理': 'thai',
+            '意式料理': 'italian',
+            '法式料理': 'french',
+            '美式料理': 'american',
+            '印度料理': 'indian',
+            '墨西哥料理': 'mexican',
+            '地中海料理': 'mediterranean',
+            '其他': 'other'
+          };
+
+          // 映射难度
+          const difficultyMap: { [key: string]: string } = {
+            '简单': 'easy',
+            '中等': 'medium',
+            '困难': 'hard'
+          };
+
+          const cuisineType = cuisineMap[row['菜系'] || row['cuisine']] || 'chinese';
+          const difficultyLevel = difficultyMap[row['难度'] || row['difficulty']] || 'medium';
+          const cookingTime = parseInt(row['烹饪时间'] || row['cooking_time']) || 30;
+          const servingSize = parseInt(row['份量'] || row['serving_size']) || 2;
+          const description = row['描述'] || row['description'] || '';
+          const instructions = row['制作步骤'] || row['instructions'] || '';
+          const culturalBackground = row['文化背景'] || row['cultural_background'] || '';
+          const ingredientsList = row['食材列表'] || row['ingredients'] || '';
+
+          // 解析制作步骤
+          let instructionsJson;
+          try {
+            instructionsJson = JSON.parse(instructions);
+          } catch {
+            instructionsJson = instructions.toString().split('\n').filter((step: string) => step.trim());
+          }
+
+          // 插入菜肴
+          const { data: dishData, error: dishError } = await supabase
+            .from('dishes_knowledge_base')
+            .insert({
+              name: dishName,
+              cuisine_type: cuisineType,
+              difficulty_level: difficultyLevel,
+              cooking_time: cookingTime,
+              serving_size: servingSize,
+              description: description,
+              instructions: instructionsJson,
+              cultural_background: culturalBackground
+            })
+            .select()
+            .single();
+
+          if (dishError) {
+            console.error('Error inserting dish:', dishError);
+            errorCount++;
+            continue;
+          }
+
+          // 解析并插入食材
+          if (ingredientsList && dishData) {
+            const ingredients = ingredientsList.toString().split(';')
+              .map((ing: string) => ing.trim())
+              .filter((ing: string) => ing);
+
+            if (ingredients.length > 0) {
+              const ingredientsToInsert = ingredients.map((ingredient: string) => ({
+                dish_id: dishData.id,
+                ingredient_name: ingredient,
+                quantity: '',
+                is_optional: false,
+                is_substitutable: false,
+                substitute_options: []
+              }));
+
+              const { error: ingredientsError } = await supabase
+                .from('dish_ingredients')
+                .insert(ingredientsToInsert);
+
+              if (ingredientsError) {
+                console.error('Error inserting ingredients:', ingredientsError);
+              }
+            }
+          }
+
+          successCount++;
+        } catch (error) {
+          console.error('Error processing row:', error);
+          errorCount++;
+        }
+      }
+
+      setUploadProgress(100);
+      toast.success(`导入完成！成功：${successCount} 条，失败：${errorCount} 条`);
+      setIsUploadDialogOpen(false);
+      fetchDishes();
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('文件上传失败：' + (error as Error).message);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      // 清空文件输入
+      if (e.target) {
+        e.target.value = '';
+      }
+    }
+  };
+
+  const downloadTemplate = () => {
+    const templateData = [
+      {
+        '菜肴名称': '宫保鸡丁',
+        '菜系': '中式菜肴',
+        '难度': '中等',
+        '烹饪时间': 20,
+        '份量': 2,
+        '描述': '经典川菜，口感鲜美',
+        '制作步骤': '1. 鸡肉切丁\n2. 爆炒花生米\n3. 下鸡丁炒制\n4. 调味装盘',
+        '文化背景': '四川传统名菜',
+        '食材列表': '鸡胸肉;花生米;干辣椒;花椒;葱;姜;蒜'
+      }
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '菜肴模板');
+    
+    XLSX.writeFile(workbook, '菜肴导入模板.xlsx');
+    toast.success('模板下载成功！');
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -271,13 +447,79 @@ const KnowledgeBase = () => {
           <h1 className="text-3xl font-bold">菜肴知识库</h1>
           <p className="text-muted-foreground">管理和维护菜肴数据库</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              添加菜肴
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="h-4 w-4 mr-2" />
+                批量导入
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Excel文件批量导入</DialogTitle>
+                <DialogDescription>
+                  上传Excel文件来批量导入菜肴数据。请确保Excel格式正确。
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="excel-file">选择Excel文件</Label>
+                  <Input
+                    id="excel-file"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>Excel文件应包含以下列：</p>
+                  <ul className="list-disc list-inside mt-1">
+                    <li>菜肴名称 (必需)</li>
+                    <li>菜系 (中式菜肴/日式料理/等)</li>
+                    <li>难度 (简单/中等/困难)</li>
+                    <li>烹饪时间 (分钟)</li>
+                    <li>份量 (人数)</li>
+                    <li>描述</li>
+                    <li>制作步骤</li>
+                    <li>文化背景</li>
+                    <li>食材列表 (用分号分隔)</li>
+                  </ul>
+                </div>
+                {isUploading && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>导入进度</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} disabled={isUploading}>
+                  取消
+                </Button>
+                <Button onClick={downloadTemplate} variant="ghost">
+                  <Download className="h-4 w-4 mr-2" />
+                  下载模板
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                添加菜肴
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>添加新菜肴</DialogTitle>
@@ -443,7 +685,8 @@ const KnowledgeBase = () => {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <Tabs defaultValue="list" className="w-full">
