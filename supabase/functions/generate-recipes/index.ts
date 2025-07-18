@@ -69,7 +69,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a master Chinese chef (师傅) with expertise in regional Chinese cuisines. Create exciting, authentic recipes with detailed wok techniques and traditional cooking methods. Focus on creating dishes with exceptional flavors, proper wok hei, and perfect texture combinations. Always respond with valid JSON only.' 
+            content: getSystemPrompt(cuisineType)
           },
           { role: 'user', content: prompt }
         ],
@@ -101,35 +101,35 @@ serve(async (req) => {
       recipes = [{
         id: "fallback-recipe",
         title: `${cuisineType} ${mealType} with Available Ingredients`,
-        description: `A delicious ${mealType} recipe using your available ingredients.`,
+        description: `A delicious ${mealType} recipe using your available ingredients in authentic ${cuisineType} style.`,
         prepTime: 15,
         cookTime: 30,
         servings: peopleCount,
         difficulty: skillLevel,
-        ingredients: ingredients.map(ing => `1 portion ${ing}`),
+        ingredients: ingredients.map(ing => ({item: ing, amount: "1 portion", usedIn: "main dish"})),
         dishInstructions: [{
           dishName: "Main Dish",
           steps: [
             {
               stepNumber: 1,
               title: "Prepare Ingredients",
-              description: `Clean and prepare all your ingredients: ${ingredients.join(', ')}.`,
+              description: `Clean and prepare all your ingredients: ${ingredients.join(', ')}. Cut ingredients according to traditional ${cuisineType} techniques for optimal cooking and presentation.`,
               duration: "10 minutes",
-              tips: "Having everything ready makes cooking much smoother.",
-              imagePrompt: "Ingredients laid out and prepared on a cutting board"
+              tips: "Proper ingredient preparation is crucial for authentic results. Take time to cut ingredients uniformly.",
+              imagePrompt: `${cuisineType} ingredients prepared and arranged on cutting board with traditional tools`
             },
             {
               stepNumber: 2,
               title: "Cook the Dish",
-              description: "Combine and cook the ingredients according to your preferred method.",
+              description: `Heat your cooking vessel and combine ingredients using traditional ${cuisineType} cooking methods. Pay attention to timing and temperature for authentic flavors.`,
               duration: "20 minutes",
-              tips: "Taste as you go and adjust seasoning.",
-              imagePrompt: "Cooking the dish in a pan or pot"
+              tips: "Taste as you go and adjust seasoning according to traditional flavor profiles.",
+              imagePrompt: `Traditional ${cuisineType} cooking technique being demonstrated`
             }
           ]
         }],
-        coordinationTips: ["Prep all ingredients first", "Cook in order of cooking time needed"],
-        tags: ["homemade", "simple"]
+        coordinationTips: ["Prep all ingredients first using proper techniques", "Follow traditional cooking order for best results"],
+        tags: ["homemade", "simple", cuisineType.toLowerCase()]
       }];
     }
 
@@ -210,6 +210,26 @@ async function queryKnowledgeBase(ingredients: string[], cuisineType: string, sk
   }
 }
 
+// Helper function to get cuisine-specific system prompt
+function getSystemPrompt(cuisineType: string) {
+  const chefProfiles = {
+    chinese: 'You are a master Chinese chef with expertise in regional Chinese cuisines including Sichuan, Cantonese, Hunan, and Beijing styles. Focus on wok techniques, proper heat control, and achieving authentic wok hei. Emphasize traditional cooking methods, knife skills, and the balance of flavors.',
+    japanese: 'You are a master Japanese chef (Itamae) with deep knowledge of traditional Japanese cooking techniques including knife skills, dashi preparation, and seasonal cooking (kaiseki). Focus on precision, umami development, and the aesthetic presentation that defines Japanese cuisine.',
+    korean: 'You are a master Korean chef specializing in traditional Korean cooking techniques including fermentation, grilling (gui), and banchan preparation. Focus on the proper use of gochujang, kimchi techniques, and the balance of spicy, savory, and fermented flavors.',
+    thai: 'You are a master Thai chef with expertise in balancing the fundamental flavors of sweet, sour, salty, and spicy. Focus on proper use of fresh herbs, curry paste preparation, and traditional techniques like pounding in a mortar and pestle.',
+    italian: 'You are a master Italian chef specializing in regional Italian cooking from North to South. Focus on pasta-making techniques, proper sauce preparation, and the use of high-quality, simple ingredients that define authentic Italian cuisine.',
+    french: 'You are a master French chef trained in classical French cooking techniques including mother sauces, proper knife skills, and refined cooking methods. Focus on technique precision, flavor development, and elegant presentation.',
+    american: 'You are a master American chef with expertise in regional American cuisines from BBQ to farm-to-table cooking. Focus on grilling techniques, comfort food preparation, and the fusion of various cultural influences in American cooking.',
+    indian: 'You are a master Indian chef with deep knowledge of spice blending, regional cooking styles, and traditional techniques like tandoor cooking and tempering (tadka). Focus on complex spice combinations and authentic preparation methods.',
+    mexican: 'You are a master Mexican chef specializing in traditional Mexican cooking techniques including masa preparation, proper salsa making, and regional Mexican cuisine. Focus on authentic ingredients, traditional cooking methods, and complex flavor profiles.',
+    mediterranean: 'You are a master Mediterranean chef with expertise in the healthy, flavorful cooking of the Mediterranean region. Focus on olive oil usage, fresh herb combinations, and simple yet elegant preparation methods.',
+    other: 'You are a master chef with expertise in international cuisines and fusion cooking. Focus on authentic techniques from various culinary traditions and creative flavor combinations.'
+  };
+
+  const profile = chefProfiles[cuisineType.toLowerCase()] || chefProfiles.other;
+  return `${profile} Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only.`;
+}
+
 // Helper function to create enhanced prompt with knowledge base information
 function createEnhancedPrompt(params: any) {
   const {
@@ -249,75 +269,92 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  return `As a master Chinese chef (师傅), create ${mealDays} exciting and authentic ${cuisineType} recipes for ${mealType}, expertly using these ingredients: ${ingredients.join(', ')}.
+  return `As a master ${cuisineType} chef, create ${mealDays} exciting and authentic ${cuisineType} recipes for ${mealType}, expertly using these ingredients: ${ingredients.join(', ')}.
 ${knowledgeSection}
 
 KEY REQUIREMENTS:
-- Skill level: ${skillLevel} (provide detailed wok techniques and heat control instructions)
+- Skill level: ${skillLevel} (provide extremely detailed cooking techniques and precise instructions)
 - Serves: ${peopleCount} people
 - Focus: Authentic ${cuisineType} cooking methods and flavors
 - Occasion: ${occasionType}
-- ${allowShopping ? 'Can suggest essential Chinese ingredients to enhance the dish' : 'Must use only provided ingredients creatively'}
+- ${allowShopping ? 'Can suggest essential ingredients to enhance the dish' : 'Must use only provided ingredients creatively'}
 - USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes
 - INCORPORATE traditional techniques mentioned above when relevant
+- EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques
 
-REQUIRED DETAILS:
-1. Chinese name and English translation
+REQUIRED DETAILS FOR EACH RECIPE:
+1. Authentic dish name with cultural context
 2. Cultural significance and regional origin
-3. Essential wok and knife techniques
-4. Precise heat control instructions
-5. Timing for wok hei and ingredient additions
-6. Specific seasoning combinations
-7. Traditional plating methods
-8. Texture and aroma indicators
+3. Essential cooking techniques specific to the cuisine
+4. Precise temperature and timing instructions
+5. Detailed ingredient preparation methods
+6. Step-by-step cooking process with professional tips
+7. Traditional serving and presentation methods
+8. Texture, aroma, and visual indicators for each step
 
 Format the response as a JSON array with this exact structure:
 [
   {
     "id": "recipe1",
-    "title": "精致中式菜肴名称 (Elegant Chinese Dish Name)",
-    "description": "详细且吸引人的描述，包含菜肴起源和文化背景 (Detailed and engaging description with dish origin and cultural background)",
+    "title": "Authentic Dish Name",
+    "description": "Detailed and engaging description with dish origin and cultural background, explaining the significance of this dish in ${cuisineType} cuisine",
     "prepTime": 20,
     "cookTime": 30,
     "servings": ${peopleCount},
     "difficulty": "${skillLevel}",
     "knowledgeBaseReferences": ${knowledgeBaseInfo.matchedDishes.length > 0 ? JSON.stringify(knowledgeBaseInfo.matchedDishes.map((d: any) => d.name)) : '[]'},
     "ingredients": [
-      {"item": "鸡肉 (chicken)", "amount": "300g，切丝", "usedIn": "主菜"},
-      {"item": "大蒜 (garlic)", "amount": "3瓣，切末", "usedIn": "调味"}
+      {"item": "Main ingredient", "amount": "300g, specific cut or preparation", "usedIn": "main dish"},
+      {"item": "Seasoning ingredient", "amount": "3 cloves, minced", "usedIn": "flavoring"}
     ],
     "dishInstructions": [
       {
-        "dishName": "红烧鸡 (Braised Chicken)",
+        "dishName": "Main Dish Name",
         "steps": [
           {
             "stepNumber": 1,
-            "title": "腌制鸡肉 (Marinate the Chicken)",
-            "description": "将鸡肉切成均匀的条状，加入料酒、酱油、盐和淀粉，用手抓匀，静置15分钟入味。这一步骤让鸡肉更加鲜嫩多汁，并为下一步的炒制做好准备。腌制时间不宜过长，以免鸡肉失去原有的口感。",
-            "duration": "15分钟",
-            "tips": "腌制时加入少量淀粉可以锁住肉汁，使成菜更加嫩滑。手法要轻柔，避免挤压肉质。",
-            "imagePrompt": "Chinese chef marinating chicken strips in a blue and white porcelain bowl with soy sauce and cooking wine, ingredients neatly arranged on bamboo cutting board"
+            "title": "Ingredient Preparation",
+            "description": "Extremely detailed description of how to prepare the ingredients. Include specific cutting techniques, sizes, and preparation methods. Explain why each preparation method is important for the final dish. Describe what the ingredients should look like after proper preparation and any signs to watch for during this process.",
+            "duration": "15 minutes",
+            "tips": "Professional tips for perfect ingredient preparation. Include common mistakes to avoid and signs of proper preparation.",
+            "imagePrompt": "Professional ${cuisineType} chef preparing ingredients with traditional tools, showing proper technique"
           },
           {
             "stepNumber": 2,
-            "title": "热锅控温 (Wok Heat Control)",
-            "description": "将炒锅置于大火上预热至冒烟，加入花生油至五成热（约160°C）。油温达到后，火力调至中高火，这是炒制中式菜肴的理想温度。油温过低会使食材吸油过多，油温过高则容易煳锅。通过观察油面的细微波纹来判断温度是否适中。",
-            "duration": "3分钟",
-            "tips": "专业厨师通过油面的波纹和轻微的烟雾判断油温。油温适中时，将木筷放入油中会出现细小气泡环绕。",
-            "imagePrompt": "Close-up of a traditional carbon steel wok being heated on high flame with slight smoke rising, Chinese kitchen setting, dramatic lighting"
+            "title": "Cooking Process - Phase 1",
+            "description": "Extremely detailed cooking instructions with precise temperatures, timing, and technique explanations. Describe the exact heat level, cooking vessel preparation, oil temperature, and step-by-step cooking process. Include sensory cues like sounds, smells, and visual changes that indicate proper cooking progress.",
+            "duration": "10 minutes",
+            "tips": "Professional cooking tips specific to this technique. Include how to judge doneness, temperature control, and timing adjustments.",
+            "imagePrompt": "Close-up of cooking process showing proper technique and visual cues for ${cuisineType} cooking"
+          },
+          {
+            "stepNumber": 3,
+            "title": "Cooking Process - Phase 2",
+            "description": "Continue with extremely detailed instructions for the next phase of cooking. Include any ingredient additions, technique changes, or temperature adjustments. Explain the science behind each step and what chemical or physical changes are occurring in the food.",
+            "duration": "8 minutes",
+            "tips": "Advanced tips for this cooking phase, including how to troubleshoot common issues and achieve perfect results.",
+            "imagePrompt": "Professional ${cuisineType} kitchen showing advanced cooking technique in action"
+          },
+          {
+            "stepNumber": 4,
+            "title": "Final Assembly and Plating",
+            "description": "Detailed instructions for finishing the dish, including final seasoning adjustments, plating techniques traditional to ${cuisineType} cuisine, and presentation methods. Explain how to check for proper doneness and make final adjustments.",
+            "duration": "5 minutes",
+            "tips": "Professional plating and presentation tips specific to ${cuisineType} cuisine. Include garnishing techniques and serving temperature.",
+            "imagePrompt": "Beautifully plated ${cuisineType} dish showing traditional presentation style"
           }
         ]
       }
     ],
     "coordinationTips": [
-      "先准备所有配料并分类摆放，这是'mise en place'的中式应用，确保炒菜过程顺畅",
-      "炒制过程中要掌握'翻炒'和'颠锅'技巧，这是获得正宗'锅气'的关键",
-      "遵循'热锅冷油'原则，确保锅温足够高再加油，防止食材粘锅",
-      "调味时遵循'鲜、香、辣、咸、甜'的平衡原则，体现中式烹饪的精髓"
+      "Prepare all ingredients first using proper ${cuisineType} techniques for smooth cooking flow",
+      "Master the specific cooking techniques essential to ${cuisineType} cuisine for authentic results",
+      "Follow traditional timing and temperature guidelines specific to this cuisine type",
+      "Pay attention to the fundamental flavor balance principles of ${cuisineType} cooking"
     ],
-    "tags": ["正宗中餐", "传统技法", "家常菜", "色香味俱全"]
+    "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions"]
   }
 ]
 
-Important: Respond ONLY with valid JSON. No other text.`;
+CRITICAL: Every step must include extremely detailed instructions with precise timing, temperatures, and professional techniques. Each step should be comprehensive enough for someone to follow perfectly. Respond ONLY with valid JSON. No other text.`;
 }
