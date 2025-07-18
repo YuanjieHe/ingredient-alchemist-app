@@ -640,32 +640,32 @@ const KnowledgeBase = () => {
               </div>
 
               <div>
-                <Label htmlFor="instructions">制作步骤</Label>
+                <Label htmlFor="instructions">Cooking Instructions</Label>
                 <Textarea
                   id="instructions"
                   value={newDish.instructions}
                   onChange={(e) => setNewDish(prev => ({ ...prev, instructions: e.target.value }))}
-                  placeholder="每行一个步骤，或者输入 JSON 格式..."
+                  placeholder="One step per line, or enter JSON format..."
                   rows={6}
                 />
               </div>
 
               <div>
-                <Label htmlFor="cultural">文化背景</Label>
+                <Label htmlFor="cultural">Cultural Background</Label>
                 <Textarea
                   id="cultural"
                   value={newDish.cultural_background}
                   onChange={(e) => setNewDish(prev => ({ ...prev, cultural_background: e.target.value }))}
-                  placeholder="这道菜的历史和文化背景..."
+                  placeholder="Historical and cultural background of this dish..."
                 />
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <Label>食材列表</Label>
+                  <Label>Ingredients List</Label>
                   <Button type="button" variant="outline" size="sm" onClick={addIngredientRow}>
                     <Plus className="h-3 w-3 mr-1" />
-                    添加食材
+                    Add Ingredient
                   </Button>
                 </div>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -673,13 +673,13 @@ const KnowledgeBase = () => {
                     <div key={index} className="grid grid-cols-12 gap-2 items-center">
                       <Input
                         className="col-span-4"
-                        placeholder="食材名称"
+                        placeholder="Ingredient name"
                         value={ingredient.name}
                         onChange={(e) => updateIngredient(index, 'name', e.target.value)}
                       />
                       <Input
                         className="col-span-3"
-                        placeholder="用量"
+                        placeholder="Quantity"
                         value={ingredient.quantity}
                         onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
                       />
@@ -691,12 +691,12 @@ const KnowledgeBase = () => {
                             onChange={(e) => updateIngredient(index, 'isOptional', e.target.checked)}
                             className="mr-1"
                           />
-                          可选
+                          Optional
                         </label>
                       </div>
                       <Input
                         className="col-span-2"
-                        placeholder="替代品"
+                        placeholder="Substitutes"
                         value={ingredient.substitutes}
                         onChange={(e) => updateIngredient(index, 'substitutes', e.target.value)}
                       />
@@ -716,10 +716,10 @@ const KnowledgeBase = () => {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                取消
+                Cancel
               </Button>
               <Button onClick={handleAddDish} disabled={isLoading}>
-                {isLoading ? '添加中...' : '添加菜肴'}
+                {isLoading ? 'Adding...' : 'Add Dish'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -731,11 +731,11 @@ const KnowledgeBase = () => {
         <TabsList>
           <TabsTrigger value="list">
             <Book className="h-4 w-4 mr-2" />
-            菜肴列表
+            Dish List
           </TabsTrigger>
           <TabsTrigger value="details">
             <ChefHat className="h-4 w-4 mr-2" />
-            菜肴详情
+            Dish Details
           </TabsTrigger>
         </TabsList>
 
@@ -743,7 +743,7 @@ const KnowledgeBase = () => {
           <div className="flex gap-4 mb-6">
             <div className="flex-1">
               <Input
-                placeholder="搜索菜肴名称或描述..."
+                placeholder="Search dish name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
@@ -754,7 +754,7 @@ const KnowledgeBase = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">所有菜系</SelectItem>
+                <SelectItem value="all">All Cuisines</SelectItem>
                 {cuisineTypes.map(cuisine => (
                   <SelectItem key={cuisine.value} value={cuisine.value}>
                     {cuisine.label}
@@ -800,12 +800,12 @@ const KnowledgeBase = () => {
                     <Badge variant="outline">
                       {difficultyLevels.find(d => d.value === dish.difficulty_level)?.label}
                     </Badge>
-                    <Badge variant="outline">{dish.cooking_time}分钟</Badge>
+                    <Badge variant="outline">{dish.cooking_time} min</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="line-clamp-3">
-                    {dish.description || '暂无描述'}
+                    {dish.description || 'No description'}
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -816,7 +816,7 @@ const KnowledgeBase = () => {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground">
-                  {dishes.length === 0 ? '暂无菜肴数据，请添加一些菜肴' : '没有找到匹配的菜肴'}
+                  {dishes.length === 0 ? 'No dish data available, please add some dishes' : 'No matching dishes found'}
                 </p>
               </CardContent>
             </Card>
@@ -835,27 +835,27 @@ const KnowledgeBase = () => {
                   <Badge variant="outline">
                     {difficultyLevels.find(d => d.value === selectedDish.difficulty_level)?.label}
                   </Badge>
-                  <Badge variant="outline">{selectedDish.cooking_time}分钟</Badge>
-                  <Badge variant="outline">{selectedDish.serving_size}人份</Badge>
+                  <Badge variant="outline">{selectedDish.cooking_time} min</Badge>
+                  <Badge variant="outline">{selectedDish.serving_size} servings</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {selectedDish.description && (
                   <div>
-                    <h3 className="font-semibold mb-2">描述</h3>
+                    <h3 className="font-semibold mb-2">Description</h3>
                     <p className="text-muted-foreground">{selectedDish.description}</p>
                   </div>
                 )}
 
                 <div>
-                  <h3 className="font-semibold mb-2">所需食材</h3>
+                  <h3 className="font-semibold mb-2">Required Ingredients</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {dishIngredients.map((ingredient) => (
                       <div key={ingredient.id} className="flex justify-between items-center p-2 bg-muted rounded">
                         <span className="font-medium">{ingredient.ingredient_name}</span>
                         <div className="text-sm text-muted-foreground">
                           {ingredient.quantity}
-                          {ingredient.is_optional && <Badge variant="outline" className="ml-2">可选</Badge>}
+                          {ingredient.is_optional && <Badge variant="outline" className="ml-2">Optional</Badge>}
                         </div>
                       </div>
                     ))}
@@ -863,7 +863,7 @@ const KnowledgeBase = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">制作步骤</h3>
+                  <h3 className="font-semibold mb-2">Cooking Instructions</h3>
                   <div className="space-y-2">
                     {Array.isArray(selectedDish.instructions) ? (
                       selectedDish.instructions.map((step: string, index: number) => (
@@ -887,7 +887,7 @@ const KnowledgeBase = () => {
 
                 {selectedDish.cultural_background && (
                   <div>
-                    <h3 className="font-semibold mb-2">文化背景</h3>
+                    <h3 className="font-semibold mb-2">Cultural Background</h3>
                     <p className="text-muted-foreground">{selectedDish.cultural_background}</p>
                   </div>
                 )}
@@ -896,7 +896,7 @@ const KnowledgeBase = () => {
           ) : (
             <Card>
               <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">请从菜肴列表中选择一道菜查看详情</p>
+                <p className="text-center text-muted-foreground">Please select a dish from the list to view details</p>
               </CardContent>
             </Card>
           )}
