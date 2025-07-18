@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { IngredientInput } from '@/components/IngredientInput';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight, Clock, Users } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import heroImage from '@/assets/kitchen-hero.jpg';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,10 +27,25 @@ const Index = () => {
   const [cuisineType, setCuisineType] = useState('chinese');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [newIngredient, setNewIngredient] = useState('');
   
   // Hardcoded API key - provided by the service
   const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
   const recipeService = new RecipeService(API_KEY);
+
+  const addIngredient = () => {
+    if (newIngredient.trim() && !ingredients.includes(newIngredient.trim())) {
+      setIngredients([...ingredients, newIngredient.trim()]);
+      setNewIngredient('');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addIngredient();
+    }
+  };
 
   const handleContinueToPreferences = () => {
     if (ingredients.length === 0) {
@@ -281,33 +297,151 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
+      {/* Hero Section - Food Delivery Style */}
       {step === 'ingredients' && (
-        <div className="relative h-96 mb-8 overflow-hidden">
-          <img 
-            src={heroImage} 
-            alt="Fresh ingredients and cooking" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="text-center text-white space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold">
-                {t('appTitle')}
-              </h1>
-              <p className="text-xl md:text-2xl opacity-90">
-                {t('appSubtitle')}
-              </p>
-              <div className="pt-4">
-                <LanguageToggle />
+        <div className="relative bg-gradient-secondary min-h-screen flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6">
+            <div className="location-indicator">
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <span className="text-sm font-medium">Location</span>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <span className="text-white font-bold">👤</span>
+            </div>
+          </div>
+
+          {/* Welcome Message */}
+          <div className="px-6 py-8">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              What are you going<br />to cook today?
+            </h1>
+          </div>
+
+          {/* Search Bar */}
+          <div className="px-6 mb-8">
+            <div className="search-bar flex items-center space-x-2">
+              <Input
+                placeholder="Search ingredients..."
+                value={newIngredient}
+                onChange={(e) => setNewIngredient(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="border-0 bg-transparent flex-1"
+              />
+              <Button onClick={addIngredient} size="icon" variant="ghost">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Discount Banner */}
+          <div className="px-6 mb-8">
+            <div className="discount-banner relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold text-foreground mb-1">Big discount</div>
+                  <div className="text-2xl font-bold text-foreground">10.10</div>
+                  <div className="text-sm text-muted-foreground">Claim your voucher now!</div>
+                </div>
+                <div className="text-6xl">🍔</div>
               </div>
             </div>
           </div>
+
+          {/* Categories */}
+          <div className="px-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Category</h3>
+              <span className="text-primary text-sm">See more</span>
+            </div>
+            <div className="flex space-x-3">
+              <div className="category-tag active">All</div>
+              <div className="category-tag">🍔 Burger</div>
+              <div className="category-tag">🌭 Hotdog</div>
+            </div>
+          </div>
+
+          {/* Ingredients List or Food Cards */}
+          <div className="px-6 space-y-4 flex-1">
+            {ingredients.length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Your Ingredients</h3>
+                <div className="space-y-3">
+                  {ingredients.map((ingredient, index) => (
+                    <Card key={index} className="food-card p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-2xl">🥗</div>
+                          <div>
+                            <div className="font-semibold text-foreground">{ingredient}</div>
+                            <div className="text-xs text-muted-foreground">Size: Fresh</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg font-bold">1</span>
+                          <div className="flex flex-col space-y-1">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">+</Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-6 w-6 p-0"
+                              onClick={() => setIngredients(ingredients.filter((_, i) => i !== index))}
+                            >-</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="food-card p-4 bg-gradient-accent">
+                  <div className="text-center space-y-2">
+                    <div className="text-4xl">🌭</div>
+                    <div className="font-semibold text-foreground">Hotdog Ntap</div>
+                    <div className="text-xs text-muted-foreground">Hotdog special with delicious</div>
+                    <div className="text-xs text-muted-foreground">vegetables</div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="text-lg font-bold text-foreground">$23.00</div>
+                      <div className="text-xs text-muted-foreground line-through">$25.00</div>
+                    </div>
+                  </div>
+                </Card>
+                
+                <Card className="food-card p-4">
+                  <div className="text-center space-y-2">
+                    <div className="text-4xl">🍣</div>
+                    <div className="font-semibold text-foreground">Salmon Sushi</div>
+                    <div className="text-xs text-muted-foreground">Amazing combination salmon</div>
+                    <div className="text-xs text-muted-foreground">vegetable</div>
+                    <div className="text-lg font-bold text-foreground mt-3">$25.00</div>
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
+
+          {/* Language Toggle */}
+          <div className="absolute top-6 right-16">
+            <LanguageToggle />
+          </div>
+
+          {/* Continue Button */}
+          {ingredients.length > 0 && (
+            <div className="px-6 pb-6 mt-auto">
+              <Button onClick={handleContinueToPreferences} size="lg" className="w-full">
+                {t('continueToPreferences')}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Navigation Header */}
+      {/* Navigation Header for other steps */}
       {(step === 'preferences' || step === 'generating' || step === 'preview' || step === 'recipes') && (
-        <div className="bg-card border-b sticky top-0 z-10">
+        <div className="bg-card border-b sticky top-0 z-10 shadow-soft">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -316,17 +450,17 @@ const Index = () => {
               </div>
               <div className="flex items-center space-x-4">
                 <div className="flex space-x-2">
-                  <div className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">
+                  <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm">
                     {t('step1')}
                   </div>
-                  <div className={`px-3 py-1 rounded text-sm ${
+                  <div className={`px-3 py-1 rounded-full text-sm ${
                     step === 'preferences' || step === 'generating' || step === 'preview' || step === 'recipes'
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-muted text-muted-foreground'
                   }`}>
                     {t('step2')}
                   </div>
-                  <div className={`px-3 py-1 rounded text-sm ${
+                  <div className={`px-3 py-1 rounded-full text-sm ${
                     step === 'generating' || step === 'preview' || step === 'recipes'
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-muted text-muted-foreground'
