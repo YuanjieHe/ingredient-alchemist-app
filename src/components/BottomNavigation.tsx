@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, Package } from 'lucide-react';
+import { ChefHat, Package, Book } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const BottomNavigation = () => {
@@ -16,6 +16,11 @@ const BottomNavigation = () => {
       path: '/ingredients',
       icon: Package,
       label: t('ingredientsBank') || '食材银行',
+    },
+    {
+      path: '/knowledge',
+      icon: Book,
+      label: t('knowledgeBase') || '知识库',
     },
   ];
 

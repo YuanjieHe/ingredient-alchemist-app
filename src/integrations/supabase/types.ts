@@ -14,6 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
+      cooking_techniques: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty_level: string
+          equipment_needed: string[] | null
+          id: string
+          name: string
+          tips: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          equipment_needed?: string[] | null
+          id?: string
+          name: string
+          tips?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          equipment_needed?: string[] | null
+          id?: string
+          name?: string
+          tips?: string[] | null
+        }
+        Relationships: []
+      }
+      dish_ingredients: {
+        Row: {
+          created_at: string
+          dish_id: string
+          id: string
+          ingredient_name: string
+          is_optional: boolean | null
+          is_substitutable: boolean | null
+          quantity: string | null
+          substitute_options: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          dish_id: string
+          id?: string
+          ingredient_name: string
+          is_optional?: boolean | null
+          is_substitutable?: boolean | null
+          quantity?: string | null
+          substitute_options?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          dish_id?: string
+          id?: string
+          ingredient_name?: string
+          is_optional?: boolean | null
+          is_substitutable?: boolean | null
+          quantity?: string | null
+          substitute_options?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_ingredients_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dish_techniques: {
+        Row: {
+          created_at: string
+          dish_id: string
+          id: string
+          step_order: number | null
+          technique_id: string
+        }
+        Insert: {
+          created_at?: string
+          dish_id: string
+          id?: string
+          step_order?: number | null
+          technique_id: string
+        }
+        Update: {
+          created_at?: string
+          dish_id?: string
+          id?: string
+          step_order?: number | null
+          technique_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_techniques_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes_knowledge_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_techniques_technique_id_fkey"
+            columns: ["technique_id"]
+            isOneToOne: false
+            referencedRelation: "cooking_techniques"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dishes_knowledge_base: {
+        Row: {
+          cooking_time: number
+          created_at: string
+          cuisine_type: string
+          cultural_background: string | null
+          description: string | null
+          difficulty_level: string
+          id: string
+          instructions: Json
+          name: string
+          nutrition_info: Json | null
+          serving_size: number
+          updated_at: string
+        }
+        Insert: {
+          cooking_time?: number
+          created_at?: string
+          cuisine_type?: string
+          cultural_background?: string | null
+          description?: string | null
+          difficulty_level?: string
+          id?: string
+          instructions: Json
+          name: string
+          nutrition_info?: Json | null
+          serving_size?: number
+          updated_at?: string
+        }
+        Update: {
+          cooking_time?: number
+          created_at?: string
+          cuisine_type?: string
+          cultural_background?: string | null
+          description?: string | null
+          difficulty_level?: string
+          id?: string
+          instructions?: Json
+          name?: string
+          nutrition_info?: Json | null
+          serving_size?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ingredients_bank: {
         Row: {
           category: string | null
