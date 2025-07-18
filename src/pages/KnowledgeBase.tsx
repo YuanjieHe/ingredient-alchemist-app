@@ -63,23 +63,23 @@ const KnowledgeBase = () => {
   });
 
   const cuisineTypes = [
-    { value: 'chinese', label: '中式菜肴' },
-    { value: 'japanese', label: '日式料理' },
-    { value: 'korean', label: '韩式料理' },
-    { value: 'thai', label: '泰式料理' },
-    { value: 'italian', label: '意式料理' },
-    { value: 'french', label: '法式料理' },
-    { value: 'american', label: '美式料理' },
-    { value: 'indian', label: '印度料理' },
-    { value: 'mexican', label: '墨西哥料理' },
-    { value: 'mediterranean', label: '地中海料理' },
-    { value: 'other', label: '其他' }
+    { value: 'chinese', label: 'Chinese' },
+    { value: 'japanese', label: 'Japanese' },
+    { value: 'korean', label: 'Korean' },
+    { value: 'thai', label: 'Thai' },
+    { value: 'italian', label: 'Italian' },
+    { value: 'french', label: 'French' },
+    { value: 'american', label: 'American' },
+    { value: 'indian', label: 'Indian' },
+    { value: 'mexican', label: 'Mexican' },
+    { value: 'mediterranean', label: 'Mediterranean' },
+    { value: 'other', label: 'Other' }
   ];
 
   const difficultyLevels = [
-    { value: 'easy', label: '简单' },
-    { value: 'medium', label: '中等' },
-    { value: 'hard', label: '困难' }
+    { value: 'easy', label: 'Easy' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'hard', label: 'Hard' }
   ];
 
   useEffect(() => {
@@ -100,7 +100,7 @@ const KnowledgeBase = () => {
       setDishes(data || []);
     } catch (error) {
       console.error('Error fetching dishes:', error);
-      toast.error('获取菜肴数据失败');
+      toast.error('Failed to fetch dish data');
     } finally {
       setIsLoading(false);
     }
@@ -117,18 +117,18 @@ const KnowledgeBase = () => {
       setDishIngredients(data || []);
     } catch (error) {
       console.error('Error fetching dish ingredients:', error);
-      toast.error('获取菜肴食材失败');
+      toast.error('Failed to fetch dish ingredients');
     }
   };
 
   const handleAddDish = async () => {
     if (!user) {
-      toast.error('请先登录');
+      toast.error('Please login first');
       return;
     }
 
     if (!newDish.name || !newDish.instructions) {
-      toast.error('请填写菜肴名称和制作步骤');
+      toast.error('Please fill in dish name and instructions');
       return;
     }
 
@@ -181,7 +181,7 @@ const KnowledgeBase = () => {
         if (ingredientsError) throw ingredientsError;
       }
 
-      toast.success('菜肴添加成功！');
+      toast.success('Dish added successfully!');
       setIsAddDialogOpen(false);
       setNewDish({
         name: '',
@@ -197,14 +197,14 @@ const KnowledgeBase = () => {
       fetchDishes();
     } catch (error) {
       console.error('Error adding dish:', error);
-      toast.error('添加菜肴失败');
+      toast.error('Failed to add dish');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteDish = async (dishId: string) => {
-    if (!confirm('确定要删除这道菜肴吗？')) return;
+    if (!confirm('Are you sure you want to delete this dish?')) return;
 
     try {
       const { error } = await supabase
@@ -213,11 +213,11 @@ const KnowledgeBase = () => {
         .eq('id', dishId);
 
       if (error) throw error;
-      toast.success('菜肴删除成功！');
+      toast.success('Dish deleted successfully!');
       fetchDishes();
     } catch (error) {
       console.error('Error deleting dish:', error);
-      toast.error('删除菜肴失败');
+      toast.error('Failed to delete dish');
     }
   };
 
@@ -261,7 +261,7 @@ const KnowledgeBase = () => {
     if (!file) return;
 
     if (!file.name.match(/\.(xlsx|xls|json)$/)) {
-      toast.error('请选择Excel文件 (.xlsx 或 .xls) 或 JSON文件 (.json)');
+      toast.error('Please select Excel file (.xlsx or .xls) or JSON file (.json)');
       return;
     }
 
@@ -286,7 +286,7 @@ const KnowledgeBase = () => {
       }
 
       if (jsonData.length === 0) {
-        throw new Error('文件为空');
+        throw new Error('File is empty');
       }
 
       let successCount = 0;
@@ -303,8 +303,20 @@ const KnowledgeBase = () => {
             continue;
           }
 
-          // 映射菜系
+          // Map cuisine types
           const cuisineMap: { [key: string]: string } = {
+            'Chinese': 'chinese',
+            'Japanese': 'japanese',
+            'Korean': 'korean',
+            'Thai': 'thai',
+            'Italian': 'italian',
+            'French': 'french',
+            'American': 'american',
+            'Indian': 'indian',
+            'Mexican': 'mexican',
+            'Mediterranean': 'mediterranean',
+            'Other': 'other',
+            // Legacy Chinese mappings for backward compatibility
             '中式菜肴': 'chinese',
             '日式料理': 'japanese',
             '韩式料理': 'korean',
@@ -318,23 +330,27 @@ const KnowledgeBase = () => {
             '其他': 'other'
           };
 
-          // 映射难度
+          // Map difficulty levels
           const difficultyMap: { [key: string]: string } = {
+            'Easy': 'easy',
+            'Medium': 'medium',
+            'Hard': 'hard',
+            // Legacy Chinese mappings for backward compatibility
             '简单': 'easy',
             '中等': 'medium',
             '困难': 'hard'
           };
 
-          const cuisineType = cuisineMap[row['菜系'] || row['cuisine'] || row.cuisine_type] || 'chinese';
-          const difficultyLevel = difficultyMap[row['难度'] || row['difficulty'] || row.difficulty_level] || 'medium';
-          const cookingTime = parseInt(row['烹饪时间'] || row['cooking_time'] || row.cooking_time) || 30;
-          const servingSize = parseInt(row['份量'] || row['serving_size'] || row.serving_size) || 2;
-          const description = row['描述'] || row['description'] || row.description || '';
-          const instructions = row['制作步骤'] || row['instructions'] || row.instructions || '';
-          const culturalBackground = row['文化背景'] || row['cultural_background'] || row.cultural_background || '';
-          const ingredientsList = row['食材列表'] || row['ingredients'] || row.ingredients || '';
+          const cuisineType = cuisineMap[row['cuisine_type'] || row['cuisine'] || row['菜系']] || 'chinese';
+          const difficultyLevel = difficultyMap[row['difficulty_level'] || row['difficulty'] || row['难度']] || 'medium';
+          const cookingTime = parseInt(row['cooking_time'] || row['烹饪时间']) || 30;
+          const servingSize = parseInt(row['serving_size'] || row['份量']) || 2;
+          const description = row['description'] || row['描述'] || '';
+          const instructions = row['instructions'] || row['制作步骤'] || '';
+          const culturalBackground = row['cultural_background'] || row['文化背景'] || '';
+          const ingredientsList = row['ingredients'] || row['食材列表'] || '';
 
-          // 解析制作步骤
+          // Parse instructions
           let instructionsJson;
           try {
             instructionsJson = JSON.parse(instructions);
@@ -342,7 +358,7 @@ const KnowledgeBase = () => {
             instructionsJson = instructions.toString().split('\n').filter((step: string) => step.trim());
           }
 
-          // 插入菜肴
+          // Insert dish
           const { data: dishData, error: dishError } = await supabase
             .from('dishes_knowledge_base')
             .insert({
@@ -364,17 +380,17 @@ const KnowledgeBase = () => {
             continue;
           }
 
-          // 解析并插入食材
+          // Parse and insert ingredients
           if (ingredientsList && dishData) {
             let ingredients: string[] = [];
             
             if (Array.isArray(ingredientsList)) {
-              // JSON格式：数组形式的食材列表
+              // JSON format: array of ingredients
               ingredients = ingredientsList.map((ing: any) => 
                 typeof ing === 'string' ? ing : (ing.name || ing.ingredient_name || String(ing))
               ).filter(ing => ing);
             } else {
-              // Excel格式：分号分隔的字符串
+              // Excel format: semicolon-separated string
               ingredients = ingredientsList.toString().split(';')
                 .map((ing: string) => ing.trim())
                 .filter((ing: string) => ing);
@@ -408,17 +424,17 @@ const KnowledgeBase = () => {
       }
 
       setUploadProgress(100);
-      toast.success(`导入完成！成功：${successCount} 条，失败：${errorCount} 条`);
+      toast.success(`Import complete! Success: ${successCount}, Failed: ${errorCount}`);
       setIsUploadDialogOpen(false);
       fetchDishes();
 
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('文件上传失败：' + (error as Error).message);
+      toast.error('File upload failed: ' + (error as Error).message);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      // 清空文件输入
+      // Clear file input
       if (e.target) {
         e.target.value = '';
       }
@@ -428,24 +444,24 @@ const KnowledgeBase = () => {
   const downloadTemplate = () => {
     const templateData = [
       {
-        '菜肴名称': '宫保鸡丁',
-        '菜系': '中式菜肴',
-        '难度': '中等',
-        '烹饪时间': 20,
-        '份量': 2,
-        '描述': '经典川菜，口感鲜美',
-        '制作步骤': '1. 鸡肉切丁\n2. 爆炒花生米\n3. 下鸡丁炒制\n4. 调味装盘',
-        '文化背景': '四川传统名菜',
-        '食材列表': '鸡胸肉;花生米;干辣椒;花椒;葱;姜;蒜'
+        'dish_name': 'Kung Pao Chicken',
+        'cuisine_type': 'Chinese',
+        'difficulty_level': 'Medium',
+        'cooking_time': 20,
+        'serving_size': 2,
+        'description': 'Classic Sichuan dish with tender chicken and peanuts',
+        'instructions': '1. Cut chicken into cubes\n2. Stir-fry peanuts\n3. Cook chicken\n4. Season and serve',
+        'cultural_background': 'Traditional Sichuan cuisine',
+        'ingredients': 'chicken breast;peanuts;dried chili;Sichuan peppercorns;scallions;ginger;garlic'
       }
     ];
 
     const worksheet = XLSX.utils.json_to_sheet(templateData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, '菜肴模板');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Dish Template');
     
-    XLSX.writeFile(workbook, '菜肴导入模板.xlsx');
-    toast.success('模板下载成功！');
+    XLSX.writeFile(workbook, 'dish-import-template.xlsx');
+    toast.success('Template downloaded successfully!');
   };
 
   if (!user) {
@@ -453,7 +469,7 @@ const KnowledgeBase = () => {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">请先登录以管理知识库</p>
+            <p className="text-center text-muted-foreground">Please login first to manage knowledge base</p>
           </CardContent>
         </Card>
       </div>
@@ -464,27 +480,27 @@ const KnowledgeBase = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">菜肴知识库</h1>
-          <p className="text-muted-foreground">管理和维护菜肴数据库</p>
+          <h1 className="text-3xl font-bold">Knowledge Base</h1>
+          <p className="text-muted-foreground">Manage and maintain recipe database</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Upload className="h-4 w-4 mr-2" />
-                批量导入
+                Bulk Import
               </Button>
             </DialogTrigger>
             <DialogContent>
             <DialogHeader>
-              <DialogTitle>批量导入菜肴</DialogTitle>
+              <DialogTitle>Bulk Import Dishes</DialogTitle>
               <DialogDescription>
-                支持 Excel 和 JSON 文件批量导入菜肴数据。
+                Support Excel and JSON file bulk import of dish data.
               </DialogDescription>
             </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="excel-file">选择文件 (Excel 或 JSON)</Label>
+                  <Label htmlFor="excel-file">Select File (Excel or JSON)</Label>
                     <Input
                       id="excel-file"
                       type="file"
@@ -494,25 +510,25 @@ const KnowledgeBase = () => {
                     />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p><strong>Excel文件格式：</strong></p>
+                  <p><strong>Excel file format:</strong></p>
                   <ul className="list-disc list-inside mt-1 mb-3">
-                    <li>菜肴名称 (必需)</li>
-                    <li>菜系 (中式菜肴/日式料理/等)</li>
-                    <li>难度 (简单/中等/困难)</li>
-                    <li>烹饪时间 (分钟)</li>
-                    <li>份量 (人数)</li>
-                    <li>描述</li>
-                    <li>制作步骤</li>
-                    <li>文化背景</li>
-                    <li>食材列表 (用分号分隔)</li>
+                    <li>dish_name (required)</li>
+                    <li>cuisine_type (Chinese/Japanese/etc)</li>
+                    <li>difficulty_level (Easy/Medium/Hard)</li>
+                    <li>cooking_time (minutes)</li>
+                    <li>serving_size (number of people)</li>
+                    <li>description</li>
+                    <li>instructions</li>
+                    <li>cultural_background</li>
+                    <li>ingredients (semicolon separated)</li>
                   </ul>
-                  <p><strong>JSON文件格式：</strong></p>
-                  <p className="mt-1">应为对象数组，每个对象包含：name, cuisine_type, difficulty_level, cooking_time, serving_size, description, instructions, cultural_background, ingredients (数组)</p>
+                  <p><strong>JSON file format:</strong></p>
+                  <p className="mt-1">Should be an array of objects, each containing: dish_name, cuisine_type, difficulty_level, cooking_time, serving_size, description, instructions, cultural_background, ingredients (array)</p>
                 </div>
                 {isUploading && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>导入进度</span>
+                      <span>Import Progress</span>
                       <span>{uploadProgress}%</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
@@ -526,11 +542,11 @@ const KnowledgeBase = () => {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} disabled={isUploading}>
-                  取消
+                  Cancel
                 </Button>
                 <Button onClick={downloadTemplate} variant="ghost">
                   <Download className="h-4 w-4 mr-2" />
-                  下载模板
+                  Download Template
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -539,29 +555,29 @@ const KnowledgeBase = () => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                添加菜肴
+                Add Dish
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>添加新菜肴</DialogTitle>
+              <DialogTitle>Add New Dish</DialogTitle>
               <DialogDescription>
-                向知识库添加新的菜肴信息
+                Add new dish information to the knowledge base
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">菜肴名称</Label>
+                  <Label htmlFor="name">Dish Name</Label>
                   <Input
                     id="name"
                     value={newDish.name}
                     onChange={(e) => setNewDish(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="例如：宫保鸡丁"
+                    placeholder="e.g.: Kung Pao Chicken"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cuisine">菜系</Label>
+                  <Label htmlFor="cuisine">Cuisine Type</Label>
                   <Select value={newDish.cuisine_type} onValueChange={(value) => setNewDish(prev => ({ ...prev, cuisine_type: value }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -579,7 +595,7 @@ const KnowledgeBase = () => {
               
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="difficulty">难度</Label>
+                  <Label htmlFor="difficulty">Difficulty</Label>
                   <Select value={newDish.difficulty_level} onValueChange={(value) => setNewDish(prev => ({ ...prev, difficulty_level: value }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -594,7 +610,7 @@ const KnowledgeBase = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="cookingTime">烹饪时间(分钟)</Label>
+                  <Label htmlFor="cookingTime">Cooking Time (minutes)</Label>
                   <Input
                     id="cookingTime"
                     type="number"
@@ -603,7 +619,7 @@ const KnowledgeBase = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="servingSize">份量(人数)</Label>
+                  <Label htmlFor="servingSize">Serving Size (people)</Label>
                   <Input
                     id="servingSize"
                     type="number"
@@ -614,12 +630,12 @@ const KnowledgeBase = () => {
               </div>
 
               <div>
-                <Label htmlFor="description">描述</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
                   value={newDish.description}
                   onChange={(e) => setNewDish(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="简短描述这道菜的特点..."
+                  placeholder="Brief description of this dish..."
                 />
               </div>
 
