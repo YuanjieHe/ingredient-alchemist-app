@@ -127,6 +127,11 @@ const translations = {
     protein: 'Protein',
     carbs: 'Carbs',
     fat: 'Fat',
+    traditionalInspiration: 'Traditional Inspiration',
+    thisRecipeInspiredBy: 'This recipe was inspired by traditional dishes',
+    enhancedWithKnowledgeBase: 'Enhanced with traditional cooking techniques from our culinary knowledge base',
+    detailedCookingSteps: 'Detailed Cooking Steps',
+    tip: 'Tip',
     
     // Dish Types
     main: 'Main',
@@ -259,6 +264,11 @@ const translations = {
     protein: '蛋白质',
     carbs: '碳水化合物',
     fat: '脂肪',
+    traditionalInspiration: '传统灵感',
+    thisRecipeInspiredBy: '此食谱参考了传统菜肴',
+    enhancedWithKnowledgeBase: '结合了传统烹饪技法知识库的精华',
+    detailedCookingSteps: '详细烹饪步骤',
+    tip: '小贴士',
     
     // Dish Types
     main: '主菜',

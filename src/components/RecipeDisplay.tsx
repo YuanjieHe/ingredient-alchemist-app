@@ -22,6 +22,7 @@ interface Recipe {
   difficulty: string;
   mealType?: string;
   dishes?: Dish[];
+  knowledgeBaseReferences?: string[];
   ingredients: Array<{
     item: string;
     amount: string;
@@ -161,6 +162,33 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
             </CardHeader>
 
             <CardContent className="p-6 space-y-6">
+              {/* 知识库参考 */}
+              {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center">
+                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
+                    {t('traditionalInspiration')}
+                  </h4>
+                  <div className="bg-gradient-subtle p-4 rounded-lg border">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {t('thisRecipeInspiredBy')}:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {recipe.knowledgeBaseReferences.map((ref, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          🍜 {ref}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {t('enhancedWithKnowledgeBase')}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
+
               {/* 菜品搭配展示 */}
               {recipe.dishes && recipe.dishes.length > 0 && (
                 <div>
