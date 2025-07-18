@@ -30,7 +30,7 @@ const Index = () => {
   const [newIngredient, setNewIngredient] = useState('');
   
   // Hardcoded API key - provided by the service
-  const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
+  const API_KEY = 'AIzaSyC5SRTd-W6TGeiWnSEia1rrzoXRAZl9h2Q';
   const recipeService = new RecipeService(API_KEY);
 
   const addIngredient = () => {
