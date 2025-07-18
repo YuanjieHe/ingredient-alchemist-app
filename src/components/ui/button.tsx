@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "btn-gradient",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-warm hover:shadow-primary",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-white/30 bg-white/20 backdrop-blur-md hover:bg-white/30 hover:text-foreground rounded-2xl",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-white/80 backdrop-blur-sm text-primary hover:bg-white/90 rounded-2xl shadow-[var(--shadow-soft)]",
-        ghost: "hover:bg-white/20 hover:text-foreground rounded-2xl",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        modern: "bg-white/95 backdrop-blur-sm text-primary border border-white/50 hover:bg-white hover:shadow-[var(--shadow-medium)] rounded-2xl",
-        warm: "bg-orange-400 text-white hover:bg-orange-500 rounded-2xl shadow-[var(--shadow-soft)]",
-        fresh: "bg-green-400 text-white hover:bg-green-500 rounded-2xl shadow-[var(--shadow-soft)]",
+        warm: "bg-gradient-warm text-foreground hover:bg-cooking-spice hover:text-white shadow-warm",
+        fresh: "bg-gradient-fresh text-foreground hover:bg-cooking-herb hover:text-white",
+        spice: "bg-cooking-spice text-white hover:bg-cooking-spice/90 shadow-warm",
       },
       size: {
         default: "h-11 px-6 py-2",

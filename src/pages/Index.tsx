@@ -189,17 +189,17 @@ const Index = () => {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {recipes.map((recipe, index) => (
-                <Card key={recipe.id} className="food-card group overflow-hidden cursor-pointer">
+                <Card key={recipe.id} className="group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer">
                   <CardContent className="p-0">
-                    <div className="relative h-48 overflow-hidden rounded-t-3xl">
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 opacity-90" />
+                    <div className="relative h-48 overflow-hidden">
+                      <div className="absolute inset-0 bg-primary opacity-90" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-6xl opacity-90">
+                        <div className="text-6xl opacity-80">
                           {index === 0 ? '🍗' : index === 1 ? '🥗' : index === 2 ? '🍜' : '🍽️'}
                         </div>
                       </div>
                       <div className="absolute top-4 right-4">
-                        <Badge className="glass-effect text-white border-0">
+                        <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">
                           <Clock className="w-3 h-3 mr-1" />
                           {recipe.prepTime + recipe.cookTime} {t('min')}
                         </Badge>
@@ -207,22 +207,22 @@ const Index = () => {
                     </div>
                     <div className="p-6 space-y-4">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
+                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                           {recipe.title}
                         </h3>
-                        <p className="text-gray-600 line-clamp-2">{recipe.description}</p>
+                        <p className="text-muted-foreground line-clamp-2">{recipe.description}</p>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Badge variant="secondary" className="bg-purple-50 text-purple-700 border border-purple-200">
+                          <Badge variant="secondary" className="bg-muted/50">
                             <Users className="w-3 h-3 mr-1" />
                             {recipe.servings}
                           </Badge>
-                          <Badge variant="secondary" className="bg-pink-50 text-pink-700 border border-pink-200">
+                          <Badge variant="secondary" className="bg-muted/50">
                             {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
                           </Badge>
                         </div>
-                        <ChefHat className="w-5 h-5 text-purple-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <ChefHat className="w-5 h-5 text-primary opacity-60 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
                   </CardContent>
@@ -280,7 +280,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       {step === 'ingredients' && (
         <div className="relative h-96 mb-8 overflow-hidden">

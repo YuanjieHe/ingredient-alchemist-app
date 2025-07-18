@@ -22,7 +22,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-background">
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route
