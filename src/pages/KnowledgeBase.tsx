@@ -260,8 +260,8 @@ const KnowledgeBase = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.match(/\.(xlsx|xls)$/)) {
-      toast.error('请选择Excel文件 (.xlsx 或 .xls)');
+    if (!file.name.match(/\.(xlsx|xls|json)$/)) {
+      toast.error('请选择Excel文件 (.xlsx 或 .xls) 或 JSON文件 (.json)');
       return;
     }
 
@@ -269,14 +269,24 @@ const KnowledgeBase = () => {
     setUploadProgress(0);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      let jsonData: any[];
+
+      if (file.name.match(/\.json$/)) {
+        // Handle JSON file
+        const text = await file.text();
+        const parsedData = JSON.parse(text);
+        jsonData = Array.isArray(parsedData) ? parsedData : [parsedData];
+      } else {
+        // Handle Excel file
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        jsonData = XLSX.utils.sheet_to_json(worksheet);
+      }
 
       if (jsonData.length === 0) {
-        throw new Error('Excel文件为空');
+        throw new Error('文件为空');
       }
 
       let successCount = 0;
@@ -287,7 +297,7 @@ const KnowledgeBase = () => {
         setUploadProgress(Math.round((i / jsonData.length) * 100));
 
         try {
-          const dishName = row['菜肴名称'] || row['name'];
+          const dishName = row['菜肴名称'] || row['name'] || row.name;
           if (!dishName) {
             errorCount++;
             continue;
@@ -315,14 +325,14 @@ const KnowledgeBase = () => {
             '困难': 'hard'
           };
 
-          const cuisineType = cuisineMap[row['菜系'] || row['cuisine']] || 'chinese';
-          const difficultyLevel = difficultyMap[row['难度'] || row['difficulty']] || 'medium';
-          const cookingTime = parseInt(row['烹饪时间'] || row['cooking_time']) || 30;
-          const servingSize = parseInt(row['份量'] || row['serving_size']) || 2;
-          const description = row['描述'] || row['description'] || '';
-          const instructions = row['制作步骤'] || row['instructions'] || '';
-          const culturalBackground = row['文化背景'] || row['cultural_background'] || '';
-          const ingredientsList = row['食材列表'] || row['ingredients'] || '';
+          const cuisineType = cuisineMap[row['菜系'] || row['cuisine'] || row.cuisine_type] || 'chinese';
+          const difficultyLevel = difficultyMap[row['难度'] || row['difficulty'] || row.difficulty_level] || 'medium';
+          const cookingTime = parseInt(row['烹饪时间'] || row['cooking_time'] || row.cooking_time) || 30;
+          const servingSize = parseInt(row['份量'] || row['serving_size'] || row.serving_size) || 2;
+          const description = row['描述'] || row['description'] || row.description || '';
+          const instructions = row['制作步骤'] || row['instructions'] || row.instructions || '';
+          const culturalBackground = row['文化背景'] || row['cultural_background'] || row.cultural_background || '';
+          const ingredientsList = row['食材列表'] || row['ingredients'] || row.ingredients || '';
 
           // 解析制作步骤
           let instructionsJson;
@@ -356,9 +366,19 @@ const KnowledgeBase = () => {
 
           // 解析并插入食材
           if (ingredientsList && dishData) {
-            const ingredients = ingredientsList.toString().split(';')
-              .map((ing: string) => ing.trim())
-              .filter((ing: string) => ing);
+            let ingredients: string[] = [];
+            
+            if (Array.isArray(ingredientsList)) {
+              // JSON格式：数组形式的食材列表
+              ingredients = ingredientsList.map((ing: any) => 
+                typeof ing === 'string' ? ing : (ing.name || ing.ingredient_name || String(ing))
+              ).filter(ing => ing);
+            } else {
+              // Excel格式：分号分隔的字符串
+              ingredients = ingredientsList.toString().split(';')
+                .map((ing: string) => ing.trim())
+                .filter((ing: string) => ing);
+            }
 
             if (ingredients.length > 0) {
               const ingredientsToInsert = ingredients.map((ingredient: string) => ({
@@ -456,26 +476,26 @@ const KnowledgeBase = () => {
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Excel文件批量导入</DialogTitle>
-                <DialogDescription>
-                  上传Excel文件来批量导入菜肴数据。请确保Excel格式正确。
-                </DialogDescription>
-              </DialogHeader>
+            <DialogHeader>
+              <DialogTitle>批量导入菜肴</DialogTitle>
+              <DialogDescription>
+                支持 Excel 和 JSON 文件批量导入菜肴数据。
+              </DialogDescription>
+            </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="excel-file">选择Excel文件</Label>
-                  <Input
-                    id="excel-file"
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                  />
+                  <Label htmlFor="excel-file">选择文件 (Excel 或 JSON)</Label>
+                    <Input
+                      id="excel-file"
+                      type="file"
+                      accept=".xlsx,.xls,.json"
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p>Excel文件应包含以下列：</p>
-                  <ul className="list-disc list-inside mt-1">
+                  <p><strong>Excel文件格式：</strong></p>
+                  <ul className="list-disc list-inside mt-1 mb-3">
                     <li>菜肴名称 (必需)</li>
                     <li>菜系 (中式菜肴/日式料理/等)</li>
                     <li>难度 (简单/中等/困难)</li>
@@ -486,6 +506,8 @@ const KnowledgeBase = () => {
                     <li>文化背景</li>
                     <li>食材列表 (用分号分隔)</li>
                   </ul>
+                  <p><strong>JSON文件格式：</strong></p>
+                  <p className="mt-1">应为对象数组，每个对象包含：name, cuisine_type, difficulty_level, cooking_time, serving_size, description, instructions, cultural_background, ingredients (数组)</p>
                 </div>
                 {isUploading && (
                   <div className="space-y-2">
