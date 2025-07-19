@@ -87,10 +87,18 @@ serve(async (req) => {
     
     console.log('Raw Gemini response:', generatedText);
 
-    // Parse the JSON response
+    // Clean and parse the JSON response
     let recipes;
     try {
-      recipes = JSON.parse(generatedText);
+      // Remove markdown code block markers if present
+      let cleanedText = generatedText.trim();
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      recipes = JSON.parse(cleanedText);
     } catch (parseError) {
       console.error('Failed to parse JSON response:', parseError);
       console.error('Response text:', generatedText);
@@ -301,58 +309,67 @@ Format the response as a JSON array with this exact structure:
     "servings": ${peopleCount},
     "difficulty": "${skillLevel}",
     "knowledgeBaseReferences": ${knowledgeBaseInfo.matchedDishes.length > 0 ? JSON.stringify(knowledgeBaseInfo.matchedDishes.map((d: any) => d.name)) : '[]'},
-    "ingredients": [
-      {"item": "Main ingredient", "amount": "300g, specific cut or preparation", "usedIn": "main dish"},
-      {"item": "Seasoning ingredient", "amount": "3 cloves, minced", "usedIn": "flavoring"}
-    ],
-    "dishInstructions": [
-      {
-        "dishName": "Main Dish Name",
-        "steps": [
-          {
-            "stepNumber": 1,
-            "title": "Ingredient Preparation",
-            "description": "Extremely detailed description of how to prepare the ingredients. Include specific cutting techniques, sizes, and preparation methods. Explain why each preparation method is important for the final dish. Describe what the ingredients should look like after proper preparation and any signs to watch for during this process.",
-            "duration": "15 minutes",
-            "tips": "Professional tips for perfect ingredient preparation. Include common mistakes to avoid and signs of proper preparation.",
-            "imagePrompt": "Professional ${cuisineType} chef preparing ingredients with traditional tools, showing proper technique"
-          },
-          {
-            "stepNumber": 2,
-            "title": "Cooking Process - Phase 1",
-            "description": "Extremely detailed cooking instructions with precise temperatures, timing, and technique explanations. Describe the exact heat level, cooking vessel preparation, oil temperature, and step-by-step cooking process. Include sensory cues like sounds, smells, and visual changes that indicate proper cooking progress.",
-            "duration": "10 minutes",
-            "tips": "Professional cooking tips specific to this technique. Include how to judge doneness, temperature control, and timing adjustments.",
-            "imagePrompt": "Close-up of cooking process showing proper technique and visual cues for ${cuisineType} cooking"
-          },
-          {
-            "stepNumber": 3,
-            "title": "Cooking Process - Phase 2",
-            "description": "Continue with extremely detailed instructions for the next phase of cooking. Include any ingredient additions, technique changes, or temperature adjustments. Explain the science behind each step and what chemical or physical changes are occurring in the food.",
-            "duration": "8 minutes",
-            "tips": "Advanced tips for this cooking phase, including how to troubleshoot common issues and achieve perfect results.",
-            "imagePrompt": "Professional ${cuisineType} kitchen showing advanced cooking technique in action"
-          },
-          {
-            "stepNumber": 4,
-            "title": "Final Assembly and Plating",
-            "description": "Detailed instructions for finishing the dish, including final seasoning adjustments, plating techniques traditional to ${cuisineType} cuisine, and presentation methods. Explain how to check for proper doneness and make final adjustments.",
-            "duration": "5 minutes",
-            "tips": "Professional plating and presentation tips specific to ${cuisineType} cuisine. Include garnishing techniques and serving temperature.",
-            "imagePrompt": "Beautifully plated ${cuisineType} dish showing traditional presentation style"
-          }
-        ]
-      }
-    ],
-    "coordinationTips": [
-      "Prepare all ingredients first using proper ${cuisineType} techniques for smooth cooking flow",
-      "Master the specific cooking techniques essential to ${cuisineType} cuisine for authentic results",
-      "Follow traditional timing and temperature guidelines specific to this cuisine type",
-      "Pay attention to the fundamental flavor balance principles of ${cuisineType} cooking"
-    ],
-    "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions"]
-  }
-]
+     "ingredients": [
+       {"item": "Main ingredient", "amount": "300g, specific cut or preparation", "usedIn": "main dish"},
+       {"item": "Seasoning ingredient", "amount": "3 cloves, minced", "usedIn": "flavoring"}
+     ],
+     "dishInstructions": [
+       {
+         "dishName": "Main Dish Name",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "选材处理 (Ingredient Selection & Preparation)",
+             "description": "选用最优质的主料（具体规格和重量），冷水下锅加香料焯水去腥，煮沸后撇浮沫，食材冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧，包括尺寸规格、处理后应呈现的状态。解释为什么每个处理步骤对最终成品至关重要，描述处理过程中需要观察的变化和征象。",
+             "duration": "15 minutes",
+             "tips": "特殊技巧：品质好的食材无需过度处理，保持原味更佳。常见错误及避免方法，正确处理的判断标准。",
+             "imagePrompt": "Professional ${cuisineType} chef meticulously selecting and preparing ingredients with traditional tools"
+           },
+           {
+             "stepNumber": 2,
+             "title": "调色调味 (Color Development & Seasoning Base)",
+             "description": "冷锅放少量油，加糖（约具体克数）小火熬至特定颜色冒密泡，立即放入主料翻炒上色，此过程需控制在特定时间内以防发苦。详细描述火候控制、温度变化、颜色判断标准、翻炒手法、时间节点。包括感官指标如声音、气味、视觉变化等判断要点。",
+             "duration": "8 minutes",
+             "tips": "替代方案：可用其他调色方法替代传统糖色。火候控制技巧，颜色深浅的判断方法，常见问题的解决办法。",
+             "imagePrompt": "Close-up of perfect caramelization process showing proper color development and technique"
+           },
+           {
+             "stepNumber": 3,
+             "title": "调味焖煮 (Seasoning & Braising Process)",
+             "description": "加入香料（具体种类和用量）、调料（具体毫升数）翻炒。倒入开水（约毫升数）完全没过食材，大火煮沸后转小火加盖焖制特定时间，期间不揭盖。详细解释每种调料的作用、加入顺序、火候变化节点、焖制过程中的物理化学变化。",
+             "duration": "40 minutes",
+             "tips": "焖制过程中的关键控制点，如何判断火候是否合适，时间控制的重要性，中途检查的方法。",
+             "imagePrompt": "Traditional braising technique showing proper heat control and ingredient ratios"
+           },
+           {
+             "stepNumber": 4,
+             "title": "收汁定型 (Sauce Reduction & Final Presentation)",
+             "description": "开盖加盐调底味，转中火收汁至浓稠，最后沿锅边淋料酒增香。详细说明收汁的火候控制、浓稠度判断、调味的平衡技巧、摆盘的传统方法。解释如何检查成熟度并进行最终调整。",
+             "duration": "10 minutes",
+             "tips": "收汁过程的关键控制点，浓稠度的专业判断标准，摆盘技巧，保温和服务温度要求。",
+             "imagePrompt": "Master chef performing final sauce reduction and traditional plating technique"
+           }
+         ]
+       }
+     ],
+     "coordinationTips": [
+       "提前备料，按传统${cuisineType}技法处理所有食材确保烹饪流程顺畅",
+       "掌握${cuisineType}菜系核心烹饪技法，严格按传统工艺操作",
+       "遵循传统火候和时间控制准则，确保正宗口味",
+       "注重${cuisineType}菜系的根本味型平衡原则和文化内涵"
+     ],
+     "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions", "professional technique"]
+   }
+ ]
 
-CRITICAL: Every step must include extremely detailed instructions with precise timing, temperatures, and professional techniques. Each step should be comprehensive enough for someone to follow perfectly. Respond ONLY with valid JSON. No other text.`;
+EXAMPLE OF EXTREME DETAIL REQUIRED (like 红烧肉):
+每个步骤必须包含：
+1. 具体的用料规格（如"选用带皮三层五花肉约750克"）
+2. 精确的时间控制（如"控制在30秒内以防发苦"）
+3. 详细的技术要点（如"冷锅放少量油，加冰糖约40克小火熬至焦糖色冒密泡"）
+4. 替代方案（如"用可乐200ml替代糖色可增加风味"）
+5. 关键控制点（如"期间不揭盖"、"完全没过肉块"）
+6. 专业判断标准（如"转中火收汁至浓稠"）
+
+CRITICAL: Every step must be as detailed as the 红烧肉 example provided, with precise measurements, timing, temperatures, and professional techniques. Include exact quantities, specific time windows, alternative methods, and critical control points. Respond ONLY with valid JSON. No other text.`;
 }
