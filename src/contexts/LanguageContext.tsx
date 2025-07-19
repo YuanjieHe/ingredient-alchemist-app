@@ -192,6 +192,7 @@ const translations = {
     logoutSuccess: 'Logout successful!',
     
     // Ingredients Bank
+    ingredientsBank: 'Ingredients Bank',
     bankTitle: 'Ingredients Bank',
     bankSubtitle: 'Manage your available ingredients',
     bankEmpty: 'Your ingredients bank is empty',
