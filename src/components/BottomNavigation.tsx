@@ -17,11 +17,6 @@ const BottomNavigation = () => {
       icon: Package,
       label: t('ingredientsBank') || '食材银行',
     },
-    {
-      path: '/knowledge',
-      icon: Book,
-      label: t('knowledgeBase') || '知识库',
-    },
   ];
 
   return (

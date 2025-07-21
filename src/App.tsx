@@ -7,7 +7,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import RecipeGenerator from "./pages/RecipeGenerator";
 import IngredientsBank from "./pages/IngredientsBank";
-import KnowledgeBase from "./pages/KnowledgeBase";
+
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import BottomNavigation from "./components/BottomNavigation";
@@ -44,10 +44,6 @@ const App = () => (
                     </div>
                   </div>
                 } 
-              />
-              <Route 
-                path="/knowledge" 
-                element={<KnowledgeBase />} 
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
