@@ -78,13 +78,12 @@ export class RecipeService {
     });
 
     try {
-      // First try the new OpenAI-based edge function
-      console.log('Trying OpenAI-based recipe generation...');
+      // Use the edge function which now includes Deepseek fallback
+      console.log('Calling edge function with Deepseek fallback capability...');
       const response = await fetch(this.apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${request.apiKey}` // Add authorization header
         },
         body: JSON.stringify({
           ingredients: request.ingredients,
@@ -100,9 +99,9 @@ export class RecipeService {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('OpenAI-based generation successful');
+        console.log('Recipe generation successful via edge function');
         
-        // Convert OpenAI format to our expected format
+        // Convert edge function format to our expected format
         const convertedRecipes = data.recipes.map((recipe: any, index: number) => ({
           id: recipe.id || `recipe-${Date.now()}-${index}`,
           title: recipe.title || 'Untitled Recipe',
@@ -123,13 +122,14 @@ export class RecipeService {
         return convertedRecipes;
       } else {
         const errorData = await response.json();
-        throw new Error(`OpenAI API failed: ${errorData.message || response.statusText}`);
+        console.error('Edge function failed:', errorData);
+        throw new Error(`Recipe generation failed: ${errorData.message || response.statusText}`);
       }
-    } catch (openAIError) {
-      console.warn('OpenAI-based generation failed, falling back to Gemini:', openAIError);
+    } catch (edgeFunctionError) {
+      console.error('Edge function error, falling back to mock recipes:', edgeFunctionError);
       
-      // Fallback to original Gemini approach
-      return this.generateWithGemini(request);
+      // If edge function fails, fall back to mock recipes instead of trying Gemini again
+      return this.getMockRecipes(request.ingredients, request.allowShopping);
     }
   }
 
