@@ -92,18 +92,38 @@ Guidelines:
     // Parse the JSON response
     let ingredients: string[] = [];
     try {
-      ingredients = JSON.parse(content);
-      if (!Array.isArray(ingredients)) {
+      // First try to parse the content as JSON directly
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        ingredients = parsed;
+      } else {
         throw new Error('Response is not an array');
       }
     } catch (parseError) {
       console.error('Failed to parse JSON response:', content);
-      // Fallback: extract ingredients from text if JSON parsing fails
-      const lines = content.split('\n').filter(line => line.trim());
-      ingredients = lines
-        .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]]/g, '').trim())
-        .filter(line => line.length > 0 && !line.includes(':'))
-        .slice(0, 10); // Limit to 10 ingredients max
+      
+      // Try to extract JSON array from markdown code blocks or other text
+      const jsonMatch = content.match(/\[[\s\S]*?\]/);
+      if (jsonMatch) {
+        try {
+          ingredients = JSON.parse(jsonMatch[0]);
+        } catch (secondParseError) {
+          console.error('Failed to parse extracted JSON:', jsonMatch[0]);
+          // Fallback: extract ingredients from text
+          const lines = content.split(/[,\n]/).filter(line => line.trim());
+          ingredients = lines
+            .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]`]/g, '').trim())
+            .filter(line => line.length > 0 && !line.includes(':') && !line.includes('json'))
+            .slice(0, 10); // Limit to 10 ingredients max
+        }
+      } else {
+        // Fallback: extract ingredients from text if no JSON found
+        const lines = content.split(/[,\n]/).filter(line => line.trim());
+        ingredients = lines
+          .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]`]/g, '').trim())
+          .filter(line => line.length > 0 && !line.includes(':') && !line.includes('json'))
+          .slice(0, 10); // Limit to 10 ingredients max
+      }
     }
 
     console.log('Final ingredients list:', ingredients);
