@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const apiKey = 'sk-482tbry6f6ZOssiuzD1kDyIqNczz231pyVoj2HS7AxgdzjL7';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +15,8 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!apiKey) {
+      throw new Error('302.ai API key not configured');
     }
 
     const { image } = await req.json();
@@ -28,16 +28,18 @@ serve(async (req) => {
       );
     }
 
-    console.log('Analyzing image with GPT-4o...');
+    console.log('Analyzing image with 302.ai...');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.302.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'User-Agent': 'https://api.302.ai/v1/chat/completions',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: '302-agent-what2cookgpt4o',
         messages: [
           {
             role: 'system',
@@ -77,15 +79,15 @@ Guidelines:
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', response.status, errorData);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+      console.error('302.ai API error:', response.status, errorData);
+      throw new Error(`302.ai API error: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response:', data);
+    console.log('302.ai response:', data);
 
     const content = data.choices[0].message.content;
-    console.log('GPT-4o analysis result:', content);
+    console.log('302.ai analysis result:', content);
 
     // Parse the JSON response
     let ingredients: string[] = [];
