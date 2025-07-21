@@ -122,8 +122,14 @@ export class RecipeService {
         return convertedRecipes;
       } else {
         const errorData = await response.json();
-        console.error('Edge function failed:', errorData);
-        throw new Error(`Recipe generation failed: ${errorData.message || response.statusText}`);
+        console.error('Edge function failed with detailed error:', errorData);
+        
+        // Show detailed API error information for debugging
+        if (errorData.debugInfo) {
+          throw new Error(`Recipe generation failed: ${errorData.debugInfo}. Details: ${JSON.stringify(errorData.details)}`);
+        } else {
+          throw new Error(`Recipe generation failed: ${errorData.message || response.statusText}`);
+        }
       }
     } catch (edgeFunctionError) {
       console.error('Edge function error, falling back to mock recipes:', edgeFunctionError);

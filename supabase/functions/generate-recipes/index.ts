@@ -58,6 +58,8 @@ serve(async (req) => {
 
     let generatedText;
     let usingFallback = false;
+    let geminiError = null;
+    let deepseekError = null;
 
     try {
       console.log('Generating recipes with Gemini...');
@@ -82,31 +84,55 @@ serve(async (req) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Gemini API error:', response.status, errorText);
+        geminiError = {
+          status: response.status,
+          statusText: response.statusText,
+          message: errorText
+        };
+        console.error('Gemini API error:', response.status, response.statusText, errorText);
         
-        // If Gemini is overloaded (503) and we have Deepseek API key, try Deepseek
-        if (response.status === 503 && deepseekApiKey) {
-          console.log('Gemini overloaded, switching to Deepseek...');
+        // If Gemini fails and we have Deepseek API key, try Deepseek
+        if (deepseekApiKey) {
+          console.log('Gemini failed, switching to Deepseek...');
           usingFallback = true;
-          generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
+          try {
+            generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
+          } catch (deepseekErr) {
+            deepseekError = deepseekErr;
+            throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, Deepseek: ${deepseekErr.message}`);
+          }
         } else {
-          throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+          throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
         }
       } else {
         const data = await response.json();
         generatedText = data.candidates[0].content.parts[0].text;
-        console.log('Raw Gemini response:', generatedText);
+        console.log('Raw Gemini response received successfully');
       }
     } catch (error) {
       // If Gemini fails completely and we have Deepseek API key, try Deepseek as fallback
       if (deepseekApiKey && !usingFallback) {
-        console.log('Gemini failed, trying Deepseek as fallback...');
+        console.log('Gemini failed completely, trying Deepseek as fallback...');
         try {
           generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
           usingFallback = true;
-        } catch (deepseekError) {
-          console.error('Deepseek fallback also failed:', deepseekError);
-          throw error; // Throw original error
+        } catch (deepseekErr) {
+          deepseekError = deepseekErr;
+          console.error('Both APIs failed:', error.message, deepseekErr.message);
+          
+          // Return detailed error information for debugging
+          return new Response(JSON.stringify({ 
+            error: 'Both APIs failed', 
+            details: {
+              gemini: geminiError || { message: error.message },
+              deepseek: { message: deepseekErr.message, status: deepseekErr.status || 'unknown' }
+            },
+            message: 'Recipe generation failed. Please check API status and try again.',
+            debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, Deepseek: ${deepseekErr.status || 'unknown error'}`
+          }), {
+            status: 503,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
       } else {
         throw error;
@@ -432,8 +458,15 @@ async function generateWithDeepseek(systemPrompt: string, prompt: string): Promi
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Deepseek API error:', response.status, errorText);
-    throw new Error(`Deepseek API error: ${response.status} ${errorText}`);
+    console.error('Deepseek API error:', response.status, response.statusText, errorText);
+    
+    // Create detailed error object for better debugging
+    const error = new Error(`Deepseek API error: ${response.status} ${response.statusText} - ${errorText}`);
+    (error as any).status = response.status;
+    (error as any).statusText = response.statusText;
+    (error as any).details = errorText;
+    
+    throw error;
   }
 
   const data = await response.json();
