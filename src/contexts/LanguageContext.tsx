@@ -182,6 +182,12 @@ const translations = {
     recipesGenerationFailed: 'Failed to generate recipes. Please try again.',
     noMealCombinations: 'No meal combinations generated yet',
     
+    // Cooking
+    cookThisRecipe: 'Cook This Recipe',
+    recipeCooked: 'Recipe cooked! Ingredients have been deducted from your bank.',
+    cookingFailed: 'Failed to update ingredients. Please try again.',
+    someIngredientsUsedUp: 'Some ingredients have been used up.',
+    
     // Auth
     login: 'Login',
     logout: 'Logout',
@@ -241,6 +247,243 @@ const translations = {
     easy: 'Easy',
     medium: 'Medium',
     hard: 'Hard'
+  },
+  zh: {
+    // App Title
+    appTitle: 'SmartChef AI',
+    appSubtitle: '将您的食材转化为美味佳肴',
+    
+    // Navigation
+    ingredients: '食材',
+    preferences: '偏好',
+    mealPlans: '餐食计划',
+    
+    // Buttons
+    continueToPreferences: '继续到偏好设置',
+    backToIngredients: '返回食材',
+    generateMealPlans: '生成餐食计划',
+    regeneratePlans: '重新生成计划',
+    viewDetailedRecipes: '查看详细食谱',
+    backToPreview: '返回预览',
+    createNewMealPlans: '创建新的餐食计划',
+    
+    // Steps
+    step1: '食材',
+    step2: '偏好',
+    step3: '生成',
+    
+    // Generating
+    creatingMealPlans: '正在创建您的餐食计划',
+    aiChefAnalyzing: '我们的AI厨师正在分析您的食材和偏好...',
+    
+    // Preview
+    recommendMeals: '推荐餐食',
+    foundMealPlans: '个餐食计划',
+    foundMealPlansPlural: '个餐食计划',
+    foundFor: '找到',
+    
+    // Recipe Display
+    yourMealPlanCombinations: '您的餐食计划组合',
+    balancedMealCreated: '我们已创建',
+    balancedMealCombinations: '个平衡餐食组合',
+    balancedMealCombinationsPlural: '个平衡餐食组合',
+    forYou: '为您',
+    
+    // Time and Servings
+    min: '分钟',
+    servings: '人份',
+    person: '人',
+    people: '人',
+    day: '天',
+    days: '天',
+    
+    // Difficulty
+    beginner: '初级',
+    intermediate: '中级',
+    advanced: '高级',
+    
+    // Preferences
+    cookingPreferences: '烹饪偏好',
+    cookingPreferencesDesc: '自定义您的餐食偏好',
+    customizeYourMeals: '自定义您的餐食偏好',
+    
+    // People Count
+    howManyPeople: '有多少人用餐？',
+    
+    // Meal Type
+    whatMeal: '您计划什么餐食？',
+    breakfast: '早餐',
+    brunch: '早午餐',
+    lunch: '午餐',
+    dinner: '晚餐',
+    snack: '小食',
+    mealType: '餐食类型',
+    
+    // Occasion
+    whatsOccasion: '什么场合？',
+    dailyMeal: '日常餐食',
+    dailyMealDesc: '常规日常烹饪',
+    gatheringParty: '聚会/派对',
+    gatheringPartyDesc: '特殊场合或招待客人',
+    daily: '日常',
+    weekend: '周末',
+    party: '聚会',
+    romantic: '浪漫',
+    occasionType: '场合',
+    
+    // Cuisine
+    whatCuisine: '您偏好什么菜系？',
+    chinese: '中式',
+    american: '美式',
+    korean: '韩式',
+    japanese: '日式',
+    italian: '意式',
+    mexican: '墨西哥式',
+    indian: '印度式',
+    thai: '泰式',
+    mediterranean: '地中海式',
+    fusion: '融合式',
+    french: '法式',
+    other: '其他',
+    cuisineType: '菜系类型',
+    
+    // Skill Level
+    cookingSkillLevel: '烹饪技能水平',
+    skillLevel: '烹饪技能水平',
+    beginnerDesc: '简单食谱，基础技巧',
+    intermediateDesc: '需要一些烹饪经验',
+    advancedDesc: '复杂技巧和食材',
+    
+    // Meal Planning
+    planMealsDays: '计划几天的餐食？',
+    mealPlanDays: '餐食计划天数',
+    servingSize: '人数',
+    
+    // Shopping
+    shoppingPreference: '购物偏好',
+    useWhatIHave: '使用现有食材',
+    useWhatIHaveDesc: '仅使用当前食材的食谱',
+    iCanShop: '我可以购物',
+    iCanShopDesc: '包含需要一些额外食材的食谱',
+    allowShopping: '允许额外购物',
+    allowShoppingDesc: 'AI可以建议您没有的食材',
+    
+    // Recipe Details
+    mealCombination: '餐食组合',
+    requiredIngredients: '所需食材',
+    needToBuy: '需要购买',
+    cookingInstructions: '烹饪说明',
+    instructions: '说明',
+    cookingTips: '烹饪小贴士',
+    nutritionPerServing: '营养信息（每份）',
+    nutritionInfo: '营养信息',
+    calories: '卡路里',
+    protein: '蛋白质',
+    carbs: '碳水化合物',
+    fat: '脂肪',
+    traditionalInspiration: '传统灵感',
+    thisRecipeInspiredBy: '此食谱受传统菜品启发',
+    enhancedWithKnowledgeBase: '通过我们的烹饪知识库中的传统烹饪技术增强',
+    detailedCookingSteps: '详细烹饪步骤',
+    tip: '小贴士',
+    
+    // Dish Types
+    main: '主菜',
+    side: '配菜',
+    soup: '汤',
+    dish: '菜品',
+    
+    // Common
+    add: '添加',
+    cancel: '取消',
+    save: '保存',
+    delete: '删除',
+    edit: '编辑',
+    search: '搜索',
+    loading: '加载中...',
+    error: '错误',
+    success: '成功',
+    
+    // Ingredients
+    addIngredients: '添加食材以继续',
+    addIngredientsFirst: '请先添加食材',
+    ingredientPlaceholder: '输入食材名称',
+    addIngredient: '添加食材',
+    ingredientAdded: '食材已添加',
+    ingredientRemoved: '食材已移除',
+    
+    // Messages
+    savedToFavorites: '餐食组合已保存到收藏夹！',
+    linkCopied: '餐食组合链接已复制到剪贴板！',
+    recipesGenerated: '食谱生成成功！',
+    recipesGenerationFailed: '生成食谱失败，请重试。',
+    noMealCombinations: '尚未生成餐食组合',
+    
+    // Cooking
+    cookThisRecipe: '制作这道菜',
+    recipeCooked: '菜谱已制作！食材已从您的食材银行中扣除。',
+    cookingFailed: '更新食材失败，请重试。',
+    someIngredientsUsedUp: '某些食材已用完。',
+    
+    // Auth
+    login: '登录',
+    logout: '登出',
+    email: '邮箱',
+    password: '密码',
+    loginSuccess: '登录成功！',
+    loginError: '登录失败',
+    logoutSuccess: '登出成功！',
+    
+    // Ingredients Bank
+    ingredientsBank: '食材银行',
+    bankTitle: '食材银行',
+    bankSubtitle: '管理您的可用食材',
+    bankEmpty: '您的食材银行为空',
+    bankEmptyDesc: '添加食材以开始创建餐食计划',
+    addToBank: '添加到银行',
+    removeFromBank: '从银行移除',
+    clearBank: '清空全部',
+    importIngredients: '导入食材',
+    exportIngredients: '导出食材',
+    usingIngredientsFromBank: '使用食材银行中的食材',
+    items: '项',
+    
+    // Knowledge Base
+    knowledgeTitle: '知识库',
+    knowledgeSubtitle: '管理和维护食谱数据库',
+    dishManagement: '菜品管理',
+    addDish: '添加新菜品',
+    bulkImport: '批量导入',
+    dishName: '菜品名称',
+    difficultyLevel: '难度等级',
+    cookingTime: '烹饪时间（分钟）',
+    description: '描述',
+    culturalBackground: '文化背景',
+    ingredientsList: '食材清单',
+    dishNameRequired: '菜品名称是必需的',
+    instructionsRequired: '说明是必需的',
+    dishAdded: '菜品添加成功！',
+    dishDeleted: '菜品删除成功！',
+    dishAddFailed: '添加菜品失败',
+    dishDeleteFailed: '删除菜品失败',
+    confirmDelete: '您确定要删除此菜品吗？',
+    fetchDataFailed: '获取菜品数据失败',
+    fetchIngredientsFailed: '获取菜品食材失败',
+    selectFile: '选择文件（Excel或JSON）',
+    fileFormatError: '请选择Excel文件（.xlsx或.xls）或JSON文件（.json）',
+    fileEmpty: '文件为空',
+    uploadProgress: '上传进度',
+    importComplete: '导入完成！成功：{success}，失败：{failed}',
+    uploadFailed: '文件上传失败',
+    downloadTemplate: '下载模板',
+    templateDownloaded: '模板下载成功！',
+    excelFormat: 'Excel文件格式：',
+    jsonFormat: 'JSON文件格式：',
+    loginRequired: '请先登录',
+    loginRequiredKnowledge: '请先登录以管理知识库',
+    easy: '简单',
+    medium: '中等',
+    hard: '困难'
   }
 };
 

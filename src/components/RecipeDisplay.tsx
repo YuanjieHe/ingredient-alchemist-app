@@ -5,6 +5,8 @@ import { Separator } from '@/components/ui/separator';
 import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Dish {
   name: string;
@@ -56,6 +58,7 @@ interface RecipeDisplayProps {
 
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -77,6 +80,61 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
   const handleShare = (recipe: Recipe) => {
     onShareRecipe?.(recipe);
     toast.success(t('linkCopied'));
+  };
+
+  const handleCookRecipe = async (recipe: Recipe) => {
+    try {
+      // Get current ingredients from localStorage
+      const bankIngredients = localStorage.getItem('ingredientsBank');
+      let currentIngredients: any[] = [];
+      
+      if (bankIngredients) {
+        currentIngredients = JSON.parse(bankIngredients);
+      }
+
+      // Track ingredients that couldn't be deducted
+      const missingIngredients: string[] = [];
+      
+      // Deduct recipe ingredients from bank
+      const updatedIngredients = currentIngredients.map(ingredient => {
+        const recipeIngredient = recipe.ingredients.find(ri => 
+          ri.item.toLowerCase().includes(ingredient.name.toLowerCase()) ||
+          ingredient.name.toLowerCase().includes(ri.item.toLowerCase())
+        );
+        
+        if (recipeIngredient) {
+          const newQuantity = Math.max(0, ingredient.quantity - 1);
+          if (newQuantity === 0 && ingredient.quantity > 0) {
+            missingIngredients.push(ingredient.name);
+          }
+          return { ...ingredient, quantity: newQuantity };
+        }
+        return ingredient;
+      });
+
+      // Save to localStorage
+      localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+
+      // Update Supabase if user is authenticated
+      if (user) {
+        for (const ingredient of updatedIngredients) {
+          await supabase
+            .from('ingredients_bank')
+            .update({ quantity: ingredient.quantity })
+            .eq('user_id', user.id)
+            .eq('name', ingredient.name);
+        }
+      }
+
+      if (missingIngredients.length > 0) {
+        toast.success(t('recipeCooked') + ' ' + t('someIngredientsUsedUp'));
+      } else {
+        toast.success(t('recipeCooked'));
+      }
+    } catch (error) {
+      console.error('Error cooking recipe:', error);
+      toast.error(t('cookingFailed'));
+    }
   };
 
   const getDishIcon = (type: string) => {
@@ -365,6 +423,19 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                   </div>
                 </>
               )}
+
+              {/* Cook Recipe Button */}
+              <Separator />
+              <div className="flex justify-center">
+                <Button 
+                  onClick={() => handleCookRecipe(recipe)}
+                  size="lg"
+                  className="px-8 py-3 text-lg font-semibold"
+                >
+                  <ChefHat className="w-5 h-5 mr-2" />
+                  {t('cookThisRecipe')}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
