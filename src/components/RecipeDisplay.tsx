@@ -52,9 +52,10 @@ interface RecipeDisplayProps {
   recipes: Recipe[];
   onSaveRecipe?: (recipe: Recipe) => void;
   onShareRecipe?: (recipe: Recipe) => void;
+  onCookRecipe?: (recipe: Recipe) => void;
 }
 
-export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
+export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe, onCookRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -77,6 +78,11 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
   const handleShare = (recipe: Recipe) => {
     onShareRecipe?.(recipe);
     toast.success(t('linkCopied'));
+  };
+
+  const handleCook = (recipe: Recipe) => {
+    onCookRecipe?.(recipe);
+    toast.success(t('cookingRecipe'));
   };
 
   const getDishIcon = (type: string) => {
@@ -365,6 +371,18 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                   </div>
                 </>
               )}
+
+              {/* Cook Recipe Button */}
+              <div className="pt-4 border-t">
+                <Button 
+                  onClick={() => handleCook(recipe)}
+                  className="w-full bg-cooking-warmth hover:bg-cooking-warmth/90 text-white"
+                  size="lg"
+                >
+                  <ChefHat className="w-4 h-4 mr-2" />
+                  {t('cookThisRecipe')}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

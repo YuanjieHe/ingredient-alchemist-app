@@ -9,6 +9,7 @@ import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package, AlertTriangle } f
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface IngredientWithQuantity {
   name: string;
@@ -112,6 +113,89 @@ const RecipeGenerator = () => {
 
   const handleViewFullRecipes = () => {
     setStep('recipes');
+  };
+
+  const handleCookRecipe = async (recipe: any) => {
+    try {
+      // Get current ingredients from localStorage
+      const bankIngredients = localStorage.getItem('ingredientsBank');
+      if (!bankIngredients) {
+        toast.error('没有找到食材库数据');
+        return;
+      }
+
+      const parsedIngredients = JSON.parse(bankIngredients);
+      const updatedIngredients = [...parsedIngredients];
+
+      // Track ingredients that couldn't be deducted
+      const missingIngredients: string[] = [];
+
+      // Deduct recipe ingredients from bank
+      recipe.ingredients.forEach((recipeIngredient: any) => {
+        const ingredientName = recipeIngredient.item.toLowerCase();
+        const foundIndex = updatedIngredients.findIndex((bankItem: any) => 
+          bankItem.name.toLowerCase() === ingredientName
+        );
+
+        if (foundIndex !== -1) {
+          // Parse amount (extract number from string like "2 cups", "1 piece")
+          const amountMatch = recipeIngredient.amount.match(/(\d+\.?\d*)/);
+          const amountToDeduct = amountMatch ? parseFloat(amountMatch[1]) : 1;
+
+          if (updatedIngredients[foundIndex].quantity >= amountToDeduct) {
+            updatedIngredients[foundIndex].quantity -= amountToDeduct;
+            
+            // Remove ingredient if quantity becomes 0
+            if (updatedIngredients[foundIndex].quantity <= 0) {
+              updatedIngredients.splice(foundIndex, 1);
+            }
+          } else {
+            missingIngredients.push(ingredientName);
+          }
+        } else {
+          missingIngredients.push(ingredientName);
+        }
+      });
+
+      // Update localStorage
+      localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+
+      // Update Supabase if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Remove all user ingredients first
+        await supabase
+          .from('ingredients_bank')
+          .delete()
+          .eq('user_id', user.id);
+
+        // Insert updated ingredients
+        if (updatedIngredients.length > 0) {
+          await supabase
+            .from('ingredients_bank')
+            .insert(
+              updatedIngredients.map((ingredient: any) => ({
+                user_id: user.id,
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit || 'pieces',
+                category: ingredient.category || 'other'
+              }))
+            );
+        }
+      }
+
+      // Show success message
+      if (missingIngredients.length > 0) {
+        toast.warning(`制作完成！部分食材不足: ${missingIngredients.join(', ')}`);
+      } else {
+        toast.success(`成功制作了 ${recipe.title}！食材已从库存中扣除。`);
+      }
+
+    } catch (error) {
+      console.error('Error cooking recipe:', error);
+      toast.error('制作菜谱时出错，请重试');
+    }
   };
 
   const renderContent = () => {
@@ -291,7 +375,7 @@ const RecipeGenerator = () => {
               </Button>
             </div>
             <div className="bg-card rounded-2xl p-6 shadow-lg">
-              <RecipeDisplay recipes={recipes} />
+              <RecipeDisplay recipes={recipes} onCookRecipe={handleCookRecipe} />
             </div>
             <div className="flex justify-center">
               <Button 

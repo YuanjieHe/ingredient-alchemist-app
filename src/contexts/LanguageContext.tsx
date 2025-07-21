@@ -181,6 +181,8 @@ const translations = {
     recipesGenerated: 'Recipes generated successfully!',
     recipesGenerationFailed: 'Failed to generate recipes. Please try again.',
     noMealCombinations: 'No meal combinations generated yet',
+    cookThisRecipe: 'Cook This Recipe',
+    cookingRecipe: 'Cooking recipe and updating ingredients!',
     
     // Auth
     login: 'Login',
