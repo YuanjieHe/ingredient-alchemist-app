@@ -6,8 +6,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface PreferencesSelectorProps {
   skillLevel: string;
   onSkillLevelChange: (level: string) => void;
-  mealDays: number;
-  onMealDaysChange: (days: number) => void;
   allowShopping: boolean;
   onAllowShoppingChange: (allow: boolean) => void;
   peopleCount: number;
@@ -23,8 +21,6 @@ interface PreferencesSelectorProps {
 export const PreferencesSelector = ({
   skillLevel,
   onSkillLevelChange,
-  mealDays,
-  onMealDaysChange,
   allowShopping,
   onAllowShoppingChange,
   peopleCount,
@@ -250,31 +246,6 @@ export const PreferencesSelector = ({
           </div>
         </div>
 
-        {/* Meal Planning Days */}
-        <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-5 h-5 text-primary" />
-            <h4 className="font-medium text-foreground">{t('planMealsDays')}</h4>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {dayOptions.map((days) => (
-              <Badge
-                key={days}
-                variant={mealDays === days ? "default" : "secondary"}
-                className={`
-                  cursor-pointer px-4 py-2 text-sm transition-all duration-200
-                  ${mealDays === days 
-                    ? 'bg-primary text-primary-foreground shadow-primary' 
-                    : 'bg-cooking-warm text-foreground hover:bg-cooking-spice hover:text-white'
-                  }
-                `}
-                onClick={() => onMealDaysChange(days)}
-              >
-                {days} {days === 1 ? t('day') : t('days')}
-              </Badge>
-            ))}
-          </div>
-        </div>
 
         {/* Shopping Preference */}
         <div className="space-y-3">

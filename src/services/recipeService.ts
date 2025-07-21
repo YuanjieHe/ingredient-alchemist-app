@@ -174,40 +174,45 @@ export class RecipeService {
   }
 
   private createPrompt(request: RecipeRequest): string {
-    const { ingredients, skillLevel, mealDays, allowShopping, peopleCount, mealType, occasionType, cuisineType } = request;
+    const { ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType } = request;
+    
+    // 根据用餐人数计算菜的数量：每2-3人一道菜，最少4道菜
+    const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
 
     return `
-You are a professional cooking assistant helping home cooks create perfect meal combinations. Create ${mealDays} complete meal plans.
+You are a professional cooking assistant helping home cooks create perfect meal combinations. Create 1 complete rich meal plan with ${dishCount} different dishes.
 
 AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
 
 MEAL REQUIREMENTS:
 - Number of people: ${peopleCount}
+- Number of dishes needed: ${dishCount} (丰富的一顿饭，不能只有一道菜)
 - Meal type: ${mealType} (breakfast/lunch/dinner/brunch/snack)
 - Occasion: ${occasionType} (daily meal or gathering/party)
 - Cuisine preference: ${cuisineType}
 - Skill level: ${skillLevel}
-- Planning for: ${mealDays} days
+- Planning for: 1 meal (一顿丰富的饭)
 - Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
 
 CRITICAL MEAL PLANNING PRINCIPLES:
-1. **SMART INGREDIENT SELECTION**: You MUST NOT use all available ingredients in each meal. Select only 3-6 ingredients that work well together and make culinary sense
-2. **LOGICAL COMBINATIONS**: Choose ingredients that complement each other in flavor, texture, and cooking method
-3. **CUISINE CONSISTENCY**: Ensure selected ingredients align with ${cuisineType} cuisine traditions
-4. **NUTRITIONAL BALANCE**: Select ingredients that provide protein, vegetables, and carbohydrates in proper proportions
-5. Create complete meal combinations for ${peopleCount} people
-6. Match the ${mealType} meal type and ${occasionType} occasion style
-7. Include balanced dish combinations: main dish + side dish + soup/beverage (when appropriate)
-8. Match the ${skillLevel} skill level with appropriate techniques
-9. Consider cooking coordination and timing
+1. **RICH MEAL COMPOSITION**: Create exactly ${dishCount} different dishes for one complete meal
+2. **DISH VARIETY**: Must include at least: 1-2 main dishes, 2-3 side dishes, 1 soup or beverage
+3. **SMART INGREDIENT SELECTION**: Select 3-6 ingredients per dish that work well together
+4. **LOGICAL COMBINATIONS**: Choose ingredients that complement each other in flavor, texture, and cooking method
+5. **CUISINE CONSISTENCY**: Ensure selected ingredients align with ${cuisineType} cuisine traditions
+6. **NUTRITIONAL BALANCE**: Select ingredients that provide protein, vegetables, and carbohydrates in proper proportions
+7. Create complete meal combinations for ${peopleCount} people
+8. Match the ${mealType} meal type and ${occasionType} occasion style
+9. Match the ${skillLevel} skill level with appropriate techniques
+10. Consider cooking coordination and timing for all ${dishCount} dishes
 
 Please respond with meal plans in this JSON format:
 {
   "recipes": [
     {
-      "id": "meal-day-1",
-      "title": "Day 1 ${mealType} Combination",
-      "description": "Balanced ${cuisineType} meal perfect for ${occasionType}, serving ${peopleCount}",
+      "id": "rich-meal-1",
+      "title": "丰富的${mealType}搭配 (${dishCount}道菜)",
+      "description": "Balanced ${cuisineType} rich meal perfect for ${occasionType}, serving ${peopleCount} people with ${dishCount} dishes",
       "prepTime": 30,
       "cookTime": 45,
       "servings": ${peopleCount},
@@ -215,19 +220,24 @@ Please respond with meal plans in this JSON format:
       "mealType": "${mealType}",
       "dishes": [
         {
-          "name": "Main Dish Name",
+          "name": "主菜名称",
           "type": "main",
-          "description": "Main dish description"
+          "description": "主菜描述"
         },
         {
-          "name": "Side Dish Name", 
+          "name": "配菜名称", 
           "type": "side",
-          "description": "Side dish description"
+          "description": "配菜描述"
         },
         {
-          "name": "Soup/Beverage Name",
+          "name": "第二个配菜名称",
+          "type": "side", 
+          "description": "第二个配菜描述"
+        },
+        {
+          "name": "汤/饮品名称",
           "type": "soup",
-          "description": "Soup or beverage description"
+          "description": "汤或饮品描述"
         }
       ],
       "ingredients": [
@@ -277,18 +287,19 @@ CRITICAL INSTRUCTIONS FOR DETAILED STEPS:
 - Include visual cues like "until golden brown", "when it sizzles", "soft to touch"
 - Provide specific measurements, temperatures (°C), and timing for each step
 - Add professional cooking tips for each step
-- Generate detailed image prompts for each step showing the cooking process
 - Make instructions so detailed that a beginner could follow them successfully
-- Include coordination between different dishes being prepared simultaneously
+- Include coordination between ${dishCount} different dishes being prepared simultaneously
 
 Important Guidelines:
+- Create exactly ${dishCount} different dishes for this one meal
 - Prioritize available ingredients as main components
-- Consider cooking time coordination for all dishes
+- Consider cooking time coordination for all ${dishCount} dishes
 - Provide practical meal combination tips and nutritional advice
 - Use specific and appealing dish names
 - Match ${cuisineType} cuisine flavor profiles and cooking methods
 - Consider dietary needs for ${occasionType} occasions
 - Adapt portion sizes and complexity for ${peopleCount} people
+- Ensure the meal is rich and complete with ${dishCount} dishes
     `;
   }
 
@@ -367,38 +378,11 @@ Important Guidelines:
   }
 
   private async generateRecipeImages(recipes: Recipe[], cuisineType: string): Promise<void> {
-    const imageEndpoint = `${this.supabaseUrl}/functions/v1/generate-dish-image`;
-    
+    // 暂时隐藏AI生成图片功能，使用占位图片
     for (const recipe of recipes) {
-      try {
-        console.log(`Generating image for recipe: ${recipe.title}`);
-        
-        const response = await fetch(imageEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            dishName: recipe.title,
-            dishDescription: recipe.description,
-            cuisineType: cuisineType
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          recipe.imageUrl = data.imageUrl;
-          console.log(`Successfully generated image for: ${recipe.title}`);
-        } else {
-          console.error(`Failed to generate image for ${recipe.title}:`, await response.text());
-          // Use a fallback food image from Unsplash
-          recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
-        }
-      } catch (error) {
-        console.error(`Error generating image for ${recipe.title}:`, error);
-        // Use a fallback food image from Unsplash
-        recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
-      }
+      // 使用菜谱相关的占位图片
+      recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
+      console.log(`Using placeholder image for: ${recipe.title}`);
     }
   }
 

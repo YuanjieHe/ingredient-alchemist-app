@@ -19,7 +19,6 @@ const Index = () => {
   const [step, setStep] = useState<'ingredients' | 'preferences' | 'generating' | 'preview' | 'recipes'>('ingredients');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
-  const [mealDays, setMealDays] = useState(3);
   const [allowShopping, setAllowShopping] = useState(false);
   const [peopleCount, setPeopleCount] = useState(4);
   const [mealType, setMealType] = useState('lunch');
@@ -68,7 +67,7 @@ const Index = () => {
       const generatedRecipes = await recipeService.generateRecipes({
         ingredients,
         skillLevel,
-        mealDays,
+        mealDays: 1, // 固定为一顿饭
         allowShopping,
         peopleCount,
         mealType,
@@ -131,8 +130,6 @@ const Index = () => {
                 <PreferencesSelector
                   skillLevel={skillLevel}
                   onSkillLevelChange={setSkillLevel}
-                  mealDays={mealDays}
-                  onMealDaysChange={setMealDays}
                   allowShopping={allowShopping}
                   onAllowShoppingChange={setAllowShopping}
                   peopleCount={peopleCount}
