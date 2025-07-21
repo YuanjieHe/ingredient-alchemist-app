@@ -3,9 +3,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const geminiApiKey = 'AIzaSyC5SRTd-W6TGeiWnSEia1rrzoXRAZl9h2Q';
-const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
+const api302Key = 'sk-482tbry6f6ZOssiuzD1kDyIqNczz231pyVoj2HS7AxgdzjL7';
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 // Create Supabase client for database operations
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -59,7 +59,7 @@ serve(async (req) => {
     let generatedText;
     let usingFallback = false;
     let geminiError = null;
-    let deepseekError = null;
+    let api302Error = null;
 
     try {
       console.log('Generating recipes with Gemini...');
@@ -91,15 +91,15 @@ serve(async (req) => {
         };
         console.error('Gemini API error:', response.status, response.statusText, errorText);
         
-        // If Gemini fails and we have Deepseek API key, try Deepseek
-        if (deepseekApiKey) {
-          console.log('Gemini failed, switching to Deepseek...');
+        // If Gemini fails, try 302.ai
+        if (api302Key) {
+          console.log('Gemini failed, switching to 302.ai...');
           usingFallback = true;
           try {
-            generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
-          } catch (deepseekErr) {
-            deepseekError = deepseekErr;
-            throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, Deepseek: ${deepseekErr.message}`);
+            generatedText = await generateWith302AI(getSystemPrompt(cuisineType), prompt);
+          } catch (api302Err) {
+            api302Error = api302Err;
+            throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, 302.ai: ${api302Err.message}`);
           }
         } else {
           throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
@@ -110,25 +110,25 @@ serve(async (req) => {
         console.log('Raw Gemini response received successfully');
       }
     } catch (error) {
-      // If Gemini fails completely and we have Deepseek API key, try Deepseek as fallback
-      if (deepseekApiKey && !usingFallback) {
-        console.log('Gemini failed completely, trying Deepseek as fallback...');
+      // If Gemini fails completely and we have 302.ai API key, try 302.ai as fallback
+      if (api302Key && !usingFallback) {
+        console.log('Gemini failed completely, trying 302.ai as fallback...');
         try {
-          generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
+          generatedText = await generateWith302AI(getSystemPrompt(cuisineType), prompt);
           usingFallback = true;
-        } catch (deepseekErr) {
-          deepseekError = deepseekErr;
-          console.error('Both APIs failed:', error.message, deepseekErr.message);
+        } catch (api302Err) {
+          api302Error = api302Err;
+          console.error('Both APIs failed:', error.message, api302Err.message);
           
           // Return detailed error information for debugging
           return new Response(JSON.stringify({ 
             error: 'Both APIs failed', 
             details: {
               gemini: geminiError || { message: error.message },
-              deepseek: { message: deepseekErr.message, status: deepseekErr.status || 'unknown' }
+              api302: { message: api302Err.message, status: api302Err.status || 'unknown' }
             },
             message: 'Recipe generation failed. Please check API status and try again.',
-            debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, Deepseek: ${deepseekErr.status || 'unknown error'}`
+            debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, 302.ai: ${api302Err.status || 'unknown error'}`
           }), {
             status: 503,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -140,7 +140,7 @@ serve(async (req) => {
     }
 
     if (usingFallback) {
-      console.log('Successfully generated recipes using Deepseek fallback');
+      console.log('Successfully generated recipes using 302.ai fallback');
     }
 
     // Clean and parse the JSON response
@@ -430,22 +430,23 @@ EXAMPLE OF EXTREME DETAIL REQUIRED (like 红烧肉):
 CRITICAL: Every step must be as detailed as the 红烧肉 example provided, with precise measurements, timing, temperatures, and professional techniques. Include exact quantities, specific time windows, alternative methods, and critical control points. Respond ONLY with valid JSON. No other text.`;
 }
 
-// Helper function to generate recipes using Deepseek API as fallback
-async function generateWithDeepseek(systemPrompt: string, prompt: string): Promise<string> {
-  if (!deepseekApiKey) {
-    throw new Error('Deepseek API key not available');
+// Helper function to generate recipes using 302.ai API as fallback
+async function generateWith302AI(systemPrompt: string, prompt: string): Promise<string> {
+  if (!api302Key) {
+    throw new Error('302.ai API key not available');
   }
 
-  console.log('Using Deepseek API for recipe generation...');
+  console.log('Using 302.ai API for recipe generation...');
   
-  const response = await fetch('https://api.deepseek.com/chat/completions', {
+  const response = await fetch('https://api.302.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${deepseekApiKey}`,
+      'Authorization': `Bearer ${api302Key}`,
+      'User-Agent': 'https://api.302.ai/v1/chat/completions',
     },
     body: JSON.stringify({
-      model: 'deepseek-chat',
+      model: '302-agent-what2cookgpt4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
@@ -458,10 +459,10 @@ async function generateWithDeepseek(systemPrompt: string, prompt: string): Promi
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Deepseek API error:', response.status, response.statusText, errorText);
+    console.error('302.ai API error:', response.status, response.statusText, errorText);
     
     // Create detailed error object for better debugging
-    const error = new Error(`Deepseek API error: ${response.status} ${response.statusText} - ${errorText}`);
+    const error = new Error(`302.ai API error: ${response.status} ${response.statusText} - ${errorText}`);
     (error as any).status = response.status;
     (error as any).statusText = response.statusText;
     (error as any).details = errorText;
@@ -471,7 +472,7 @@ async function generateWithDeepseek(systemPrompt: string, prompt: string): Promi
 
   const data = await response.json();
   const generatedText = data.choices[0].message.content;
-  console.log('Raw Deepseek response:', generatedText);
+  console.log('Raw 302.ai response:', generatedText);
   
   return generatedText;
 }
