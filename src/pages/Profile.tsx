@@ -212,10 +212,7 @@ export default function Profile() {
                     onClick={() => setIsSignUp(!isSignUp)}
                     className="text-sm text-primary hover:underline"
                   >
-                    {isSignUp ? 
-                      (t('alreadyHaveAccount') || '已有账号？点击登录') : 
-                      (t('noAccount') || '没有账号？点击注册')
-                    }
+                    Sign Up
                   </button>
                 </div>
                 <Button 
