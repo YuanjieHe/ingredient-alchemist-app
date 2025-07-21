@@ -47,8 +47,8 @@ const RecipeGenerator = () => {
         // Handle both old format (string[]) and new format (IngredientWithQuantity[])
         if (Array.isArray(parsedIngredients)) {
           if (parsedIngredients.length === 0) {
-            // Empty array - set defaults
-            setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
+            // Empty array - no ingredients
+            setIngredients([]);
           } else if (typeof parsedIngredients[0] === 'string') {
             // Old format - array of strings
             console.log('Using old format (strings)');
@@ -59,21 +59,21 @@ const RecipeGenerator = () => {
             const ingredientNames = parsedIngredients.map((item: IngredientWithQuantity) => item.name);
             setIngredients(ingredientNames);
           } else {
-            // Unknown format - set defaults
-            console.log('Unknown format, using defaults');
-            setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
+            // Unknown format - no ingredients
+            console.log('Unknown format, setting empty');
+            setIngredients([]);
           }
         } else {
-          // Not an array - set defaults
-          setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
+          // Not an array - no ingredients
+          setIngredients([]);
         }
       } catch (error) {
         console.error('Error parsing ingredients:', error);
-        setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
+        setIngredients([]);
       }
     } else {
-      // Set default ingredients if bank is empty
-      setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
+      // No bank data - no ingredients
+      setIngredients([]);
     }
   }, []);
 
