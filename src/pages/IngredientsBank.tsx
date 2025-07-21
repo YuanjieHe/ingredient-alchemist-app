@@ -6,18 +6,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ChefHat, ArrowRight, Package, ShoppingCart, X, AlertCircle, LogIn, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ChefHat, ArrowRight, Package, ShoppingCart, X, AlertCircle, LogIn, User, Plus, Minus, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+
+interface IngredientWithQuantity {
+  name: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+}
 
 const IngredientsBank = () => {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [bankIngredients, setBankIngredients] = useState<string[]>([]);
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [bankIngredients, setBankIngredients] = useState<IngredientWithQuantity[]>([]);
+  const [selectedIngredients, setSelectedIngredients] = useState<IngredientWithQuantity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingIngredient, setEditingIngredient] = useState<string | null>(null);
+  const [editQuantity, setEditQuantity] = useState<string>('');
+  const [editUnit, setEditUnit] = useState<string>('');
 
   // Load ingredients from both localStorage and database
   useEffect(() => {
@@ -30,7 +41,7 @@ const IngredientsBank = () => {
       // Try to load from database first
       const { data, error } = await supabase
         .from('ingredients_bank')
-        .select('name, category')
+        .select('name, category, quantity, unit')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -38,14 +49,33 @@ const IngredientsBank = () => {
         // Fallback to localStorage
         const saved = localStorage.getItem('ingredientsBank');
         if (saved) {
-          setBankIngredients(JSON.parse(saved));
+          const ingredients = JSON.parse(saved);
+          // Convert old format to new format if needed
+          if (Array.isArray(ingredients) && ingredients.length > 0) {
+            if (typeof ingredients[0] === 'string') {
+              const convertedIngredients = ingredients.map((name: string) => ({
+                name,
+                quantity: 1,
+                unit: 'pieces'
+              }));
+              setBankIngredients(convertedIngredients);
+              localStorage.setItem('ingredientsBank', JSON.stringify(convertedIngredients));
+            } else {
+              setBankIngredients(ingredients);
+            }
+          }
         }
       } else {
         // Successfully loaded from database
-        const ingredientNames = data?.map(item => item.name) || [];
-        setBankIngredients(ingredientNames);
+        const ingredients = data?.map(item => ({
+          name: item.name,
+          quantity: item.quantity || 1,
+          unit: item.unit || 'pieces',
+          category: item.category
+        })) || [];
+        setBankIngredients(ingredients);
         // Also save to localStorage as backup
-        localStorage.setItem('ingredientsBank', JSON.stringify(ingredientNames));
+        localStorage.setItem('ingredientsBank', JSON.stringify(ingredients));
       }
     } catch (error) {
       console.log('Error loading ingredients:', error);
@@ -59,7 +89,7 @@ const IngredientsBank = () => {
     }
   };
 
-  const saveIngredientToDatabase = async (ingredient: string, category: string = 'other') => {
+  const saveIngredientToDatabase = async (ingredient: IngredientWithQuantity) => {
     try {
       // Check if user is authenticated first
       const { data: { user } } = await supabase.auth.getUser();
@@ -71,13 +101,17 @@ const IngredientsBank = () => {
 
       const { error } = await supabase
         .from('ingredients_bank')
-        .insert([
+        .upsert([
           { 
-            name: ingredient, 
-            category: category,
+            name: ingredient.name, 
+            category: ingredient.category || 'other',
+            quantity: ingredient.quantity,
+            unit: ingredient.unit,
             user_id: user.id
           }
-        ]);
+        ], {
+          onConflict: 'user_id,name'
+        });
 
       if (error) {
         console.log('Database save failed:', error.message);
@@ -90,7 +124,7 @@ const IngredientsBank = () => {
     }
   };
 
-  const removeIngredientFromDatabase = async (ingredient: string) => {
+  const removeIngredientFromDatabase = async (ingredientName: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -102,7 +136,7 @@ const IngredientsBank = () => {
       const { error } = await supabase
         .from('ingredients_bank')
         .delete()
-        .eq('name', ingredient)
+        .eq('name', ingredientName)
         .eq('user_id', user.id);
 
       if (error) {
@@ -119,12 +153,18 @@ const IngredientsBank = () => {
   const handleAddToBank = async (newIngredients: string[]) => {
     // Add only new ingredients to avoid duplicates
     const uniqueIngredients = newIngredients.filter(ing => 
-      !bankIngredients.some(existing => existing.toLowerCase() === ing.toLowerCase())
+      !bankIngredients.some(existing => existing.name.toLowerCase() === ing.toLowerCase())
     );
     
     if (uniqueIngredients.length > 0) {
+      const newIngredientObjects = uniqueIngredients.map(name => ({
+        name,
+        quantity: 1,
+        unit: 'pieces'
+      }));
+
       // Update local state immediately
-      const updatedIngredients = [...bankIngredients, ...uniqueIngredients];
+      const updatedIngredients = [...bankIngredients, ...newIngredientObjects];
       setBankIngredients(updatedIngredients);
       
       // Save to localStorage
@@ -132,7 +172,7 @@ const IngredientsBank = () => {
       
       // Try to save to database
       let dbSaveCount = 0;
-      for (const ingredient of uniqueIngredients) {
+      for (const ingredient of newIngredientObjects) {
         const saved = await saveIngredientToDatabase(ingredient);
         if (saved) dbSaveCount++;
       }
@@ -145,24 +185,60 @@ const IngredientsBank = () => {
     }
   };
 
-  const removeFromBank = async (ingredient: string) => {
-    // Update local state immediately
-    const updatedIngredients = bankIngredients.filter(item => item !== ingredient);
+  const updateQuantity = async (ingredientName: string, newQuantity: number) => {
+    if (newQuantity <= 0) return;
+    
+    const updatedIngredients = bankIngredients.map(item => 
+      item.name === ingredientName ? { ...item, quantity: newQuantity } : item
+    );
     setBankIngredients(updatedIngredients);
-    setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
+    localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+    
+    // Update in database
+    const ingredient = updatedIngredients.find(item => item.name === ingredientName);
+    if (ingredient) {
+      await saveIngredientToDatabase(ingredient);
+    }
+  };
+
+  const updateIngredientDetails = async (ingredientName: string, newQuantity: number, newUnit: string) => {
+    if (newQuantity <= 0) return;
+    
+    const updatedIngredients = bankIngredients.map(item => 
+      item.name === ingredientName ? { ...item, quantity: newQuantity, unit: newUnit } : item
+    );
+    setBankIngredients(updatedIngredients);
+    localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+    
+    // Update in database
+    const ingredient = updatedIngredients.find(item => item.name === ingredientName);
+    if (ingredient) {
+      await saveIngredientToDatabase(ingredient);
+    }
+    
+    setEditingIngredient(null);
+    toast.success(`${t('updated') || '已更新'} ${ingredientName}`);
+  };
+
+  const removeFromBank = async (ingredientName: string) => {
+    // Update local state immediately
+    const updatedIngredients = bankIngredients.filter(item => item.name !== ingredientName);
+    setBankIngredients(updatedIngredients);
+    setSelectedIngredients(selectedIngredients.filter(item => item.name !== ingredientName));
     
     // Update localStorage
     localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
     
     // Try to remove from database
-    await removeIngredientFromDatabase(ingredient);
+    await removeIngredientFromDatabase(ingredientName);
     
-    toast.success(`${t('removed') || '已移除'} ${ingredient}`);
+    toast.success(`${t('removed') || '已移除'} ${ingredientName}`);
   };
 
-  const toggleIngredientSelection = (ingredient: string) => {
-    if (selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
+  const toggleIngredientSelection = (ingredient: IngredientWithQuantity) => {
+    const isSelected = selectedIngredients.some(item => item.name === ingredient.name);
+    if (isSelected) {
+      setSelectedIngredients(selectedIngredients.filter(item => item.name !== ingredient.name));
     } else {
       setSelectedIngredients([...selectedIngredients, ingredient]);
     }
@@ -179,6 +255,12 @@ const IngredientsBank = () => {
   const handleCookWithSelected = () => {
     toast.success(t('navigatingToRecipeGenerator') || '正在跳转到食谱生成器');
     navigate('/');
+  };
+
+  const startEditing = (ingredient: IngredientWithQuantity) => {
+    setEditingIngredient(ingredient.name);
+    setEditQuantity(ingredient.quantity.toString());
+    setEditUnit(ingredient.unit);
   };
 
   const getIngredientEmoji = (ingredient: string) => {
@@ -259,40 +341,123 @@ const IngredientsBank = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {bankIngredients.map((ingredient, index) => (
                   <div
                     key={index}
-                    className={`relative group cursor-pointer transition-all duration-300 hover:scale-110 ${
-                      selectedIngredients.includes(ingredient) 
+                    className={`relative group transition-all duration-300 ${
+                      selectedIngredients.some(item => item.name === ingredient.name) 
                         ? 'transform scale-105 z-10' 
                         : ''
                     }`}
-                    onClick={() => toggleIngredientSelection(ingredient)}
                   >
-                    <div className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
-                      selectedIngredients.includes(ingredient)
+                    <div className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                      selectedIngredients.some(item => item.name === ingredient.name)
                         ? 'bg-gradient-to-br from-primary to-secondary text-white border-primary shadow-lg shadow-primary/25'
-                        : 'bg-card hover:bg-gradient-to-br hover:from-cooking-warm hover:to-cooking-spice border-border hover:border-primary/50 hover:text-white'
+                        : 'bg-card hover:bg-gradient-to-br hover:from-cooking-warm hover:to-cooking-spice border-border hover:border-primary/50'
                     }`}>
-                      <div className="text-3xl mb-2 animate-bounce">
-                        {getIngredientEmoji(ingredient)}
+                      {/* Ingredient Header */}
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => toggleIngredientSelection(ingredient)}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-2xl">
+                            {getIngredientEmoji(ingredient.name)}
+                          </div>
+                          {selectedIngredients.some(item => item.name === ingredient.name) && (
+                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">✓</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm font-semibold break-words leading-tight mb-2">
+                          {ingredient.name}
+                        </div>
                       </div>
-                      <div className="text-xs font-semibold break-words leading-tight">
-                        {ingredient}
-                      </div>
-                      {selectedIngredients.includes(ingredient) && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                          <span className="text-white text-xs font-bold">✓</span>
+
+                      {/* Quantity Controls */}
+                      {editingIngredient === ingredient.name ? (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              value={editQuantity}
+                              onChange={(e) => setEditQuantity(e.target.value)}
+                              className="h-8 text-xs"
+                              min="0.1"
+                              step="0.1"
+                            />
+                            <Input
+                              value={editUnit}
+                              onChange={(e) => setEditUnit(e.target.value)}
+                              className="h-8 text-xs"
+                              placeholder="单位"
+                            />
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => updateIngredientDetails(ingredient.name, parseFloat(editQuantity), editUnit)}
+                              className="flex-1 h-6 text-xs"
+                            >
+                              保存
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingIngredient(null)}
+                              className="flex-1 h-6 text-xs"
+                            >
+                              取消
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold">
+                              {ingredient.quantity} {ingredient.unit}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditing(ingredient)}
+                              className="h-6 w-6 p-0 hover:bg-white/20"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(ingredient.name, ingredient.quantity - 0.5)}
+                              className="flex-1 h-6 text-xs"
+                              disabled={ingredient.quantity <= 0.5}
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(ingredient.name, ingredient.quantity + 0.5)}
+                              className="flex-1 h-6 text-xs"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
+
+                    {/* Remove Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeFromBank(ingredient);
+                        removeFromBank(ingredient.name);
                       }}
-                      className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-xs shadow-lg"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-xs shadow-lg"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -315,7 +480,7 @@ const IngredientsBank = () => {
                     <div className="flex flex-wrap gap-2 justify-center max-h-20 overflow-y-auto">
                       {selectedIngredients.map((ingredient, index) => (
                         <Badge key={index} className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-300 font-medium">
-                          {getIngredientEmoji(ingredient)} {ingredient}
+                          {getIngredientEmoji(ingredient.name)} {ingredient.name} ({ingredient.quantity} {ingredient.unit})
                         </Badge>
                       ))}
                     </div>
