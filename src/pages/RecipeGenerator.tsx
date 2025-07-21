@@ -10,6 +10,13 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
+interface IngredientWithQuantity {
+  name: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+}
+
 const RecipeGenerator = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -33,7 +40,17 @@ const RecipeGenerator = () => {
     const bankIngredients = localStorage.getItem('ingredientsBank');
     if (bankIngredients) {
       const parsedIngredients = JSON.parse(bankIngredients);
-      setIngredients(parsedIngredients);
+      // Handle both old format (string[]) and new format (IngredientWithQuantity[])
+      if (Array.isArray(parsedIngredients) && parsedIngredients.length > 0) {
+        if (typeof parsedIngredients[0] === 'string') {
+          // Old format - array of strings
+          setIngredients(parsedIngredients);
+        } else {
+          // New format - array of objects with name, quantity, unit
+          const ingredientNames = parsedIngredients.map((item: IngredientWithQuantity) => item.name);
+          setIngredients(ingredientNames);
+        }
+      }
     } else {
       // Set default ingredients if bank is empty
       setIngredients(['chicken', 'rice', 'vegetables', 'onions', 'garlic']);
