@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,7 @@ interface FavoriteRecipe {
 export default function Profile() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
@@ -171,7 +173,7 @@ export default function Profile() {
                 <p className="text-muted-foreground">
                   {t('loginToViewFavorites') || '登录后查看收藏的菜谱'}
                 </p>
-                <Button onClick={() => setShowLogin(true)} className="w-full">
+                <Button onClick={() => navigate('/auth')} className="w-full">
                   <LogIn className="w-4 h-4 mr-2" />
                   {t('login') || '登录'}
                 </Button>
