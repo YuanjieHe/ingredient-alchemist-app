@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const geminiApiKey = 'AIzaSyC5SRTd-W6TGeiWnSEia1rrzoXRAZl9h2Q';
+const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -55,37 +56,66 @@ serve(async (req) => {
 
     console.log('Enhanced prompt created with knowledge base references');
 
-    console.log('Generating recipes with Gemini...');
+    let generatedText;
+    let usingFallback = false;
 
-    
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${getSystemPrompt(cuisineType)}\n\n${prompt}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 8000,
+    try {
+      console.log('Generating recipes with Gemini...');
+      
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${getSystemPrompt(cuisineType)}\n\n${prompt}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 8000,
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Gemini API error:', response.status, errorText);
+        
+        // If Gemini is overloaded (503) and we have Deepseek API key, try Deepseek
+        if (response.status === 503 && deepseekApiKey) {
+          console.log('Gemini overloaded, switching to Deepseek...');
+          usingFallback = true;
+          generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
+        } else {
+          throw new Error(`Gemini API error: ${response.status} ${errorText}`);
         }
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
-      throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+      } else {
+        const data = await response.json();
+        generatedText = data.candidates[0].content.parts[0].text;
+        console.log('Raw Gemini response:', generatedText);
+      }
+    } catch (error) {
+      // If Gemini fails completely and we have Deepseek API key, try Deepseek as fallback
+      if (deepseekApiKey && !usingFallback) {
+        console.log('Gemini failed, trying Deepseek as fallback...');
+        try {
+          generatedText = await generateWithDeepseek(getSystemPrompt(cuisineType), prompt);
+          usingFallback = true;
+        } catch (deepseekError) {
+          console.error('Deepseek fallback also failed:', deepseekError);
+          throw error; // Throw original error
+        }
+      } else {
+        throw error;
+      }
     }
 
-    const data = await response.json();
-    const generatedText = data.candidates[0].content.parts[0].text;
-    
-    console.log('Raw Gemini response:', generatedText);
+    if (usingFallback) {
+      console.log('Successfully generated recipes using Deepseek fallback');
+    }
 
     // Clean and parse the JSON response
     let recipes;
@@ -372,4 +402,43 @@ EXAMPLE OF EXTREME DETAIL REQUIRED (like 红烧肉):
 6. 专业判断标准（如"转中火收汁至浓稠"）
 
 CRITICAL: Every step must be as detailed as the 红烧肉 example provided, with precise measurements, timing, temperatures, and professional techniques. Include exact quantities, specific time windows, alternative methods, and critical control points. Respond ONLY with valid JSON. No other text.`;
+}
+
+// Helper function to generate recipes using Deepseek API as fallback
+async function generateWithDeepseek(systemPrompt: string, prompt: string): Promise<string> {
+  if (!deepseekApiKey) {
+    throw new Error('Deepseek API key not available');
+  }
+
+  console.log('Using Deepseek API for recipe generation...');
+  
+  const response = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${deepseekApiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.8,
+      max_tokens: 8000,
+      stream: false
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Deepseek API error:', response.status, errorText);
+    throw new Error(`Deepseek API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  const generatedText = data.choices[0].message.content;
+  console.log('Raw Deepseek response:', generatedText);
+  
+  return generatedText;
 }
