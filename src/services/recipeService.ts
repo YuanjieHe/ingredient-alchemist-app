@@ -16,6 +16,7 @@ export interface Recipe {
   difficulty: string;
   mealType?: string;
   dishes?: Dish[];
+  imageUrl?: string;
   ingredients: Array<{
     item: string;
     amount: string;
@@ -118,6 +119,9 @@ export class RecipeService {
           tips: recipe.coordinationTips || [],
           nutritionInfo: recipe.nutritionInfo
         }));
+        
+        // Generate images for recipes
+        await this.generateRecipeImages(convertedRecipes, request.cuisineType);
         
         return convertedRecipes;
       } else {
@@ -329,8 +333,9 @@ Important Guidelines:
         nutritionInfo: recipe.nutritionInfo
       }));
 
-      // Generate images for detailed steps
+      // Generate images for detailed steps and recipe main images  
       await this.generateStepImages(parsedRecipes);
+      await this.generateRecipeImages(parsedRecipes, 'Chinese');
       
       return parsedRecipes;
     } catch (error) {
@@ -357,6 +362,42 @@ Important Guidelines:
             step.imageUrl = `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center`;
           }
         }
+      }
+    }
+  }
+
+  private async generateRecipeImages(recipes: Recipe[], cuisineType: string): Promise<void> {
+    const imageEndpoint = `${this.supabaseUrl}/functions/v1/generate-dish-image`;
+    
+    for (const recipe of recipes) {
+      try {
+        console.log(`Generating image for recipe: ${recipe.title}`);
+        
+        const response = await fetch(imageEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            dishName: recipe.title,
+            dishDescription: recipe.description,
+            cuisineType: cuisineType
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          recipe.imageUrl = data.imageUrl;
+          console.log(`Successfully generated image for: ${recipe.title}`);
+        } else {
+          console.error(`Failed to generate image for ${recipe.title}:`, await response.text());
+          // Use a fallback food image from Unsplash
+          recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
+        }
+      } catch (error) {
+        console.error(`Error generating image for ${recipe.title}:`, error);
+        // Use a fallback food image from Unsplash
+        recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
       }
     }
   }

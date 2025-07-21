@@ -25,6 +25,7 @@ interface Recipe {
   mealType?: string;
   dishes?: Dish[];
   knowledgeBaseReferences?: string[];
+  imageUrl?: string;
   ingredients: Array<{
     item: string;
     amount: string;
@@ -177,6 +178,17 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
       <div className="grid gap-6">
         {recipes.map((recipe) => (
           <Card key={recipe.id} className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300">
+            {/* Recipe Image */}
+            {recipe.imageUrl && (
+              <div className="w-full h-64 overflow-hidden">
+                <img 
+                  src={recipe.imageUrl} 
+                  alt={recipe.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            
             <CardHeader className="bg-gradient-warm">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
