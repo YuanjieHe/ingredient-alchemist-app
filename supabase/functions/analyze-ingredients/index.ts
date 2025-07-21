@@ -92,37 +92,69 @@ Guidelines:
     // Parse the JSON response
     let ingredients: string[] = [];
     try {
-      // First try to parse the content as JSON directly
-      const parsed = JSON.parse(content);
+      // Remove markdown code block markers if present
+      let cleanedContent = content.trim();
+      
+      // Remove ```json and ``` markers
+      cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      
+      console.log('Cleaned content:', cleanedContent);
+      
+      // Try to parse the cleaned content as JSON
+      const parsed = JSON.parse(cleanedContent);
       if (Array.isArray(parsed)) {
-        ingredients = parsed;
+        ingredients = parsed.filter(item => 
+          typeof item === 'string' && 
+          item.trim().length > 0 &&
+          !item.includes('```') &&
+          !item.includes('json')
+        );
       } else {
         throw new Error('Response is not an array');
       }
     } catch (parseError) {
       console.error('Failed to parse JSON response:', content);
       
-      // Try to extract JSON array from markdown code blocks or other text
+      // Try to extract JSON array from the content
       const jsonMatch = content.match(/\[[\s\S]*?\]/);
       if (jsonMatch) {
         try {
-          ingredients = JSON.parse(jsonMatch[0]);
+          const parsed = JSON.parse(jsonMatch[0]);
+          ingredients = parsed.filter(item => 
+            typeof item === 'string' && 
+            item.trim().length > 0 &&
+            !item.includes('```') &&
+            !item.includes('json')
+          );
         } catch (secondParseError) {
           console.error('Failed to parse extracted JSON:', jsonMatch[0]);
-          // Fallback: extract ingredients from text
-          const lines = content.split(/[,\n]/).filter(line => line.trim());
-          ingredients = lines
-            .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]`]/g, '').trim())
-            .filter(line => line.length > 0 && !line.includes(':') && !line.includes('json'))
-            .slice(0, 10); // Limit to 10 ingredients max
+          // Final fallback: split the text by commas and clean up
+          ingredients = content
+            .replace(/```json|```/g, '')
+            .split(/[,\n]/)
+            .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]]/g, '').trim())
+            .filter(line => 
+              line.length > 0 && 
+              !line.includes(':') && 
+              !line.includes('json') &&
+              !line.includes('```')
+            )
+            .slice(0, 10);
         }
       } else {
-        // Fallback: extract ingredients from text if no JSON found
-        const lines = content.split(/[,\n]/).filter(line => line.trim());
-        ingredients = lines
-          .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]`]/g, '').trim())
-          .filter(line => line.length > 0 && !line.includes(':') && !line.includes('json'))
-          .slice(0, 10); // Limit to 10 ingredients max
+        // Final fallback if no JSON structure found
+        ingredients = content
+          .replace(/```json|```/g, '')
+          .split(/[,\n]/)
+          .map(line => line.replace(/^[-*•]\s*/, '').replace(/["\[\]]/g, '').trim())
+          .filter(line => 
+            line.length > 0 && 
+            !line.includes(':') && 
+            !line.includes('json') &&
+            !line.includes('```')
+          )
+          .slice(0, 10);
       }
     }
 
