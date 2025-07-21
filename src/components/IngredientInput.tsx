@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface IngredientInputProps {
   ingredients: string[];
@@ -37,29 +38,44 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
     setIsProcessingImage(true);
     
     try {
-      // Here we would typically use AI to analyze the image
-      // For now, we'll simulate with a mock response
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Convert file to base64 for OpenAI API
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(file);
+      });
+
+      console.log('Sending image to GPT-4o for analysis...');
       
-      const mockIngredients = [
-        'Tomatoes', 'Onions', 'Garlic', 'Bell peppers', 
-        'Carrots', 'Potatoes', 'Lettuce', 'Eggs'
-      ];
+      // Call our edge function to analyze the image
+      const { data, error } = await supabase.functions.invoke('analyze-ingredients', {
+        body: { image: base64 }
+      });
+
+      if (error) {
+        console.error('Error calling edge function:', error);
+        throw new Error(error.message || 'Failed to analyze image');
+      }
+
+      console.log('GPT-4o analysis result:', data);
+
+      const detectedIngredients = data.ingredients || [];
       
-      const detectedIngredients = mockIngredients.slice(0, Math.floor(Math.random() * 4) + 3);
-      
-      const newIngredients = detectedIngredients.filter(ing => 
+      const newIngredients = detectedIngredients.filter((ing: string) => 
         !ingredients.some(existing => existing.toLowerCase() === ing.toLowerCase())
       );
       
       if (newIngredients.length > 0) {
         onIngredientsChange([...ingredients, ...newIngredients]);
-        toast.success(`Found ${newIngredients.length} ingredients in your photo!`);
+        toast.success(`🎉 Found ${newIngredients.length} ingredients in your photo!`);
+      } else if (detectedIngredients.length > 0) {
+        toast.info('All detected ingredients are already in your list');
       } else {
-        toast.info('No new ingredients detected in this photo');
+        toast.info('No ingredients detected in this photo. Try a clearer image of food items.');
       }
     } catch (error) {
-      toast.error('Failed to analyze image. Please try again.');
+      console.error('Image analysis error:', error);
+      toast.error('Failed to analyze image. Please try again or add ingredients manually.');
     } finally {
       setIsProcessingImage(false);
     }
