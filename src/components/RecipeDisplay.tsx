@@ -73,9 +73,33 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
     }
   };
 
-  const handleSave = (recipe: Recipe) => {
-    onSaveRecipe?.(recipe);
-    toast.success(t('savedToFavorites'));
+  const handleSave = async (recipe: Recipe) => {
+    if (!user) {
+      toast.error(t('loginRequired') || '请先登录');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('favorite_recipes')
+        .insert({
+          user_id: user.id,
+          recipe_id: recipe.id,
+          recipe_data: recipe as any
+        });
+
+      if (error) throw error;
+      
+      onSaveRecipe?.(recipe);
+      toast.success(t('savedToFavorites') || '已收藏');
+    } catch (error: any) {
+      console.error('Error saving favorite:', error);
+      if (error.code === '23505') {
+        toast.error(t('alreadyFavorited') || '已经收藏过了');
+      } else {
+        toast.error(t('saveFavoriteFailed') || '收藏失败');
+      }
+    }
   };
 
   const handleShare = (recipe: Recipe) => {

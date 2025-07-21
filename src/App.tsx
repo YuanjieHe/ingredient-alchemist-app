@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import RecipeGenerator from "./pages/RecipeGenerator";
+import Profile from "./pages/Profile";
 import IngredientsBank from "./pages/IngredientsBank";
 
 import Auth from "./pages/Auth";
@@ -42,6 +43,14 @@ const App = () => (
                     <div className="max-w-4xl mx-auto">
                       <IngredientsBank />
                     </div>
+                  </div>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <div className="pb-20">
+                    <Profile />
                   </div>
                 } 
               />
