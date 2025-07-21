@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IngredientInput } from '@/components/IngredientInput';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -287,9 +288,13 @@ const IngredientsBank = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">{t('ingredientsBank') || '食材银行'}</h1>
-        <p className="text-muted-foreground">{t('manageFoodInventory') || '管理您的食物库存'}</p>
+      {/* Header with Language Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="text-center space-y-2 flex-1">
+          <h1 className="text-3xl font-bold text-foreground">{t('bankTitle')}</h1>
+          <p className="text-muted-foreground">{t('bankSubtitle')}</p>
+        </div>
+        <LanguageToggle />
       </div>
 
       {/* Add New Ingredients Section */}
@@ -297,7 +302,7 @@ const IngredientsBank = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="w-5 h-5" />
-            {t('addNewIngredients') || '添加新食材'}
+            {t('addNewIngredients')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -321,20 +326,20 @@ const IngredientsBank = () => {
                     <div className="absolute inset-0 w-4 h-4 bg-green-400 rounded-full animate-ping opacity-75"></div>
                   </div>
                   <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    {t('yourCurrentInventory') || '您当前的库存'}
+                    {t('yourCurrentInventory')}
                   </span>
                   <Badge variant="default" className="bg-gradient-to-r from-primary to-secondary text-white font-bold px-3 py-1 text-sm">
-                    {bankIngredients.length} {t('items') || '项'}
+                    {bankIngredients.length} {t('items')}
                   </Badge>
                 </div>
                 {bankIngredients.length > 0 && (
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={selectAllIngredients} className="text-xs">
                       <Package className="w-3 h-3 mr-1" />
-                      {t('selectAll') || '全选'}
+                      {t('selectAll')}
                     </Button>
                     <Button variant="outline" size="sm" onClick={clearSelection} className="text-xs">
-                      {t('clearSelection') || '清空'}
+                      {t('clearSelection')}
                     </Button>
                   </div>
                 )}
@@ -392,7 +397,7 @@ const IngredientsBank = () => {
                               value={editUnit}
                               onChange={(e) => setEditUnit(e.target.value)}
                               className="h-8 text-xs"
-                              placeholder="单位"
+                              placeholder={t('unit')}
                             />
                           </div>
                           <div className="flex gap-1">
@@ -401,7 +406,7 @@ const IngredientsBank = () => {
                               onClick={() => updateIngredientDetails(ingredient.name, parseFloat(editQuantity), editUnit)}
                               className="flex-1 h-6 text-xs"
                             >
-                              保存
+                              {t('save')}
                             </Button>
                             <Button
                               variant="outline"
@@ -409,7 +414,7 @@ const IngredientsBank = () => {
                               onClick={() => setEditingIngredient(null)}
                               className="flex-1 h-6 text-xs"
                             >
-                              取消
+                              {t('cancel')}
                             </Button>
                           </div>
                         </div>
@@ -474,7 +479,7 @@ const IngredientsBank = () => {
                         <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                       </div>
                       <p className="text-green-800 font-bold text-lg">
-                        {t('selectedForCooking') || '已选择用于烹饪'}: {selectedIngredients.length} {t('ingredients') || '种食材'}
+                        {t('selectedForCooking')}: {selectedIngredients.length} {t('ingredientsCount')}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2 justify-center max-h-20 overflow-y-auto">
@@ -490,7 +495,7 @@ const IngredientsBank = () => {
                       className="w-full sm:w-auto bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                     >
                       <ChefHat className="w-5 h-5 mr-2" />
-                      {t('cookWithSelected') || '用选中食材烹饪'}
+                      {t('cookWithSelected')}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </div>
@@ -510,10 +515,10 @@ const IngredientsBank = () => {
               <div className="text-6xl opacity-50">📦</div>
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-muted-foreground">
-                  {t('emptyInventory') || '库存为空'}
+                  {t('bankEmpty')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {t('addIngredientsFirst') || '请先添加食材到您的银行'}
+                  {t('bankEmptyDesc')}
                 </p>
               </div>
             </CardContent>
@@ -530,10 +535,10 @@ const IngredientsBank = () => {
                 <User className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div className="space-y-1">
                   <h3 className="font-semibold text-green-800">
-                    已登录：{user.email}
+                    {t('loggedInAs')}: {user.email}
                   </h3>
                   <p className="text-sm text-green-700">
-                    食材将自动同步到云端数据库
+                    {t('ingredientsSyncedToCloud')}
                   </p>
                 </div>
               </div>
@@ -543,7 +548,7 @@ const IngredientsBank = () => {
                 onClick={signOut}
                 className="text-green-700 border-green-300 hover:bg-green-100"
               >
-                退出登录
+                {t('logout')}
               </Button>
             </div>
           ) : (
@@ -552,10 +557,10 @@ const IngredientsBank = () => {
                 <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div className="space-y-1">
                   <h3 className="font-semibold text-orange-800">
-                    {t('authRequiredForPersistence') || '需要登录以启用持久存储'}
+                    {t('authRequiredForPersistence')}
                   </h3>
                   <p className="text-sm text-orange-700">
-                    {t('authNoticeMessage') || '当前食材将保存到本地存储。登录后可在设备间同步和永久保存。'}
+                    {t('authNoticeMessage')}
                   </p>
                 </div>
               </div>
@@ -565,7 +570,7 @@ const IngredientsBank = () => {
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 <LogIn className="w-4 h-4 mr-2" />
-                登录
+                {t('login')}
               </Button>
             </div>
           )}

@@ -9,6 +9,7 @@ import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package, AlertTriangle } f
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 interface IngredientWithQuantity {
   name: string;
@@ -119,14 +120,19 @@ const RecipeGenerator = () => {
       case 'preferences':
         return (
           <div className="space-y-8">
+            {/* Language Toggle */}
+            <div className="flex justify-end">
+              <LanguageToggle />
+            </div>
+            
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold text-foreground">{t('preferences') || '偏好设置'}</h2>
-              <p className="text-lg text-muted-foreground">{t('customizeYourMeals') || '自定义您的餐食'}</p>
+              <h2 className="text-3xl font-bold text-foreground">{t('preferences')}</h2>
+              <p className="text-lg text-muted-foreground">{t('customizeYourMeals')}</p>
               
               {ingredients.length > 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
                   <p className="text-green-800 text-sm font-medium mb-2">
-                    {t('usingIngredientsFromBank') || '使用食材银行中的食材'}: {ingredients.length} {t('items') || '项'}
+                    {t('usingIngredientsFromBank')}: {ingredients.length} {t('items')}
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {ingredients.slice(0, 8).map((ingredient, index) => (
@@ -172,7 +178,7 @@ const RecipeGenerator = () => {
                 className="px-8 py-3 text-lg font-semibold"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
-                {t('generateMealPlans') || '生成餐食计划'}
+                {t('generateMealPlans')}
               </Button>
             </div>
           </div>
@@ -281,6 +287,7 @@ const RecipeGenerator = () => {
       case 'recipes':
         return (
           <div className="space-y-8">
+            {/* Language Toggle */}
             <div className="flex items-center justify-between">
               <Button 
                 variant="outline" 
@@ -289,6 +296,7 @@ const RecipeGenerator = () => {
               >
                 {t('backToPreview')}
               </Button>
+              <LanguageToggle />
             </div>
             <div className="bg-card rounded-2xl p-6 shadow-lg">
               <RecipeDisplay recipes={recipes} />

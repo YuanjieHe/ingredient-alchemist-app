@@ -246,7 +246,28 @@ const translations = {
     loginRequiredKnowledge: 'Please login first to manage knowledge base',
     easy: 'Easy',
     medium: 'Medium',
-    hard: 'Hard'
+    hard: 'Hard',
+    
+    // New ingredient bank terms
+    addNewIngredients: 'Add New Ingredients',
+    yourCurrentInventory: 'Your Current Inventory',
+    selectAll: 'Select All', 
+    clearSelection: 'Clear Selection',
+    unit: 'Unit',
+    selectedForCooking: 'Selected for Cooking',
+    ingredientsCount: 'ingredients',
+    cookWithSelected: 'Cook With Selected',
+    loggedInAs: 'Logged in as',
+    ingredientsSyncedToCloud: 'Ingredients will automatically sync to cloud database',
+    authRequiredForPersistence: 'Authentication required for persistence',
+    authNoticeMessage: 'Current ingredients will be saved to local storage. Login to sync across devices and save permanently.',
+    added: 'Added',
+    ingredientsToBank: 'ingredients to bank',
+    savedToDatabase: 'saved to database',
+    localStorageOnly: 'local storage only',
+    updated: 'Updated',
+    removed: 'Removed',
+    navigatingToRecipeGenerator: 'Navigating to recipe generator'
   },
   zh: {
     // App Title
@@ -483,12 +504,33 @@ const translations = {
     loginRequiredKnowledge: '请先登录以管理知识库',
     easy: '简单',
     medium: '中等',
-    hard: '困难'
+    hard: '困难',
+    
+    // New ingredient bank terms
+    addNewIngredients: '添加新食材',
+    yourCurrentInventory: '您当前的库存',
+    selectAll: '全选',
+    clearSelection: '清空选择',
+    unit: '单位',
+    selectedForCooking: '已选择用于烹饪',
+    ingredientsCount: '种食材',
+    cookWithSelected: '用选中食材烹饪',
+    loggedInAs: '已登录',
+    ingredientsSyncedToCloud: '食材将自动同步到云端数据库',
+    authRequiredForPersistence: '需要登录以启用持久存储',
+    authNoticeMessage: '当前食材将保存到本地存储。登录后可在设备间同步和永久保存。',
+    added: '已添加',
+    ingredientsToBank: '种食材到银行',
+    savedToDatabase: '已保存到数据库',
+    localStorageOnly: '仅本地存储',
+    updated: '已更新',
+    removed: '已移除',
+    navigatingToRecipeGenerator: '正在跳转到食谱生成器'
   }
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('zh');
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations['en']] || key;
