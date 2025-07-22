@@ -201,7 +201,16 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
       <div className="grid gap-6">
         {recipes.map((recipe) => (
-          <Card key={recipe.id} className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300">
+          <Card 
+            key={recipe.id} 
+            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
+            onClick={() => {
+              // Store recipe in localStorage for detailed view
+              localStorage.setItem('selectedRecipe', JSON.stringify(recipe));
+              // Navigate to recipe detail page
+              window.location.href = `/recipe/${recipe.id}`;
+            }}
+          >
             {/* Recipe Image */}
             {recipe.imageUrl && (
               <div className="w-full h-64 overflow-hidden">
@@ -223,7 +232,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleSave(recipe)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSave(recipe);
+                    }}
                     className="hover:bg-white/20"
                   >
                     <Heart className="w-4 h-4" />
@@ -231,7 +243,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleShare(recipe)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShare(recipe);
+                    }}
                     className="hover:bg-white/20"
                   >
                     <Share className="w-4 h-4" />
@@ -464,7 +479,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
               <Separator />
               <div className="flex justify-center">
                 <Button 
-                  onClick={() => handleCookRecipe(recipe)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCookRecipe(recipe);
+                  }}
                   size="lg"
                   className="px-8 py-3 text-lg font-semibold"
                 >
