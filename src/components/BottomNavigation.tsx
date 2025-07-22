@@ -9,13 +9,13 @@ const BottomNavigation = () => {
   const navItems = [
     {
       path: '/',
-      icon: ChefHat,
-      label: t('aiGenerator') || 'AI生成器',
-    },
-    {
-      path: '/ingredients',
       icon: Package,
       label: t('ingredientsBank') || '食材银行',
+    },
+    {
+      path: '/recipes',
+      icon: ChefHat,
+      label: t('aiGenerator') || 'AI生成器',
     },
     {
       path: '/profile',

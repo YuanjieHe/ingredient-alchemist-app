@@ -31,17 +31,17 @@ const App = () => (
                 element={
                   <div className="container mx-auto px-4 py-8">
                     <div className="max-w-4xl mx-auto">
-                      <RecipeGenerator />
+                      <IngredientsBank />
                     </div>
                   </div>
                 } 
               />
               <Route 
-                path="/ingredients" 
+                path="/recipes" 
                 element={
                   <div className="container mx-auto px-4 py-8">
                     <div className="max-w-4xl mx-auto">
-                      <IngredientsBank />
+                      <RecipeGenerator />
                     </div>
                   </div>
                 } 
