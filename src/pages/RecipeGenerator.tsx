@@ -88,22 +88,27 @@ const RecipeGenerator = () => {
       return;
     }
 
-    // Check if user can generate recipes
-    if (!canGenerate) {
-      if (subscription?.subscription_type === 'free') {
-        toast.error(t('freeTrialExpired'));
-        navigate('/subscription');
-      } else {
-        toast.error(t('subscriptionExpired'));
-        navigate('/subscription');
-      }
+    // For free users, check if they've reached the limit BEFORE generating
+    if (subscription?.subscription_type === 'free' && 
+        subscription.free_generations_used >= subscription.free_generations_limit) {
+      toast.error(t('freeTrialExpired'));
+      navigate('/subscription');
       return;
     }
 
-    // Increment usage count before generating
-    const canProceed = await incrementUsage();
-    if (!canProceed) {
+    // For premium users, check subscription status
+    if (subscription?.subscription_type === 'premium' && subscription.subscription_status !== 'active') {
+      toast.error(t('subscriptionExpired'));
+      navigate('/subscription');
       return;
+    }
+
+    // Increment usage count before generating (only for free users)
+    if (subscription?.subscription_type === 'free') {
+      const canProceed = await incrementUsage();
+      if (!canProceed) {
+        return;
+      }
     }
 
     setIsGenerating(true);
