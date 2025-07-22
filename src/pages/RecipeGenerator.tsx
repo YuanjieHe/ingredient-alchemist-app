@@ -5,11 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { RecipeService, Recipe } from '@/services/recipeService';
-import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package, AlertTriangle } from 'lucide-react';
+import { ChefHat, Sparkles, ArrowRight, Clock, Users, Package, AlertTriangle, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface IngredientWithQuantity {
   name: string;
@@ -21,6 +23,8 @@ interface IngredientWithQuantity {
 const RecipeGenerator = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { subscription, canGenerate, remainingGenerations, incrementUsage, loading: subscriptionLoading } = useSubscription();
   const [step, setStep] = useState<'preferences' | 'generating' | 'preview' | 'recipes'>('preferences');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState('beginner');
@@ -77,6 +81,31 @@ const RecipeGenerator = () => {
   }, []);
 
   const handleGenerateRecipes = async () => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error(t('pleaseLoginFirst'));
+      navigate('/auth');
+      return;
+    }
+
+    // Check if user can generate recipes
+    if (!canGenerate) {
+      if (subscription?.subscription_type === 'free') {
+        toast.error(t('freeTrialExpired'));
+        navigate('/subscription');
+      } else {
+        toast.error(t('subscriptionExpired'));
+        navigate('/subscription');
+      }
+      return;
+    }
+
+    // Increment usage count before generating
+    const canProceed = await incrementUsage();
+    if (!canProceed) {
+      return;
+    }
+
     setIsGenerating(true);
     setStep('generating');
 
@@ -127,6 +156,55 @@ const RecipeGenerator = () => {
             <div className="text-center space-y-2">
               <h2 className="text-3xl font-bold text-foreground">{t('preferences')}</h2>
               <p className="text-lg text-muted-foreground">{t('customizeYourMeals')}</p>
+              
+              {/* Subscription Status Card */}
+              {user && subscription && (
+                <Card className={`mt-4 ${subscription.subscription_type === 'premium' ? 'bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20' : 'bg-muted/50'}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {subscription.subscription_type === 'premium' ? (
+                          <Crown className="w-5 h-5 text-yellow-500" />
+                        ) : (
+                          <Sparkles className="w-5 h-5 text-muted-foreground" />
+                        )}
+                        <Badge variant={subscription.subscription_type === 'premium' ? 'default' : 'secondary'}>
+                          {subscription.subscription_type === 'premium' 
+                            ? (t('language') === 'en' ? 'Premium' : '高级版') 
+                            : (t('language') === 'en' ? 'Free' : '免费版')
+                          }
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        {subscription.subscription_type === 'free' ? (
+                          <p className="text-sm text-muted-foreground">
+                            {t('language') === 'en' 
+                              ? `${remainingGenerations} generations left`
+                              : `剩余 ${remainingGenerations} 次生成`
+                            }
+                          </p>
+                        ) : (
+                          <p className="text-sm text-primary font-medium">
+                            {t('language') === 'en' ? 'Unlimited' : '无限制'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {subscription.subscription_type === 'free' && remainingGenerations === 0 && (
+                      <div className="mt-3 pt-3 border-t border-muted-foreground/20">
+                        <Button 
+                          size="sm" 
+                          onClick={() => navigate('/subscription')}
+                          className="w-full"
+                        >
+                          <Crown className="w-4 h-4 mr-2" />
+                          {t('language') === 'en' ? 'Upgrade to Premium' : '升级到高级版'}
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
               
               {ingredients.length > 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">

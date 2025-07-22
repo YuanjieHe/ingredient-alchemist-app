@@ -178,6 +178,9 @@ const translations = {
     // Messages
     linkCopied: 'Meal combination link copied to clipboard!',
     recipesGenerated: 'Recipes generated successfully!',
+    pleaseLoginFirst: 'Please login first',
+    freeTrialExpired: 'Free trial expired, please upgrade to premium',
+    subscriptionExpired: 'Subscription expired, please renew',
     recipesGenerationFailed: 'Failed to generate recipes. Please try again.',
     noMealCombinations: 'No meal combinations generated yet',
     
@@ -471,6 +474,9 @@ const translations = {
     // Messages
     linkCopied: '餐食组合链接已复制到剪贴板！',
     recipesGenerated: '食谱生成成功！',
+    pleaseLoginFirst: '请先登录',
+    freeTrialExpired: '免费次数已用完，请升级到高级版',
+    subscriptionExpired: '订阅已过期，请续费',
     recipesGenerationFailed: '生成食谱失败，请重试。',
     noMealCombinations: '尚未生成餐食组合',
     

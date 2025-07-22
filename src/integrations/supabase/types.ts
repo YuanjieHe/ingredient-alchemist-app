@@ -268,6 +268,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          apple_original_transaction_id: string | null
+          apple_transaction_id: string | null
+          created_at: string
+          free_generations_limit: number
+          free_generations_used: number
+          id: string
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          apple_original_transaction_id?: string | null
+          apple_transaction_id?: string | null
+          created_at?: string
+          free_generations_limit?: number
+          free_generations_used?: number
+          id?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          apple_original_transaction_id?: string | null
+          apple_transaction_id?: string | null
+          created_at?: string
+          free_generations_limit?: number
+          free_generations_used?: number
+          id?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

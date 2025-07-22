@@ -5,9 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import RecipeGenerator from "./pages/RecipeGenerator";
 import Profile from "./pages/Profile";
 import IngredientsBank from "./pages/IngredientsBank";
+import Subscription from "./pages/Subscription";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -18,7 +20,8 @@ const queryClient = new QueryClient();
 const App = () => (
   <LanguageProvider>
     <AuthProvider>
-      <QueryClientProvider client={queryClient}>
+      <SubscriptionProvider>
+        <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -54,6 +57,14 @@ const App = () => (
                   </div>
                 } 
               />
+              <Route 
+                path="/subscription" 
+                element={
+                  <div className="pb-20">
+                    <Subscription />
+                  </div>
+                } 
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNavigation />
@@ -61,6 +72,7 @@ const App = () => (
         </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   </LanguageProvider>
 );
