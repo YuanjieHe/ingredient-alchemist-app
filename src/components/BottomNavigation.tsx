@@ -10,17 +10,17 @@ const BottomNavigation = () => {
     {
       path: '/',
       icon: Package,
-      label: t('ingredientsBank') || '食材银行',
+      label: t('ingredientsBank'),
     },
     {
       path: '/recipes',
       icon: ChefHat,
-      label: t('aiGenerator') || 'AI生成器',
+      label: t('aiGenerator'),
     },
     {
       path: '/profile',
       icon: User,
-      label: t('myProfile') || '我的',
+      label: t('myProfile'),
     },
   ];
 

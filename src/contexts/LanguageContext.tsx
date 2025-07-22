@@ -176,7 +176,6 @@ const translations = {
     ingredientRemoved: 'Ingredient removed',
     
     // Messages
-    savedToFavorites: 'Meal combination saved to favorites!',
     linkCopied: 'Meal combination link copied to clipboard!',
     recipesGenerated: 'Recipes generated successfully!',
     recipesGenerationFailed: 'Failed to generate recipes. Please try again.',
@@ -193,9 +192,28 @@ const translations = {
     logout: 'Logout',
     email: 'Email',
     password: 'Password',
+    signIn: 'Sign In',
+    signUp: 'Sign Up',
+    signInSuccess: 'Sign in successful!',
+    signUpSuccess: 'Sign up successful!',
+    signInError: 'Sign in failed',
+    signUpError: 'Sign up failed',
+    signingIn: 'Signing in...',
+    signingUp: 'Signing up...',
+    signInDescription: 'Sign in with your account',
+    signUpDescription: 'Create a new account',
+    emailPlaceholder: 'Enter your email',
+    passwordPlaceholder: 'Enter your password',
+    authSubtitle: 'Start your culinary journey',
+    skipLogin: 'Skip login and try directly',
     loginSuccess: 'Login successful!',
     loginError: 'Login failed',
     logoutSuccess: 'Logout successful!',
+    
+    // Favorites
+    savedToFavorites: 'Saved to favorites!',
+    alreadyFavorited: 'Already favorited',
+    saveFavoriteFailed: 'Failed to save favorite',
     
     // Ingredients Bank
     ingredientsBank: 'Ingredients Bank',
@@ -272,7 +290,19 @@ const translations = {
     // Input guidance
     enterKeyTip: 'Tip: Press',
     enterKey: 'Enter',
-    toQuicklyAdd: 'to quickly add ingredients'
+    toQuicklyAdd: 'to quickly add ingredients',
+    
+    // Navigation  
+    aiGenerator: 'AI Generator',
+    myProfile: 'My Profile',
+    
+    // Additional Profile and other missing keys
+    loginToViewFavorites: 'Login to view your favorite recipes',
+    totalFavorites: 'Total Favorites',
+    recipes: 'recipes',
+    myFavorites: 'My Favorites', 
+    noFavorites: 'No favorite recipes yet',
+    more: 'more'
   },
   zh: {
     // App Title
@@ -439,7 +469,6 @@ const translations = {
     ingredientRemoved: '食材已移除',
     
     // Messages
-    savedToFavorites: '餐食组合已保存到收藏夹！',
     linkCopied: '餐食组合链接已复制到剪贴板！',
     recipesGenerated: '食谱生成成功！',
     recipesGenerationFailed: '生成食谱失败，请重试。',
@@ -456,9 +485,28 @@ const translations = {
     logout: '登出',
     email: '邮箱',
     password: '密码',
+    signIn: '登录',
+    signUp: '注册',
+    signInSuccess: '登录成功！',
+    signUpSuccess: '注册成功！',
+    signInError: '登录失败',
+    signUpError: '注册失败',
+    signingIn: '登录中...',
+    signingUp: '注册中...',
+    signInDescription: '使用您的账户登录',
+    signUpDescription: '创建新账户',
+    emailPlaceholder: '请输入邮箱',
+    passwordPlaceholder: '请输入密码',
+    authSubtitle: '开始您的美食之旅',
+    skipLogin: '跳过登录，直接体验',
     loginSuccess: '登录成功！',
     loginError: '登录失败',
     logoutSuccess: '登出成功！',
+    
+    // Favorites
+    savedToFavorites: '已收藏',
+    alreadyFavorited: '已经收藏过了',
+    saveFavoriteFailed: '收藏失败',
     
     // Ingredients Bank
     ingredientsBank: '食材银行',
@@ -535,7 +583,19 @@ const translations = {
     // Input guidance
     enterKeyTip: '💡 提示：按',
     enterKey: 'Enter',
-    toQuicklyAdd: '键快速添加食材'
+    toQuicklyAdd: '键快速添加食材',
+    
+    // Navigation
+    aiGenerator: 'AI生成器', 
+    myProfile: '我的',
+    
+    // Additional Profile and other missing keys
+    loginToViewFavorites: '登录后查看收藏的菜谱',
+    totalFavorites: '总收藏',
+    recipes: '个菜谱',
+    myFavorites: '我的收藏',
+    noFavorites: '还没有收藏的菜谱',
+    more: '更多'
   }
 };
 

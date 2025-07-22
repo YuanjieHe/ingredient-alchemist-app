@@ -179,9 +179,9 @@ const IngredientsBank = () => {
       }
       
       if (dbSaveCount > 0) {
-        toast.success(`${t('added') || '已添加'} ${uniqueIngredients.length} ${t('ingredientsToBank') || '种食材到银行'} (${t('savedToDatabase') || '已保存到数据库'})`);
+        toast.success(`${t('added')} ${uniqueIngredients.length} ${t('ingredientsToBank')} (${t('savedToDatabase')})`);
       } else {
-        toast.success(`${t('added') || '已添加'} ${uniqueIngredients.length} ${t('ingredientsToBank') || '种食材到银行'} (${t('localStorageOnly') || '仅本地存储'})`);
+        toast.success(`${t('added')} ${uniqueIngredients.length} ${t('ingredientsToBank')} (${t('localStorageOnly')})`);
       }
     }
   };
@@ -218,7 +218,7 @@ const IngredientsBank = () => {
     }
     
     setEditingIngredient(null);
-    toast.success(`${t('updated') || '已更新'} ${ingredientName}`);
+    toast.success(`${t('updated')} ${ingredientName}`);
   };
 
   const removeFromBank = async (ingredientName: string) => {
@@ -233,7 +233,7 @@ const IngredientsBank = () => {
     // Try to remove from database
     await removeIngredientFromDatabase(ingredientName);
     
-    toast.success(`${t('removed') || '已移除'} ${ingredientName}`);
+    toast.success(`${t('removed')} ${ingredientName}`);
   };
 
   const toggleIngredientSelection = (ingredient: IngredientWithQuantity) => {
@@ -254,7 +254,7 @@ const IngredientsBank = () => {
   };
 
   const handleCookWithSelected = () => {
-    toast.success(t('navigatingToRecipeGenerator') || '正在跳转到食谱生成器');
+    toast.success(t('navigatingToRecipeGenerator'));
     navigate('/');
   };
 

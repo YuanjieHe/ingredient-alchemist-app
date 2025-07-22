@@ -164,25 +164,25 @@ export default function Profile() {
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2">
               <User className="w-6 h-6" />
-              {t('myProfile') || '我的'}
+              {t('myProfile')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {!showLogin ? (
               <div className="text-center space-y-4">
                 <p className="text-muted-foreground">
-                  {t('loginToViewFavorites') || '登录后查看收藏的菜谱'}
+                  {t('loginToViewFavorites')}
                 </p>
                 <Button onClick={() => navigate('/auth')} className="w-full">
                   <LogIn className="w-4 h-4 mr-2" />
-                  {t('login') || '登录'}
+                  {t('login')}
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleAuth} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    {t('email') || '邮箱'}
+                    {t('email')}
                   </label>
                   <input
                     type="email"
@@ -194,7 +194,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    {t('password') || '密码'}
+                    {t('password')}
                   </label>
                   <input
                     type="password"
@@ -205,8 +205,8 @@ export default function Profile() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={authLoading}>
-                  {authLoading ? t('loading') || '加载中...' : 
-                   isSignUp ? t('signUp') || '注册' : t('login') || '登录'}
+                  {authLoading ? t('loading') : 
+                   isSignUp ? t('signUp') : t('login')}
                 </Button>
                 <div className="text-center">
                   <button
@@ -223,7 +223,7 @@ export default function Profile() {
                   onClick={() => setShowLogin(false)}
                   className="w-full"
                 >
-                  {t('cancel') || '取消'}
+                  {t('cancel')}
                 </Button>
               </form>
             )}
@@ -241,18 +241,18 @@ export default function Profile() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <User className="w-6 h-6" />
-              {t('myProfile') || '我的'}
+              {t('myProfile')}
             </CardTitle>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
-              {t('logout') || '退出登录'}
+              {t('logout')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">{user.email}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {t('totalFavorites') || '总收藏'}: {favorites.length} {t('recipes') || '个菜谱'}
+            {t('totalFavorites')}: {favorites.length} {t('recipes')}
           </p>
         </CardContent>
       </Card>
@@ -262,17 +262,17 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Heart className="w-6 h-6 text-red-500" />
-            {t('myFavorites') || '我的收藏'}
+            {t('myFavorites')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <p className="text-center py-8 text-muted-foreground">
-              {t('loading') || '加载中...'}
+              {t('loading')}
             </p>
           ) : favorites.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">
-              {t('noFavorites') || '还没有收藏的菜谱'}
+              {t('noFavorites')}
             </p>
           ) : (
             <div className="space-y-4">
@@ -327,7 +327,7 @@ export default function Profile() {
                       <div className="mb-3">
                         <h4 className="font-medium mb-2 flex items-center">
                           <Utensils className="w-4 h-4 mr-1" />
-                          {t('ingredients') || '食材'}
+                          {t('ingredients')}
                         </h4>
                         <div className="grid grid-cols-2 gap-1 text-sm">
                           {recipe.ingredients.slice(0, 6).map((ingredient, index) => (
@@ -337,7 +337,7 @@ export default function Profile() {
                           ))}
                           {recipe.ingredients.length > 6 && (
                             <div className="text-muted-foreground">
-                              +{recipe.ingredients.length - 6} {t('more') || '更多...'}
+                              +{recipe.ingredients.length - 6} {t('more')}
                             </div>
                           )}
                         </div>

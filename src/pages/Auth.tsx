@@ -28,11 +28,11 @@ const Auth = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success(t('signInSuccess') || '登录成功');
+        toast.success(t('signInSuccess'));
         navigate('/');
       }
     } catch (error) {
-      toast.error(t('signInError') || '登录失败');
+      toast.error(t('signInError'));
     } finally {
       setLoading(false);
     }
@@ -47,11 +47,11 @@ const Auth = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success(t('signUpSuccess') || '注册成功');
+        toast.success(t('signUpSuccess'));
         navigate('/');
       }
     } catch (error) {
-      toast.error(t('signUpError') || '注册失败');
+      toast.error(t('signUpError'));
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const Auth = () => {
             <ChefHat className="w-8 h-8 text-primary" />
             <h1 className="text-3xl font-bold">{t('appTitle')}</h1>
           </div>
-          <p className="text-muted-foreground">{t('authSubtitle') || '开始您的美食之旅'}</p>
+          <p className="text-muted-foreground">{t('authSubtitle')}</p>
         </div>
 
         <Card>
@@ -81,71 +81,71 @@ const Auth = () => {
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">{t('signIn') || '登录'}</TabsTrigger>
-                <TabsTrigger value="signup">{t('signUp') || '注册'}</TabsTrigger>
+                <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
+                <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4 mt-6">
                 <CardHeader className="px-0 pb-4">
-                  <CardTitle className="text-xl">{t('signIn') || '登录'}</CardTitle>
+                  <CardTitle className="text-xl">{t('signIn')}</CardTitle>
                   <CardDescription>
-                    {t('signInDescription') || '使用您的账户登录'}
+                    {t('signInDescription')}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">{t('email') || '邮箱'}</Label>
+                    <Label htmlFor="signin-email">{t('email')}</Label>
                     <Input
                       id="signin-email"
                       type="email"
-                      placeholder={t('emailPlaceholder') || '请输入邮箱'}
+                      placeholder={t('emailPlaceholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">{t('password') || '密码'}</Label>
+                    <Label htmlFor="signin-password">{t('password')}</Label>
                     <Input
                       id="signin-password"
                       type="password"
-                      placeholder={t('passwordPlaceholder') || '请输入密码'}
+                      placeholder={t('passwordPlaceholder')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (t('signingIn') || '登录中...') : (t('signIn') || '登录')}
+                    {loading ? t('signingIn') : t('signIn')}
                   </Button>
                 </form>
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <CardHeader className="px-0 pb-4">
-                  <CardTitle className="text-xl">{t('signUp') || '注册'}</CardTitle>
+                  <CardTitle className="text-xl">{t('signUp')}</CardTitle>
                   <CardDescription>
-                    {t('signUpDescription') || '创建新账户'}
+                    {t('signUpDescription')}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">{t('email') || '邮箱'}</Label>
+                    <Label htmlFor="signup-email">{t('email')}</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder={t('emailPlaceholder') || '请输入邮箱'}
+                      placeholder={t('emailPlaceholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t('password') || '密码'}</Label>
+                    <Label htmlFor="signup-password">{t('password')}</Label>
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder={t('passwordPlaceholder') || '请输入密码（至少6位）'}
+                      placeholder={t('passwordPlaceholder')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -153,7 +153,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (t('signingUp') || '注册中...') : (t('signUp') || '注册')}
+                    {loading ? t('signingUp') : t('signUp')}
                   </Button>
                 </form>
               </TabsContent>
@@ -166,7 +166,7 @@ const Auth = () => {
                 className="w-full text-muted-foreground"
               >
                 <ArrowRight className="w-4 h-4 mr-2" />
-                {t('skipLogin') || '跳过登录，直接体验'}
+                {t('skipLogin')}
               </Button>
             </div>
           </CardContent>

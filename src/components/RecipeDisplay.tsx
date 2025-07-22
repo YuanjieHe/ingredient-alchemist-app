@@ -75,7 +75,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const handleSave = async (recipe: Recipe) => {
     if (!user) {
-      toast.error(t('loginRequired') || '请先登录');
+      toast.error(t('loginRequired'));
       return;
     }
 
@@ -91,13 +91,13 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
       if (error) throw error;
       
       onSaveRecipe?.(recipe);
-      toast.success(t('savedToFavorites') || '已收藏');
+      toast.success(t('savedToFavorites'));
     } catch (error: any) {
       console.error('Error saving favorite:', error);
       if (error.code === '23505') {
-        toast.error(t('alreadyFavorited') || '已经收藏过了');
+        toast.error(t('alreadyFavorited'));
       } else {
-        toast.error(t('saveFavoriteFailed') || '收藏失败');
+        toast.error(t('saveFavoriteFailed'));
       }
     }
   };
@@ -256,7 +256,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
             </CardHeader>
 
             <CardContent className="p-6 space-y-6">
-              {/* 知识库参考 */}
+              {/* Traditional inspiration */}
               {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
@@ -283,7 +283,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
 
-              {/* 菜品搭配展示 */}
+              {/* Meal combination display */}
               {recipe.dishes && recipe.dishes.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
@@ -311,7 +311,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* 食材清单 */}
+              {/* Ingredients list */}
               <div>
                 <h4 className="font-semibold mb-3 flex items-center">
                   <Utensils className="w-4 h-4 mr-2 text-primary" />
