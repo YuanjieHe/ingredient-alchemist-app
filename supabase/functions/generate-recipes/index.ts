@@ -306,6 +306,9 @@ function createEnhancedPrompt(params: any) {
     knowledgeBaseInfo
   } = params;
 
+  // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
+  const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
+
   let knowledgeSection = '';
   
   if (knowledgeBaseInfo.matchedDishes.length > 0) {
@@ -331,8 +334,17 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  return `As a master ${cuisineType} chef, create ${mealDays} exciting and authentic ${cuisineType} recipes for ${mealType}, expertly using these ingredients: ${ingredients.join(', ')}.
+  return `🍽️ CRITICAL: Create a COMPLETE TABLE SETTING with ${dishCount} different dishes for ${peopleCount} people eating ${mealType}.
+
+As a master ${cuisineType} chef, create 1 RICH MEAL COMBINATION (NOT individual recipes) with ${dishCount} complementary dishes using these ingredients: ${ingredients.join(', ')}.
 ${knowledgeSection}
+
+🔥 MEAL COMPOSITION REQUIREMENTS (MANDATORY):
+- Total dishes: ${dishCount} different dishes for one complete meal
+- MUST include: 1-2 main dishes (荤菜/主菜) + 2-3 side dishes (素菜/配菜) + 1 soup/drink (汤/饮品)
+- Create a BALANCED TABLE that feeds ${peopleCount} people for ${mealType}
+- Each dish uses different cooking methods and ingredients
+- All dishes should complement each other in flavor and nutrition
 
 KEY REQUIREMENTS:
 - Skill level: ${skillLevel} (provide extremely detailed cooking techniques and precise instructions)
@@ -371,42 +383,50 @@ Format the response as a JSON array with this exact structure:
      ],
      "dishInstructions": [
        {
-         "dishName": "Main Dish Name",
+         "dishName": "【主菜】红烧排骨",
+         "type": "main",
          "steps": [
            {
              "stepNumber": 1,
              "title": "选材处理 (Ingredient Selection & Preparation)",
-             "description": "选用最优质的主料（具体规格和重量），冷水下锅加香料焯水去腥，煮沸后撇浮沫，食材冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧，包括尺寸规格、处理后应呈现的状态。解释为什么每个处理步骤对最终成品至关重要，描述处理过程中需要观察的变化和征象。",
+             "description": "选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。",
              "duration": "15 minutes",
-             "tips": "特殊技巧：品质好的食材无需过度处理，保持原味更佳。常见错误及避免方法，正确处理的判断标准。",
-             "imagePrompt": "Professional ${cuisineType} chef meticulously selecting and preparing ingredients with traditional tools"
-           },
+             "tips": "特殊技巧：品质好的排骨无需过度处理，保持原味更佳。",
+             "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
+           }
+         ]
+       },
+       {
+         "dishName": "【配菜】清炒时蔬",
+         "type": "side",
+         "steps": [
            {
-             "stepNumber": 2,
-             "title": "调色调味 (Color Development & Seasoning Base)",
-             "description": "冷锅放少量油，加糖（约具体克数）小火熬至特定颜色冒密泡，立即放入主料翻炒上色，此过程需控制在特定时间内以防发苦。详细描述火候控制、温度变化、颜色判断标准、翻炒手法、时间节点。包括感官指标如声音、气味、视觉变化等判断要点。",
-             "duration": "8 minutes",
-             "tips": "替代方案：可用其他调色方法替代传统糖色。火候控制技巧，颜色深浅的判断方法，常见问题的解决办法。",
-             "imagePrompt": "Close-up of perfect caramelization process showing proper color development and technique"
-           },
-           {
-             "stepNumber": 3,
-             "title": "调味焖煮 (Seasoning & Braising Process)",
-             "description": "加入香料（具体种类和用量）、调料（具体毫升数）翻炒。倒入开水（约毫升数）完全没过食材，大火煮沸后转小火加盖焖制特定时间，期间不揭盖。详细解释每种调料的作用、加入顺序、火候变化节点、焖制过程中的物理化学变化。",
-             "duration": "40 minutes",
-             "tips": "焖制过程中的关键控制点，如何判断火候是否合适，时间控制的重要性，中途检查的方法。",
-             "imagePrompt": "Traditional braising technique showing proper heat control and ingredient ratios"
-           },
-           {
-             "stepNumber": 4,
-             "title": "收汁定型 (Sauce Reduction & Final Presentation)",
-             "description": "开盖加盐调底味，转中火收汁至浓稠，最后沿锅边淋料酒增香。详细说明收汁的火候控制、浓稠度判断、调味的平衡技巧、摆盘的传统方法。解释如何检查成熟度并进行最终调整。",
+             "stepNumber": 1,
+             "title": "蔬菜清洗与切配",
+             "description": "详细的蔬菜处理步骤，包括清洗、切配、调味准备。",
              "duration": "10 minutes",
-             "tips": "收汁过程的关键控制点，浓稠度的专业判断标准，摆盘技巧，保温和服务温度要求。",
-             "imagePrompt": "Master chef performing final sauce reduction and traditional plating technique"
+             "tips": "蔬菜切配的技巧和要点。"
+           }
+         ]
+       },
+       {
+         "dishName": "【汤品】紫菜蛋花汤",
+         "type": "soup",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "汤品制作",
+             "description": "详细的汤品制作步骤，包括水量、调味、火候控制。",
+             "duration": "12 minutes",
+             "tips": "汤品制作的关键要点。"
            }
          ]
        }
+     ],
+     "dishes": [
+       {"name": "红烧排骨", "type": "main", "description": "香甜软糯的主菜"},
+       {"name": "清炒时蔬", "type": "side", "description": "清爽解腻的配菜"},
+       {"name": "紫菜蛋花汤", "type": "soup", "description": "营养丰富的汤品"}
      ],
      "coordinationTips": [
        "提前备料，按传统${cuisineType}技法处理所有食材确保烹饪流程顺畅",
