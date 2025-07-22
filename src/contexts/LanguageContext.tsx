@@ -267,7 +267,12 @@ const translations = {
     localStorageOnly: 'local storage only',
     updated: 'Updated',
     removed: 'Removed',
-    navigatingToRecipeGenerator: 'Navigating to recipe generator'
+    navigatingToRecipeGenerator: 'Navigating to recipe generator',
+    
+    // Input guidance
+    enterKeyTip: 'Tip: Press',
+    enterKey: 'Enter',
+    toQuicklyAdd: 'to quickly add ingredients'
   },
   zh: {
     // App Title
@@ -525,7 +530,12 @@ const translations = {
     localStorageOnly: '仅本地存储',
     updated: '已更新',
     removed: '已移除',
-    navigatingToRecipeGenerator: '正在跳转到食谱生成器'
+    navigatingToRecipeGenerator: '正在跳转到食谱生成器',
+    
+    // Input guidance
+    enterKeyTip: '💡 提示：按',
+    enterKey: 'Enter',
+    toQuicklyAdd: '键快速添加食材'
   }
 };
 

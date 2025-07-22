@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface IngredientInputProps {
   ingredients: string[];
@@ -13,6 +14,7 @@ interface IngredientInputProps {
 }
 
 export const IngredientInput = ({ ingredients, onIngredientsChange }: IngredientInputProps) => {
+  const { t } = useLanguage();
   const [newIngredient, setNewIngredient] = useState('');
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,7 +171,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            💡 Tip: Press <kbd className="px-1.5 py-0.5 text-xs font-semibold text-foreground bg-muted border border-border rounded">Enter</kbd> to quickly add ingredients
+            {t('enterKeyTip')} <kbd className="px-1.5 py-0.5 text-xs font-semibold text-foreground bg-muted border border-border rounded">{t('enterKey')}</kbd> {t('toQuicklyAdd')}
           </p>
         </div>
 
