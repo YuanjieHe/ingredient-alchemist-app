@@ -16,7 +16,6 @@ export interface Recipe {
   difficulty: string;
   mealType?: string;
   dishes?: Dish[];
-  imageUrl?: string;
   ingredients: Array<{
     item: string;
     amount: string;
@@ -30,8 +29,6 @@ export interface Recipe {
     description: string;
     duration: string;
     tips?: string;
-    imagePrompt?: string;
-    imageUrl?: string;
   }>;
   tips?: string[];
   nutritionInfo?: {
@@ -120,8 +117,6 @@ export class RecipeService {
           nutritionInfo: recipe.nutritionInfo
         }));
         
-        // Generate images for recipes
-        await this.generateRecipeImages(convertedRecipes, request.cuisineType);
         
         return convertedRecipes;
       } else {
@@ -255,16 +250,14 @@ Please respond with meal plans in this JSON format:
           "title": "Preparation Phase",
           "description": "Detailed step-by-step description of what to do, including exact measurements, techniques, and timing. Be very specific about cutting techniques, temperatures, and cooking methods.",
           "duration": "5-10 minutes",
-          "tips": "Pro tip for this specific step",
-          "imagePrompt": "A realistic cooking photo showing the preparation stage with ingredients laid out on a clean kitchen counter, proper lighting, professional food photography style"
+          "tips": "Pro tip for this specific step"
         },
         {
           "stepNumber": 2,
           "title": "Cooking Phase",
           "description": "Very detailed cooking instructions with specific temperatures, timing, and visual cues to look for. Include what the food should look, smell, and sound like.",
           "duration": "15-20 minutes",
-          "tips": "Important cooking tip for this step",
-          "imagePrompt": "A realistic cooking photo showing the cooking process in action, with proper lighting and professional food photography style"
+          "tips": "Important cooking tip for this step"
         }
       ],
       "tips": [
@@ -344,9 +337,6 @@ Important Guidelines:
         nutritionInfo: recipe.nutritionInfo
       }));
 
-      // Generate images for detailed steps and recipe main images  
-      await this.generateStepImages(parsedRecipes);
-      await this.generateRecipeImages(parsedRecipes, 'Chinese');
       
       return parsedRecipes;
     } catch (error) {
@@ -362,29 +352,6 @@ Important Guidelines:
     }
   }
 
-  private async generateStepImages(recipes: Recipe[]): Promise<void> {
-    // For now, we'll skip image generation and just add placeholder URLs
-    // In a real implementation, you would call an image generation API here
-    for (const recipe of recipes) {
-      if (recipe.detailedSteps) {
-        for (const step of recipe.detailedSteps) {
-          if (step.imagePrompt) {
-            // For now, use a placeholder. In production, generate images using AI
-            step.imageUrl = `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center`;
-          }
-        }
-      }
-    }
-  }
-
-  private async generateRecipeImages(recipes: Recipe[], cuisineType: string): Promise<void> {
-    // 暂时隐藏AI生成图片功能，使用占位图片
-    for (const recipe of recipes) {
-      // 使用菜谱相关的占位图片
-      recipe.imageUrl = `https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop&crop=center`;
-      console.log(`Using placeholder image for: ${recipe.title}`);
-    }
-  }
 
   private processIngredients(ingredients: any[], availableIngredients: string[]): Array<{item: string, amount: string, needed?: boolean, usedIn?: string}> {
     return ingredients.map(ing => {
