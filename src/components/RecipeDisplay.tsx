@@ -125,53 +125,93 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const handleCookRecipe = async (recipe: Recipe) => {
     try {
-      // Get current ingredients from localStorage
-      const bankIngredients = localStorage.getItem('ingredientsBank');
+      // Get current ingredients from localStorage and Supabase
       let currentIngredients: any[] = [];
       
-      if (bankIngredients) {
-        currentIngredients = JSON.parse(bankIngredients);
+      if (user) {
+        // Get from Supabase for authenticated users
+        const { data: bankData, error } = await supabase
+          .from('ingredients_bank')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        currentIngredients = bankData || [];
+      } else {
+        // Get from localStorage for non-authenticated users
+        const bankIngredients = localStorage.getItem('ingredientsBank');
+        if (bankIngredients) {
+          currentIngredients = JSON.parse(bankIngredients);
+        }
       }
 
-      // Track ingredients that couldn't be deducted
+      // Track ingredients that were used and missing
+      const usedIngredients: string[] = [];
       const missingIngredients: string[] = [];
       
       // Deduct recipe ingredients from bank
       const updatedIngredients = currentIngredients.map(ingredient => {
-        const recipeIngredient = recipe.ingredients.find(ri => 
-          ri.item.toLowerCase().includes(ingredient.name.toLowerCase()) ||
-          ingredient.name.toLowerCase().includes(ri.item.toLowerCase())
-        );
+        const recipeIngredient = recipe.ingredients.find(ri => {
+          // More precise matching
+          const itemName = ri.item.toLowerCase().trim();
+          const ingredientName = ingredient.name.toLowerCase().trim();
+          return itemName.includes(ingredientName) || 
+                 ingredientName.includes(itemName) ||
+                 itemName === ingredientName;
+        });
         
         if (recipeIngredient) {
-          const newQuantity = Math.max(0, ingredient.quantity - 1);
-          if (newQuantity === 0 && ingredient.quantity > 0) {
+          // Parse amount to get numeric value (simple parsing)
+          let amountNeeded = 1; // default to 1 if can't parse
+          const amountMatch = recipeIngredient.amount.match(/(\d+\.?\d*)/);
+          if (amountMatch) {
+            amountNeeded = Math.max(1, Math.ceil(parseFloat(amountMatch[1]) / 100)); // Convert to reasonable units
+          }
+          
+          const currentQty = Number(ingredient.quantity) || 0;
+          const newQuantity = Math.max(0, currentQty - amountNeeded);
+          
+          if (currentQty >= amountNeeded) {
+            usedIngredients.push(`${ingredient.name} (${amountNeeded}${ingredient.unit || ''})`);
+          } else if (currentQty > 0) {
+            usedIngredients.push(`${ingredient.name} (${currentQty}${ingredient.unit || ''}, 不足)`);
+            missingIngredients.push(ingredient.name);
+          } else {
             missingIngredients.push(ingredient.name);
           }
+          
           return { ...ingredient, quantity: newQuantity };
         }
         return ingredient;
       });
 
-      // Save to localStorage
-      localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
-
-      // Update Supabase if user is authenticated
+      // Update storage
       if (user) {
+        // Update Supabase for authenticated users
         for (const ingredient of updatedIngredients) {
-          await supabase
-            .from('ingredients_bank')
-            .update({ quantity: ingredient.quantity })
-            .eq('user_id', user.id)
-            .eq('name', ingredient.name);
+          if (ingredient.quantity !== currentIngredients.find(ci => ci.id === ingredient.id)?.quantity) {
+            await supabase
+              .from('ingredients_bank')
+              .update({ quantity: ingredient.quantity })
+              .eq('id', ingredient.id);
+          }
         }
+      } else {
+        // Update localStorage for non-authenticated users
+        localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
       }
 
-      if (missingIngredients.length > 0) {
-        toast.success(t('recipeCooked') + ' ' + t('someIngredientsUsedUp'));
+      // Show appropriate success message
+      if (usedIngredients.length > 0) {
+        if (missingIngredients.length > 0) {
+          toast.success(`${t('recipeCooked')} 使用了: ${usedIngredients.join(', ')}。部分食材不足: ${missingIngredients.join(', ')}`);
+        } else {
+          toast.success(`${t('recipeCooked')} 使用了: ${usedIngredients.join(', ')}`);
+        }
       } else {
-        toast.success(t('recipeCooked'));
+        toast.warning('没有找到匹配的食材可以扣除');
       }
+      
     } catch (error) {
       console.error('Error cooking recipe:', error);
       toast.error(t('cookingFailed'));
