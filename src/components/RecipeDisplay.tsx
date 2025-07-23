@@ -2,16 +2,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 
 interface Dish {
   name: string;
   type: 'main' | 'side' | 'soup';
   description: string;
+  ingredients?: Array<{
+    item: string;
+    amount: string;
+    needed?: boolean;
+  }>;
+  instructions?: string[];
+  detailedSteps?: Array<{
+    stepNumber: number;
+    title: string;
+    description: string;
+    duration: string;
+    tips?: string;
+  }>;
 }
 
 interface Recipe {
@@ -60,6 +75,7 @@ interface RecipeDisplayProps {
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const [selectedDishes, setSelectedDishes] = useState<{[key: string]: string}>({});
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -298,29 +314,105 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
 
-              {/* Meal combination display */}
+              {/* Meal combination display with tabs */}
               {recipe.dishes && recipe.dishes.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
                     <Coffee className="w-4 h-4 mr-2 text-primary" />
                     {t('mealCombination')}
                   </h4>
-                  <div className="grid gap-3">
+                  <Tabs 
+                    value={selectedDishes[recipe.id] || recipe.dishes[0]?.name} 
+                    onValueChange={(value) => setSelectedDishes(prev => ({ ...prev, [recipe.id]: value }))}
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+                      {recipe.dishes.map((dish, index) => (
+                        <TabsTrigger key={index} value={dish.name} className="text-sm">
+                          <span className="mr-2">{getDishIcon(dish.type)}</span>
+                          {dish.name}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                    
                     {recipe.dishes.map((dish, index) => (
-                      <div key={index} className="flex items-center p-3 bg-cooking-cream rounded-lg">
-                        <div className="text-2xl mr-3">{getDishIcon(dish.type)}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="font-medium">{dish.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {getDishTypeText(dish.type)}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{dish.description}</p>
-                        </div>
-                      </div>
+                      <TabsContent key={index} value={dish.name} className="mt-4">
+                        <Card className="bg-cooking-cream/50">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-2xl">{getDishIcon(dish.type)}</span>
+                              <div>
+                                <CardTitle className="text-lg">{dish.name}</CardTitle>
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {getDishTypeText(dish.type)}
+                                </Badge>
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-2">{dish.description}</p>
+                          </CardHeader>
+                          
+                          {/* Dish-specific ingredients */}
+                          {dish.ingredients && dish.ingredients.length > 0 && (
+                            <CardContent className="pt-0">
+                              <h5 className="font-medium mb-2 text-sm">{t('ingredients')}:</h5>
+                              <div className="grid gap-1">
+                                {dish.ingredients.map((ingredient, idx) => (
+                                  <div key={idx} className="flex justify-between items-center text-xs p-2 bg-white/50 rounded">
+                                    <span>{ingredient.item}</span>
+                                    <span className="text-muted-foreground">{ingredient.amount}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          )}
+                          
+                          {/* Dish-specific instructions */}
+                          {dish.instructions && dish.instructions.length > 0 && (
+                            <CardContent className="pt-0">
+                              <h5 className="font-medium mb-2 text-sm">{t('instructions')}:</h5>
+                              <ol className="space-y-1">
+                                {dish.instructions.map((step, idx) => (
+                                  <li key={idx} className="flex space-x-2 text-xs">
+                                    <span className="flex-shrink-0 w-4 h-4 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-medium">
+                                      {idx + 1}
+                                    </span>
+                                    <span className="leading-relaxed">{step}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                            </CardContent>
+                          )}
+                          
+                          {/* Dish-specific detailed steps */}
+                          {dish.detailedSteps && dish.detailedSteps.length > 0 && (
+                            <CardContent className="pt-0">
+                              <h5 className="font-medium mb-2 text-sm">{t('detailedSteps')}:</h5>
+                              <div className="space-y-2">
+                                {dish.detailedSteps.map((step, idx) => (
+                                  <div key={idx} className="p-2 bg-white/50 rounded">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                                        {step.stepNumber}
+                                      </span>
+                                      <span className="font-medium text-sm">{step.title}</span>
+                                      <span className="text-xs text-muted-foreground">({step.duration})</span>
+                                    </div>
+                                    <p className="text-xs leading-relaxed ml-7">{step.description}</p>
+                                    {step.tips && (
+                                      <div className="ml-7 mt-1 p-1 bg-cooking-herb/10 rounded text-xs">
+                                        <span className="font-medium">💡 {t('tip')}: </span>
+                                        {step.tips}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          )}
+                        </Card>
+                      </TabsContent>
                     ))}
-                  </div>
+                  </Tabs>
                 </div>
               )}
 
