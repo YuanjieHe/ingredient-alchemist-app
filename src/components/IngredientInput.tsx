@@ -3,10 +3,53 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Camera, Upload, Plus, X } from 'lucide-react';
+import { Camera, Upload, Plus, X, Beef, Fish, Wheat, Apple, Carrot, Egg, Milk } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// 食材图标映射
+const getIngredientIcon = (ingredient: string) => {
+  const lowerIngredient = ingredient.toLowerCase();
+  
+  // 中英文食材映射
+  const ingredientIconMap: { [key: string]: any } = {
+    // 肉类
+    '牛肉': Beef, '猪肉': Beef, '羊肉': Beef, '鸡肉': Beef, '肉': Beef,
+    'beef': Beef, 'pork': Beef, 'lamb': Beef, 'chicken': Beef, 'meat': Beef,
+    
+    // 海鲜
+    '鱼': Fish, '虾': Fish, '蟹': Fish, '鱿鱼': Fish, '章鱼': Fish, '海鲜': Fish,
+    'fish': Fish, 'shrimp': Fish, 'crab': Fish, 'squid': Fish, 'seafood': Fish,
+    
+    // 蔬菜
+    '胡萝卜': Carrot, '萝卜': Carrot, '白萝卜': Carrot, '青萝卜': Carrot,
+    'carrot': Carrot, 'radish': Carrot,
+    '土豆': Apple, '番茄': Apple, '西红柿': Apple, '黄瓜': Apple, '茄子': Apple,
+    'potato': Apple, 'tomato': Apple, 'cucumber': Apple, 'eggplant': Apple,
+    
+    // 水果
+    '苹果': Apple, '香蕉': Apple, '橙子': Apple, '柠檬': Apple, '葡萄': Apple,
+    'apple': Apple, 'banana': Apple, 'orange': Apple, 'lemon': Apple, 'grape': Apple,
+    
+    // 谷物
+    '大米': Wheat, '面粉': Wheat, '小麦': Wheat, '燕麦': Wheat, '玉米': Wheat,
+    'rice': Wheat, 'flour': Wheat, 'wheat': Wheat, 'oats': Wheat, 'corn': Wheat,
+    
+    // 蛋奶类
+    '鸡蛋': Egg, '蛋': Egg, '牛奶': Milk, '奶': Milk, '酸奶': Milk, '奶酪': Milk,
+    'egg': Egg, 'milk': Milk, 'yogurt': Milk, 'cheese': Milk
+  };
+
+  // 寻找匹配的食材
+  for (const [key, icon] of Object.entries(ingredientIconMap)) {
+    if (lowerIngredient.includes(key) || key.includes(lowerIngredient)) {
+      return icon;
+    }
+  }
+  
+  return null; // 没有找到匹配的图标
+};
 
 interface IngredientInputProps {
   ingredients: string[];
@@ -180,21 +223,25 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
           <div className="space-y-3">
             <h4 className="font-medium text-foreground">{t('yourIngredients')}</h4>
             <div className="flex flex-wrap gap-2">
-              {ingredients.map((ingredient, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="bg-cooking-warm text-foreground hover:bg-cooking-spice hover:text-white transition-colors px-3 py-1 text-sm"
-                >
-                  {ingredient}
-                  <button
-                    onClick={() => removeIngredient(ingredient)}
-                    className="ml-2 hover:text-destructive transition-colors"
+              {ingredients.map((ingredient, index) => {
+                const IconComponent = getIngredientIcon(ingredient);
+                return (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="bg-cooking-warm text-foreground hover:bg-cooking-spice hover:text-white transition-colors px-3 py-1 text-sm flex items-center gap-1.5"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
+                    {IconComponent && <IconComponent className="w-3.5 h-3.5" />}
+                    {ingredient}
+                    <button
+                      onClick={() => removeIngredient(ingredient)}
+                      className="ml-1 hover:text-destructive transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
             </div>
           </div>
         )}
