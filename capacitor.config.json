@@ -1,0 +1,14 @@
+{
+  "appId": "app.lovable.f942c7238b404d27a27117c79f073062",
+  "appName": "what2cook",
+  "webDir": "dist",
+  "server": {
+    "url": "https://f942c723-8b40-4d27-a271-17c79f073062.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "CapacitorPurchases": {
+      "apiKey": "YOUR_REVENUECAT_API_KEY"
+    }
+  }
+}

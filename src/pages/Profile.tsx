@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn, Crown, Star } from 'lucide-react';
+import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn, Crown, Star, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { ApplePaymentService } from '@/services/applePaymentService';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Recipe {
@@ -171,27 +172,54 @@ export default function Profile() {
     setPaymentLoading(true);
 
     try {
-      // 调用 Stripe 创建检出会话
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-        body: { planType }
-      });
-
-      if (checkoutError) {
-        throw new Error(checkoutError.message);
-      }
-
-      if (checkoutData?.url) {
-        // 重定向到 Stripe 支付页面
-        window.location.href = checkoutData.url;
+      const applePaymentService = ApplePaymentService.getInstance();
+      
+      // 优先使用Apple支付（如果在iOS设备上）
+      if (applePaymentService.isApplePayAvailable()) {
+        toast.info('正在启动Apple内购...');
+        
+        const result = await applePaymentService.purchaseProduct(planType);
+        
+        if (result.success && result.transactionId) {
+          toast.success('购买成功！欢迎成为高级会员！');
+          // 刷新页面数据
+          window.location.reload();
+        } else if (result.error === 'Redirected to web payment') {
+          toast.info('已跳转到网页支付');
+        } else {
+          throw new Error(result.error || '购买失败');
+        }
       } else {
-        throw new Error('未能创建支付链接');
+        // 非iOS设备使用Stripe支付
+        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+          body: { planType }
+        });
+
+        if (checkoutError) {
+          throw new Error(checkoutError.message);
+        }
+
+        if (checkoutData?.url) {
+          // 在新标签页打开支付页面
+          window.open(checkoutData.url, '_blank');
+          toast.info('已在新标签页打开支付页面');
+        } else {
+          throw new Error('未能创建支付链接');
+        }
       }
     } catch (error: any) {
       console.error('Purchase error:', error);
       toast.error(`购买失败: ${error.message || '请重试'}`);
+    } finally {
       setPaymentLoading(false);
       setSelectedPlan(null);
     }
+  };
+
+  // 恢复购买功能
+  const handleRestorePurchases = async () => {
+    const applePaymentService = ApplePaymentService.getInstance();
+    await applePaymentService.restorePurchases();
   };
 
   // 检查 URL 参数，显示支付结果
@@ -467,6 +495,19 @@ export default function Profile() {
                           </Button>
                         </CardContent>
                       </Card>
+                    </div>
+                    
+                    {/* iOS恢复购买按钮 */}
+                    <div className="mt-4 flex justify-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleRestorePurchases}
+                        className="flex items-center gap-2"
+                      >
+                        <Smartphone className="w-4 h-4" />
+                        恢复购买 (iOS)
+                      </Button>
                     </div>
                     
                     <div className="mt-4 p-3 bg-muted rounded-lg">
