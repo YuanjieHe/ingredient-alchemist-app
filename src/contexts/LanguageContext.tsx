@@ -158,6 +158,8 @@ const translations = {
     
     // Common
     add: 'Add',
+    more: 'more',
+    mainIngredients: 'Main Ingredients',
     cancel: 'Cancel',
     save: 'Save',
     delete: 'Delete',
@@ -318,8 +320,7 @@ const translations = {
     totalFavorites: 'Total Favorites',
     recipes: 'recipes',
     myFavorites: 'My Favorites', 
-    noFavorites: 'No favorite recipes yet',
-    more: 'more'
+    noFavorites: 'No favorite recipes yet'
   },
   zh: {
     // App Title
@@ -468,6 +469,8 @@ const translations = {
     
     // Common
     add: '添加',
+    more: '更多',
+    mainIngredients: '主要食材',
     cancel: '取消',
     save: '保存',
     delete: '删除',
@@ -628,8 +631,7 @@ const translations = {
     totalFavorites: '总收藏',
     recipes: '个菜谱',
     myFavorites: '我的收藏',
-    noFavorites: '还没有收藏的菜谱',
-    more: '更多'
+    noFavorites: '还没有收藏的菜谱'
   }
 };
 

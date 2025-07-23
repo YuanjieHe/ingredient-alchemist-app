@@ -60,6 +60,7 @@ interface RecipeDisplayProps {
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -199,299 +200,319 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="space-y-8">
         {recipes.map((recipe) => (
-          <Card 
-            key={recipe.id} 
-            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
-            onClick={() => {
-              // Store recipe in localStorage for detailed view
-              localStorage.setItem('selectedRecipe', JSON.stringify(recipe));
-              // Navigate to recipe detail page
-              window.location.href = `/recipe/${recipe.id}`;
-            }}
-          >
-            {/* Recipe Image */}
-            {recipe.imageUrl && (
-              <div className="w-full h-64 overflow-hidden">
-                <img 
-                  src={recipe.imageUrl} 
-                  alt={recipe.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <CardHeader className="bg-gradient-warm">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-xl mb-2">{recipe.title}</CardTitle>
-                  <p className="text-muted-foreground text-sm">{recipe.description}</p>
+          <div key={recipe.id} className="space-y-4">
+            {/* If recipe has dishes, show them as separate cards */}
+            {recipe.dishes && recipe.dishes.length > 0 ? (
+              <div className="space-y-4">
+                <div className="text-center mb-4">
+                  <h3 className="text-lg font-semibold text-muted-foreground">
+                    {recipe.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{recipe.description}</p>
                 </div>
-                <div className="flex space-x-2 ml-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSave(recipe);
-                    }}
-                    className="hover:bg-white/20"
-                  >
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShare(recipe);
-                    }}
-                    className="hover:bg-white/20"
-                  >
-                    <Share className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                <Badge className={getDifficultyColor(recipe.difficulty)}>
-                  <ChefHat className="w-3 h-3 mr-1" />
-                  {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
-                </Badge>
-                <Badge variant="secondary">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {recipe.prepTime + recipe.cookTime} {t('min')}
-                </Badge>
-                <Badge variant="secondary">
-                  <Users className="w-3 h-3 mr-1" />
-                  {recipe.servings} {t('servings')}
-                </Badge>
-              </div>
-            </CardHeader>
-
-            <CardContent className="p-6 space-y-6">
-              {/* Traditional inspiration */}
-              {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3 flex items-center">
-                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
-                    {t('traditionalInspiration')}
-                  </h4>
-                  <div className="bg-gradient-subtle p-4 rounded-lg border">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {t('thisRecipeInspiredBy')}:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {recipe.knowledgeBaseReferences.map((ref, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          🍜 {ref}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {t('enhancedWithKnowledgeBase')}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
-
-              {/* Meal combination display */}
-              {recipe.dishes && recipe.dishes.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3 flex items-center">
-                    <Coffee className="w-4 h-4 mr-2 text-primary" />
-                    {t('mealCombination')}
-                  </h4>
-                  <div className="grid gap-3">
-                    {recipe.dishes.map((dish, index) => (
-                      <div key={index} className="flex items-center p-3 bg-cooking-cream rounded-lg">
-                        <div className="text-2xl mr-3">{getDishIcon(dish.type)}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="font-medium">{dish.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {getDishTypeText(dish.type)}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{dish.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <Separator />
-
-              {/* Ingredients list */}
-              <div>
-                <h4 className="font-semibold mb-3 flex items-center">
-                  <Utensils className="w-4 h-4 mr-2 text-primary" />
-                  {t('requiredIngredients')}
-                </h4>
-                <div className="grid gap-2">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <div
-                      key={index}
-                      className={`
-                        flex justify-between items-center p-3 rounded-md
-                        ${ingredient.needed 
-                          ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-800' 
-                          : 'bg-muted'
-                        }
-                      `}
+                
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {recipe.dishes.map((dish, dishIndex) => (
+                    <Card 
+                      key={`${recipe.id}-${dishIndex}`} 
+                      className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
+                      onClick={() => {
+                        // Create a sub-recipe for this dish
+                        const dishRecipe = {
+                          ...recipe,
+                          id: `${recipe.id}-dish-${dishIndex}`,
+                          title: dish.name,
+                          description: dish.description,
+                          dishes: [dish],
+                          // Filter ingredients for this dish
+                          ingredients: recipe.ingredients.filter(ing => 
+                            !ing.usedIn || ing.usedIn === dish.name
+                          )
+                        };
+                        localStorage.setItem('selectedRecipe', JSON.stringify(dishRecipe));
+                        window.location.href = `/recipe/${dishRecipe.id}`;
+                      }}
                     >
-                      <div className="flex-1">
-                        <span className="font-medium">{ingredient.item}</span>
-                        {ingredient.usedIn && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({ingredient.usedIn})
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-muted-foreground">{ingredient.amount}</span>
-                        {ingredient.needed && (
-                          <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
-                            {t('needToBuy')}
+                      <CardHeader className="bg-gradient-warm pb-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="text-2xl">{getDishIcon(dish.type)}</span>
+                              <CardTitle className="text-lg">{dish.name}</CardTitle>
+                            </div>
+                            <p className="text-muted-foreground text-sm">{dish.description}</p>
+                          </div>
+                          <div className="flex space-x-1 ml-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const dishRecipe = {
+                                  ...recipe,
+                                  id: `${recipe.id}-dish-${dishIndex}`,
+                                  title: dish.name,
+                                  description: dish.description,
+                                  dishes: [dish]
+                                };
+                                handleSave(dishRecipe);
+                              }}
+                              className="hover:bg-white/20 h-8 w-8"
+                            >
+                              <Heart className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const dishRecipe = {
+                                  ...recipe,
+                                  id: `${recipe.id}-dish-${dishIndex}`,
+                                  title: dish.name,
+                                  description: dish.description,
+                                  dishes: [dish]
+                                };
+                                handleShare(dishRecipe);
+                              }}
+                              className="hover:bg-white/20 h-8 w-8"
+                            >
+                              <Share className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <Badge variant="outline" className="text-xs">
+                            {getDishTypeText(dish.type)}
                           </Badge>
-                        )}
-                      </div>
-                    </div>
+                          <Badge className={getDifficultyColor(recipe.difficulty) + " text-xs"}>
+                            <ChefHat className="w-3 h-3 mr-1" />
+                            {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {Math.ceil((recipe.prepTime + recipe.cookTime) / recipe.dishes.length)} {t('min')}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            <Users className="w-3 h-3 mr-1" />
+                            {recipe.servings} {t('servings')}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <h5 className="font-medium text-sm flex items-center">
+                            <Utensils className="w-3 h-3 mr-2 text-primary" />
+                            {t('mainIngredients')}
+                          </h5>
+                          <div className="space-y-1">
+                            {recipe.ingredients
+                              .filter(ing => !ing.usedIn || ing.usedIn === dish.name)
+                              .slice(0, 3)
+                              .map((ingredient, index) => (
+                                <div key={index} className="flex justify-between text-xs">
+                                  <span>{ingredient.item}</span>
+                                  <span className="text-muted-foreground">{ingredient.amount}</span>
+                                </div>
+                              ))}
+                            {recipe.ingredients.filter(ing => !ing.usedIn || ing.usedIn === dish.name).length > 3 && (
+                              <div className="text-xs text-muted-foreground">
+                                + {recipe.ingredients.filter(ing => !ing.usedIn || ing.usedIn === dish.name).length - 3} {t('more')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </div>
-
-              <Separator />
-
-              {/* Detailed Cooking Steps */}
-              {recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
-                <div className="space-y-6">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    {t('detailedCookingSteps')}
-                  </h4>
-                  <div className="space-y-6">
-                    {recipe.detailedSteps.map((step, index) => (
-                      <Card key={index} className="p-4 bg-muted/30">
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3">
-                            <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
-                              {step.stepNumber}
-                            </span>
-                            <div>
-                              <h5 className="font-semibold">{step.title}</h5>
-                              <span className="text-sm text-muted-foreground">{step.duration}</span>
-                            </div>
-                          </div>
-                          
-                          {step.imageUrl && (
-                            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
-                              <img 
-                                src={step.imageUrl} 
-                                alt={`Step ${step.stepNumber}: ${step.title}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          
-                          <p className="text-sm leading-relaxed">{step.description}</p>
-                          
-                          {step.tips && (
-                            <div className="bg-cooking-cream p-3 rounded-lg">
-                              <p className="text-sm text-muted-foreground">
-                                <span className="font-medium">💡 {t('tip')}: </span>
-                                {step.tips}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </Card>
-                    ))}
+            ) : (
+              // Fallback for recipes without dishes structure
+              <Card 
+                className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
+                onClick={() => {
+                  localStorage.setItem('selectedRecipe', JSON.stringify(recipe));
+                  window.location.href = `/recipe/${recipe.id}`;
+                }}
+              >
+                {recipe.imageUrl && (
+                  <div className="w-full h-64 overflow-hidden">
+                    <img 
+                      src={recipe.imageUrl} 
+                      alt={recipe.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
-              ) : (
-                /* Fallback to basic instructions */
-                <div>
-                  <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
-                  <ol className="space-y-3">
-                    {recipe.instructions.map((step, index) => (
-                      <li key={index} className="flex space-x-3">
-                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                          {index + 1}
-                        </div>
-                        <p className="text-sm leading-relaxed">{step}</p>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-
-              {/* Cooking Tips */}
-              {recipe.tips && recipe.tips.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="font-semibold mb-3">{t('cookingTips')}</h4>
-                    <ul className="space-y-2">
-                      {recipe.tips.map((tip, index) => (
-                        <li key={index} className="text-sm bg-cooking-cream p-3 rounded-md">
-                          {tip}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              )}
-
-              {/* Nutrition Information */}
-              {recipe.nutritionInfo && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="font-semibold mb-3">{t('nutritionPerServing')}</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-muted rounded-md">
-                        <div className="font-bold text-primary">{recipe.nutritionInfo.calories}</div>
-                        <div className="text-xs text-muted-foreground">{t('calories')}</div>
-                      </div>
-                      <div className="text-center p-3 bg-muted rounded-md">
-                        <div className="font-bold text-primary">{recipe.nutritionInfo.protein}</div>
-                        <div className="text-xs text-muted-foreground">{t('protein')}</div>
-                      </div>
-                      <div className="text-center p-3 bg-muted rounded-md">
-                        <div className="font-bold text-primary">{recipe.nutritionInfo.carbs}</div>
-                        <div className="text-xs text-muted-foreground">{t('carbs')}</div>
-                      </div>
-                      <div className="text-center p-3 bg-muted rounded-md">
-                        <div className="font-bold text-primary">{recipe.nutritionInfo.fat}</div>
-                        <div className="text-xs text-muted-foreground">{t('fat')}</div>
-                      </div>
+                )}
+                
+                <CardHeader className="bg-gradient-warm">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl mb-2">{recipe.title}</CardTitle>
+                      <p className="text-muted-foreground text-sm">{recipe.description}</p>
+                    </div>
+                    <div className="flex space-x-2 ml-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSave(recipe);
+                        }}
+                        className="hover:bg-white/20"
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare(recipe);
+                        }}
+                        className="hover:bg-white/20"
+                      >
+                        <Share className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                </>
-              )}
 
-              {/* Cook Recipe Button */}
-              <Separator />
-              <div className="flex justify-center">
-                <Button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCookRecipe(recipe);
-                  }}
-                  size="lg"
-                  className="px-8 py-3 text-lg font-semibold"
-                >
-                  <ChefHat className="w-5 h-5 mr-2" />
-                  {t('cookThisRecipe')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <Badge className={getDifficultyColor(recipe.difficulty)}>
+                      <ChefHat className="w-3 h-3 mr-1" />
+                      {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
+                    </Badge>
+                    <Badge variant="secondary">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {recipe.prepTime + recipe.cookTime} {t('min')}
+                    </Badge>
+                    <Badge variant="secondary">
+                      <Users className="w-3 h-3 mr-1" />
+                      {recipe.servings} {t('servings')}
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="p-6 space-y-6">
+                  {/* Traditional inspiration */}
+                  {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center">
+                        <BookOpen className="w-4 h-4 mr-2 text-primary" />
+                        {t('traditionalInspiration')}
+                      </h4>
+                      <div className="bg-gradient-subtle p-4 rounded-lg border">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {t('thisRecipeInspiredBy')}:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {recipe.knowledgeBaseReferences.map((ref, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              🍜 {ref}
+                            </Badge>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {t('enhancedWithKnowledgeBase')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
+
+                  {/* Meal combination display */}
+                  {recipe.dishes && recipe.dishes.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center">
+                        <Coffee className="w-4 h-4 mr-2 text-primary" />
+                        {t('mealCombination')}
+                      </h4>
+                      <div className="grid gap-3">
+                        {recipe.dishes.map((dish, index) => (
+                          <div key={index} className="flex items-center p-3 bg-cooking-cream rounded-lg">
+                            <div className="text-2xl mr-3">{getDishIcon(dish.type)}</div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="font-medium">{dish.name}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {getDishTypeText(dish.type)}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{dish.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  {/* Ingredients list */}
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center">
+                      <Utensils className="w-4 h-4 mr-2 text-primary" />
+                      {t('requiredIngredients')}
+                    </h4>
+                    <div className="grid gap-2">
+                      {recipe.ingredients.map((ingredient, index) => (
+                        <div
+                          key={index}
+                          className={`
+                            flex justify-between items-center p-3 rounded-md
+                            ${ingredient.needed 
+                              ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-800' 
+                              : 'bg-muted'
+                            }
+                          `}
+                        >
+                          <div className="flex-1">
+                            <span className="font-medium">{ingredient.item}</span>
+                            {ingredient.usedIn && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                ({ingredient.usedIn})
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-muted-foreground">{ingredient.amount}</span>
+                            {ingredient.needed && (
+                              <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
+                                {t('needToBuy')}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Cook Recipe Button */}
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCookRecipe(recipe);
+                      }}
+                      size="lg"
+                      className="px-8 py-3 text-lg font-semibold"
+                    >
+                      <ChefHat className="w-5 h-5 mr-2" />
+                      {t('cookThisRecipe')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         ))}
       </div>
     </div>
