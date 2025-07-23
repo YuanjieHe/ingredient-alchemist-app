@@ -54,6 +54,8 @@ export default function Profile() {
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -156,6 +158,61 @@ export default function Profile() {
         return 'bg-primary text-primary-foreground';
       default:
         return 'bg-secondary text-secondary-foreground';
+    }
+  };
+
+  const handlePurchase = async (planType: string, price: number) => {
+    if (!user) {
+      toast.error('请先登录');
+      return;
+    }
+
+    setSelectedPlan(planType);
+    setPaymentLoading(true);
+
+    try {
+      // 这里模拟支付流程，实际项目中需要集成真实的支付接口
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 模拟支付成功后更新订阅状态
+      const endDate = new Date();
+      switch (planType) {
+        case 'monthly':
+          endDate.setMonth(endDate.getMonth() + 1);
+          break;
+        case 'quarterly':
+          endDate.setMonth(endDate.getMonth() + 3);
+          break;
+        case 'annual':
+          endDate.setFullYear(endDate.getFullYear() + 1);
+          break;
+        case 'lifetime':
+          endDate.setFullYear(endDate.getFullYear() + 100); // 设置为100年后
+          break;
+      }
+
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .update({
+          subscription_type: 'premium',
+          subscription_status: 'active',
+          subscription_start_date: new Date().toISOString(),
+          subscription_end_date: planType === 'lifetime' ? null : endDate.toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('购买成功！欢迎成为高级会员！');
+      // 刷新页面数据
+      window.location.reload();
+    } catch (error) {
+      console.error('Purchase error:', error);
+      toast.error('购买失败，请重试');
+    } finally {
+      setPaymentLoading(false);
+      setSelectedPlan(null);
     }
   };
 
@@ -293,46 +350,158 @@ export default function Profile() {
                 )}
               </div>
               
-              {subscription.subscription_type === 'free' && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-sm">免费试用进度</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        剩余 {remainingGenerations} 次免费生成机会
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">
-                        {remainingGenerations}
+              {subscription.subscription_type === 'free' ? (
+                <>
+                  <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm">免费试用进度</h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          剩余 {remainingGenerations} 次免费生成机会
+                        </p>
                       </div>
-                      <div className="text-xs text-muted-foreground">次剩余</div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          {remainingGenerations}
+                        </div>
+                        <div className="text-xs text-muted-foreground">次剩余</div>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>已使用 {subscription.free_generations_used}</span>
+                        <span>总共 {subscription.free_generations_limit}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${(subscription.free_generations_used / subscription.free_generations_limit) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    {remainingGenerations === 0 && (
+                      <div className="mt-3 p-2 bg-orange-100 dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
+                        <p className="text-xs text-orange-800 dark:text-orange-200 text-center">
+                          免费次数已用完，升级到高级会员享受无限生成
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 购买选项 */}
+                  <div className="mt-6">
+                    <h4 className="font-medium mb-4 flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      升级到高级会员
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Monthly */}
+                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-lg font-bold text-primary">¥14</div>
+                          <div className="text-sm text-muted-foreground">月付</div>
+                          <div className="text-xs text-muted-foreground mt-1">每月</div>
+                          <Button 
+                            className="w-full mt-3" 
+                            size="sm"
+                            onClick={() => handlePurchase('monthly', 14)}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading && selectedPlan === 'monthly' ? '处理中...' : '选择'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Quarterly */}
+                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-lg font-bold text-primary">¥30</div>
+                          <div className="text-sm text-muted-foreground">季付</div>
+                          <div className="text-xs text-muted-foreground mt-1">3个月</div>
+                          <div className="text-xs text-green-600">节省 ¥12</div>
+                          <Button 
+                            className="w-full mt-3" 
+                            size="sm"
+                            onClick={() => handlePurchase('quarterly', 30)}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading && selectedPlan === 'quarterly' ? '处理中...' : '选择'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Annual */}
+                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-orange-500 text-white">推荐</Badge>
+                        </div>
+                        <CardContent className="p-3 text-center">
+                          <div className="text-lg font-bold text-primary">¥98</div>
+                          <div className="text-sm text-muted-foreground">年付</div>
+                          <div className="text-xs text-muted-foreground mt-1">12个月</div>
+                          <div className="text-xs text-green-600">节省 ¥70</div>
+                          <Button 
+                            className="w-full mt-3" 
+                            size="sm"
+                            onClick={() => handlePurchase('annual', 98)}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading && selectedPlan === 'annual' ? '处理中...' : '选择'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Lifetime */}
+                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-purple-500 text-white">终生</Badge>
+                        </div>
+                        <CardContent className="p-3 text-center">
+                          <div className="text-lg font-bold text-primary">¥168</div>
+                          <div className="text-sm text-muted-foreground">终生会员</div>
+                          <div className="text-xs text-muted-foreground mt-1">永久使用</div>
+                          <div className="text-xs text-green-600">最超值</div>
+                          <Button 
+                            className="w-full mt-3" 
+                            size="sm"
+                            onClick={() => handlePurchase('lifetime', 168)}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading && selectedPlan === 'lifetime' ? '处理中...' : '选择'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-muted rounded-lg">
+                      <h4 className="font-medium mb-2 text-sm">高级会员特权:</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• 无限次菜谱生成</li>
+                        <li>• 根据人数智能搭配菜品</li>
+                        <li>• 主菜 + 配菜完整搭配</li>
+                        <li>• 优先客服支持</li>
+                      </ul>
                     </div>
                   </div>
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>已使用 {subscription.free_generations_used}</span>
-                      <span>总共 {subscription.free_generations_limit}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${(subscription.free_generations_used / subscription.free_generations_limit) * 100}%` 
-                        }}
-                      ></div>
-                    </div>
+                </>
+              ) : (
+                // 高级会员状态显示
+                <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="w-5 h-5 text-yellow-500" />
+                    <span className="font-medium">高级会员特权</span>
                   </div>
-                  {remainingGenerations === 0 && (
-                    <div className="mt-3 p-2 bg-orange-100 dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
-                      <p className="text-xs text-orange-800 dark:text-orange-200 text-center">
-                        免费次数已用完，升级到高级会员享受无限生成
-                      </p>
-                    </div>
-                  )}
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>✅ 无限次菜谱生成</li>
+                    <li>✅ 智能菜品搭配</li>
+                    <li>✅ 完整餐桌方案</li>
+                    <li>✅ 优先客服支持</li>
+                  </ul>
                 </div>
               )}
-              
+
               {subscription.subscription_end_date && (
                 <p className="text-sm text-muted-foreground">
                   到期时间: {new Date(subscription.subscription_end_date).toLocaleDateString()}
@@ -344,88 +513,6 @@ export default function Profile() {
           )}
         </CardContent>
       </Card>
-
-      {/* Purchase Options - Only show for free users */}
-      {subscription && subscription.subscription_type === 'free' && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="w-6 h-6 text-yellow-500" />
-              升级到高级会员
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Monthly */}
-              <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
-                <CardContent className="p-4 text-center">
-                  <div className="text-lg font-bold text-primary">¥14</div>
-                  <div className="text-sm text-muted-foreground">月付</div>
-                  <div className="text-xs text-muted-foreground mt-1">每月</div>
-                  <Button className="w-full mt-3" size="sm">
-                    选择
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Quarterly */}
-              <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
-                <CardContent className="p-4 text-center">
-                  <div className="text-lg font-bold text-primary">¥30</div>
-                  <div className="text-sm text-muted-foreground">季付</div>
-                  <div className="text-xs text-muted-foreground mt-1">3个月</div>
-                  <div className="text-xs text-green-600">节省 ¥12</div>
-                  <Button className="w-full mt-3" size="sm">
-                    选择
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Annual */}
-              <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-orange-500 text-white">推荐</Badge>
-                </div>
-                <CardContent className="p-4 text-center">
-                  <div className="text-lg font-bold text-primary">¥98</div>
-                  <div className="text-sm text-muted-foreground">年付</div>
-                  <div className="text-xs text-muted-foreground mt-1">12个月</div>
-                  <div className="text-xs text-green-600">节省 ¥70</div>
-                  <Button className="w-full mt-3" size="sm">
-                    选择
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Lifetime */}
-              <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-purple-500 text-white">终生</Badge>
-                </div>
-                <CardContent className="p-4 text-center">
-                  <div className="text-lg font-bold text-primary">¥168</div>
-                  <div className="text-sm text-muted-foreground">终生会员</div>
-                  <div className="text-xs text-muted-foreground mt-1">永久使用</div>
-                  <div className="text-xs text-green-600">最超值</div>
-                  <Button className="w-full mt-3" size="sm">
-                    选择
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="mt-6 p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">高级会员特权:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 无限次菜谱生成</li>
-                <li>• 根据人数智能搭配菜品</li>
-                <li>• 主菜 + 配菜完整搭配</li>
-                <li>• 优先客服支持</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Favorites */}
       <Card>
