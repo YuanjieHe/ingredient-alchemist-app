@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Purchases } from '@revenuecat/purchases-capacitor';
 
 // 产品ID配置（需要在App Store Connect中设置）
 export const PRODUCT_IDS = {
@@ -28,6 +29,7 @@ export interface ApplePurchaseResult {
 
 export class ApplePaymentService {
   private static instance: ApplePaymentService;
+  private isInitialized = false;
 
   public static getInstance(): ApplePaymentService {
     if (!ApplePaymentService.instance) {
@@ -40,6 +42,39 @@ export class ApplePaymentService {
     return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
   }
 
+  async initialize(apiKey: string, userId?: string): Promise<void> {
+    if (this.isInitialized) return;
+
+    try {
+      // 配置RevenueCat
+      await Purchases.configure({
+        apiKey,
+        appUserID: userId || undefined
+      });
+
+      this.isInitialized = true;
+      console.log('RevenueCat initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize RevenueCat:', error);
+      throw error;
+    }
+  }
+
+  async getOfferings(): Promise<any> {
+    if (!this.isApplePayAvailable()) {
+      console.log('RevenueCat not available on this platform');
+      return null;
+    }
+
+    try {
+      const result = await Purchases.getOfferings();
+      return result;
+    } catch (error) {
+      console.error('Failed to get offerings:', error);
+      return null;
+    }
+  }
+
   async purchaseProduct(planType: string): Promise<ApplePurchaseResult> {
     if (!this.isApplePayAvailable()) {
       // 在非iOS环境下，回退到网页支付
@@ -47,23 +82,42 @@ export class ApplePaymentService {
     }
 
     try {
-      // 在真实iOS环境中，这里会调用原生的Apple Store Kit
-      // 现在我们模拟成功的购买流程
-      const mockTransaction = {
-        transactionId: `ios_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        originalTransactionId: `ios_orig_${Date.now()}`,
-        productId: PRODUCT_IDS[planType as keyof typeof PRODUCT_IDS]
-      };
+      // 获取产品列表
+      const offerings = await this.getOfferings();
+      if (!offerings?.current?.availablePackages) {
+        throw new Error('No products available');
+      }
 
-      console.log('模拟Apple内购成功:', mockTransaction);
+      // 查找对应的产品包
+      const targetPackage = offerings.current.availablePackages.find(
+        (pkg: any) => pkg.identifier === PRODUCT_IDS[planType as keyof typeof PRODUCT_IDS]
+      );
+
+      if (!targetPackage) {
+        throw new Error(`Product not found for plan: ${planType}`);
+      }
+
+      // 发起购买
+      const purchaseResult = await Purchases.purchasePackage({
+        aPackage: targetPackage
+      });
+
+      const customerInfo = purchaseResult.customerInfo;
+      const transaction = purchaseResult.transaction;
+
+      console.log('RevenueCat purchase successful:', {
+        customerInfo,
+        transaction
+      });
 
       // 调用后端处理购买
       const { error } = await supabase.functions.invoke('process-apple-purchase', {
         body: {
-          transactionId: mockTransaction.transactionId,
-          originalTransactionId: mockTransaction.originalTransactionId,
-          productId: mockTransaction.productId,
-          planType
+          transactionId: transaction?.transactionIdentifier,
+          originalTransactionId: transaction?.transactionIdentifier, // RevenueCat已处理原始ID
+          productId: targetPackage.identifier,
+          planType,
+          revenueCatUserId: customerInfo.originalAppUserId
         }
       });
 
@@ -73,9 +127,9 @@ export class ApplePaymentService {
 
       return {
         success: true,
-        transactionId: mockTransaction.transactionId,
-        originalTransactionId: mockTransaction.originalTransactionId,
-        productId: mockTransaction.productId
+        transactionId: transaction?.transactionIdentifier,
+        originalTransactionId: transaction?.transactionIdentifier,
+        productId: targetPackage.identifier
       };
 
     } catch (error: any) {
@@ -123,14 +177,29 @@ export class ApplePaymentService {
     }
 
     try {
-      // 在真实环境中调用iOS的恢复购买API
-      console.log('模拟恢复购买成功');
+      // 调用RevenueCat的恢复购买API
+      const result = await Purchases.restorePurchases();
+      console.log('恢复购买成功:', result);
       toast.success('购买已恢复');
       return true;
     } catch (error) {
       console.error('恢复购买失败:', error);
       toast.error('恢复购买失败');
       return false;
+    }
+  }
+
+  async checkSubscriptionStatus(): Promise<any> {
+    if (!this.isApplePayAvailable()) {
+      return null;
+    }
+
+    try {
+      const customerInfo = await Purchases.getCustomerInfo();
+      return customerInfo.customerInfo;
+    } catch (error) {
+      console.error('Failed to get customer info:', error);
+      return null;
     }
   }
 

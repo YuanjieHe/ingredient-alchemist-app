@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,21 +7,74 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { ApplePaymentService } from '@/services/applePaymentService';
+import { toast } from 'sonner';
 
 const Subscription = () => {
-  const { subscription, remainingGenerations, canGenerate } = useSubscription();
+  const { subscription, remainingGenerations, canGenerate, refreshSubscription } = useSubscription();
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isEN = language === 'en';
+  const paymentService = ApplePaymentService.getInstance();
+
+  // 初始化RevenueCat（需要在真实环境中设置API Key）
+  useEffect(() => {
+    const initializePayments = async () => {
+      if (paymentService.isApplePayAvailable() && !isInitialized) {
+        try {
+          // 注意：这里需要替换为您的RevenueCat API Key
+          await paymentService.initialize('YOUR_REVENUECAT_API_KEY', user?.id);
+          setIsInitialized(true);
+        } catch (error) {
+          console.error('Failed to initialize payments:', error);
+        }
+      }
+    };
+
+    if (user) {
+      initializePayments();
+    }
+  }, [user, isInitialized, paymentService]);
 
   const handleUpgrade = async (planType?: string) => {
-    // This will be replaced with actual Apple IAP integration later
-    const message = planType === 'restore' 
-      ? (isEN ? 'Restore purchase functionality coming soon!' : '恢复购买功能即将推出！')
-      : (isEN ? `Apple In-App Purchase for ${planType} plan coming soon!` : `${planType} 方案的苹果内购集成即将推出！`);
-    alert(message);
+    if (planType === 'restore') {
+      setIsLoading(true);
+      try {
+        const success = await paymentService.restorePurchases();
+        if (success) {
+          await refreshSubscription();
+          toast.success(isEN ? 'Purchases restored successfully!' : '购买恢复成功！');
+        }
+      } catch (error) {
+        toast.error(isEN ? 'Failed to restore purchases' : '恢复购买失败');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    if (!planType) return;
+
+    setIsLoading(true);
+    try {
+      const result = await paymentService.purchaseProduct(planType);
+      
+      if (result.success) {
+        await refreshSubscription();
+        toast.success(isEN ? 'Purchase successful!' : '购买成功！');
+      } else {
+        toast.error(result.error || (isEN ? 'Purchase failed' : '购买失败'));
+      }
+    } catch (error: any) {
+      console.error('Purchase error:', error);
+      toast.error(error.message || (isEN ? 'Purchase failed' : '购买失败'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!user) {
@@ -114,8 +167,8 @@ const Subscription = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('monthly')} className="w-full">
-                {isEN ? 'Select' : '选择'}
+              <Button onClick={() => handleUpgrade('monthly')} className="w-full" disabled={isLoading}>
+                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
               </Button>
             </CardContent>
           </Card>
@@ -133,8 +186,8 @@ const Subscription = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('quarterly')} className="w-full">
-                {isEN ? 'Select' : '选择'}
+              <Button onClick={() => handleUpgrade('quarterly')} className="w-full" disabled={isLoading}>
+                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
               </Button>
             </CardContent>
           </Card>
@@ -157,8 +210,8 @@ const Subscription = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('annual')} className="w-full">
-                {isEN ? 'Select' : '选择'}
+              <Button onClick={() => handleUpgrade('annual')} className="w-full" disabled={isLoading}>
+                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
               </Button>
             </CardContent>
           </Card>
@@ -181,8 +234,8 @@ const Subscription = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('lifetime')} className="w-full bg-purple-600 hover:bg-purple-700">
-                {isEN ? 'Select' : '选择'}
+              <Button onClick={() => handleUpgrade('lifetime')} className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
+                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
               </Button>
             </CardContent>
           </Card>
@@ -227,8 +280,8 @@ const Subscription = () => {
 
         {/* Restore Purchase Button */}
         <div className="flex justify-center mt-6">
-          <Button variant="outline" onClick={() => handleUpgrade('restore')}>
-            📱 {isEN ? 'Restore Purchase (iOS)' : '恢复购买 (iOS)'}
+          <Button variant="outline" onClick={() => handleUpgrade('restore')} disabled={isLoading}>
+            📱 {isLoading ? (isEN ? 'Restoring...' : '恢复中...') : (isEN ? 'Restore Purchase (iOS)' : '恢复购买 (iOS)')}
           </Button>
         </div>
 

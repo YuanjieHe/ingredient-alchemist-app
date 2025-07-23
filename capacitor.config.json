@@ -7,8 +7,8 @@
     "cleartext": true
   },
   "plugins": {
-    "CapacitorPurchases": {
-      "apiKey": "YOUR_REVENUECAT_API_KEY"
+    "PurchasesPlugin": {
+      "usesStoreKit2IfAvailable": false
     }
   }
 }
