@@ -79,6 +79,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
   const { t } = useLanguage();
   const { user } = useAuth();
   const [selectedDishTab, setSelectedDishTab] = useState<string>("overview");
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -222,7 +223,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
         {recipes.map((recipe) => (
           <Card 
             key={recipe.id} 
-            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300"
+            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
+            onClick={() => {
+              setSelectedRecipe(recipe);
+            }}
           >
             {/* Recipe Image */}
             {recipe.imageUrl && (
