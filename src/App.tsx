@@ -13,6 +13,7 @@ import Subscription from "./pages/Subscription";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import RecipeDetail from "./pages/RecipeDetail";
 import BottomNavigation from "./components/BottomNavigation";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,16 @@ const App = () => (
                 element={
                   <div className="pb-20">
                     <Subscription />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/recipe/:id" 
+                element={
+                  <div className="container mx-auto px-4 py-8 pb-20">
+                    <div className="max-w-4xl mx-auto">
+                      <RecipeDetail />
+                    </div>
                   </div>
                 } 
               />

@@ -35,8 +35,33 @@ serve(async (req) => {
       mealType, 
       occasionType, 
       cuisineType,
-      language = 'zh'
+      language = 'zh',
+      // New parameters for single dish mode
+      singleDishMode = false,
+      dishName,
+      dishDescription
     } = await req.json();
+
+    // Handle single dish detail generation
+    if (singleDishMode) {
+      console.log('Generating detailed recipe for single dish:', dishName);
+      
+      const detailedRecipe = await generateDetailedSingleRecipe({
+        dishName,
+        dishDescription,
+        ingredients,
+        skillLevel,
+        peopleCount,
+        language
+      });
+
+      return new Response(
+        JSON.stringify({ detailedRecipe }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // Query knowledge base for relevant dishes
     console.log('Querying knowledge base for relevant dishes...');
@@ -531,4 +556,147 @@ async function generateWith302AI(systemPrompt: string, prompt: string): Promise<
   console.log('Raw 302.ai response:', generatedText);
   
   return generatedText;
+}
+
+// Helper function to generate detailed recipe for a single dish
+async function generateDetailedSingleRecipe(params: any): Promise<any> {
+  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = 'zh' } = params;
+  const isEnglish = language === 'en';
+  
+  const systemPrompt = isEnglish 
+    ? 'You are a master chef creating extremely detailed, step-by-step cooking instructions. Focus on precision, technique, and professional tips. Respond only with valid JSON.'
+    : '您是一位烹饪大师，创建极其详细的逐步烹饪说明。专注于精确性、技法和专业提示。仅用有效的JSON格式回复。';
+
+  const prompt = `为菜品"${dishName}"生成极其详细的烹饪步骤。
+
+菜品信息：
+- 菜名：${dishName}
+- 描述：${dishDescription}
+- 可用食材：${ingredients.join(', ')}
+- 技能水平：${skillLevel}
+- 服务人数：${peopleCount}人
+
+要求生成包含以下内容的详细食谱：
+1. 每个步骤都必须极其详细，包含精确的时间、温度、技法
+2. 提供专业的烹饪提示和关键控制点
+3. 包含营养信息和完整的食材清单
+
+请按以下JSON格式回复：
+{
+  "detailedSteps": [
+    {
+      "stepNumber": 1,
+      "title": "详细步骤标题",
+      "description": "非常详细的步骤描述，包含具体的操作方法、时间、温度、技巧等",
+      "duration": "X分钟",
+      "tips": "专业提示和关键控制点"
+    }
+  ],
+  "ingredients": [
+    {"item": "食材名称", "amount": "用量", "needed": false}
+  ],
+  "tips": ["烹饪提示1", "烹饪提示2"],
+  "nutritionInfo": {
+    "calories": 350,
+    "protein": "25g",
+    "carbs": "30g", 
+    "fat": "12g"
+  }
+}`;
+
+  try {
+    console.log('Generating detailed recipe with Gemini...');
+    
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4000,
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error in single recipe generation:', response.status, response.statusText, errorText);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    let generatedText = data.candidates[0].content.parts[0].text;
+    
+    // Clean and parse the JSON response
+    let cleanedText = generatedText.trim();
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    const result = JSON.parse(cleanedText);
+    console.log('Successfully generated detailed single recipe');
+    
+    return result;
+  } catch (error) {
+    console.error('Error generating detailed recipe:', error);
+    
+    // Fallback detailed recipe
+    return {
+      detailedSteps: [
+        {
+          stepNumber: 1,
+          title: "食材准备",
+          description: `准备制作${dishName}所需的所有食材。将${ingredients.slice(0, 3).join('、')}等主要食材清洗干净，按照传统烹饪方法进行切配处理。`,
+          duration: "10分钟",
+          tips: "食材的新鲜度直接影响菜品的最终口感，选择优质食材是成功的关键。"
+        },
+        {
+          stepNumber: 2,
+          title: "预处理阶段", 
+          description: "根据传统工艺对主要食材进行预处理，包括腌制、焯水或其他必要的预备工序。",
+          duration: "15分钟",
+          tips: "预处理步骤不可省略，这是确保菜品口感和味道的重要环节。"
+        },
+        {
+          stepNumber: 3,
+          title: "主要烹饪",
+          description: `开始正式烹饪${dishName}。控制好火候和时间，按照传统方法进行烹制。`,
+          duration: "20分钟", 
+          tips: "烹饪过程中要注意火候控制，不同阶段使用不同的火力。"
+        },
+        {
+          stepNumber: 4,
+          title: "调味收尾",
+          description: "在烹饪的最后阶段进行调味，确保口感平衡。最后进行装盘摆设。",
+          duration: "5分钟",
+          tips: "调味要循序渐进，可以先尝味再调整，避免过咸或过淡。"
+        }
+      ],
+      ingredients: ingredients.map((ing: string) => ({
+        item: ing,
+        amount: "适量",
+        needed: false
+      })),
+      tips: [
+        "选用新鲜优质的食材是制作美味菜品的基础",
+        "严格控制烹饪时间和火候，避免过度烹饪",
+        "调味要适中，可以根据个人口味进行微调"
+      ],
+      nutritionInfo: {
+        calories: 280,
+        protein: "18g",
+        carbs: "25g",
+        fat: "10g"
+      }
+    };
+  }
 }
