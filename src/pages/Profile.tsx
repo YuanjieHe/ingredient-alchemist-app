@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn } from 'lucide-react';
+import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn, Crown, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Recipe {
@@ -44,6 +45,7 @@ interface FavoriteRecipe {
 export default function Profile() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
+  const { subscription, loading: subscriptionLoading } = useSubscription();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -256,6 +258,140 @@ export default function Profile() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Subscription Status */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="w-6 h-6 text-yellow-500" />
+            会员状态
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {subscriptionLoading ? (
+            <p className="text-muted-foreground">加载中...</p>
+          ) : subscription ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={subscription.subscription_type === 'premium' ? 'default' : 'secondary'}
+                  className={subscription.subscription_type === 'premium' ? 'bg-yellow-500 text-white' : ''}
+                >
+                  {subscription.subscription_type === 'premium' ? (
+                    <>
+                      <Star className="w-3 h-3 mr-1" />
+                      高级会员
+                    </>
+                  ) : (
+                    '免费用户'
+                  )}
+                </Badge>
+                {subscription.subscription_type === 'premium' && (
+                  <span className="text-sm text-muted-foreground">
+                    状态: {subscription.subscription_status === 'active' ? '有效' : '已过期'}
+                  </span>
+                )}
+              </div>
+              
+              {subscription.subscription_type === 'free' && (
+                <p className="text-sm text-muted-foreground">
+                  已使用: {subscription.free_generations_used}/{subscription.free_generations_limit} 次免费生成
+                </p>
+              )}
+              
+              {subscription.subscription_end_date && (
+                <p className="text-sm text-muted-foreground">
+                  到期时间: {new Date(subscription.subscription_end_date).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">加载订阅信息失败</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Purchase Options - Only show for free users */}
+      {subscription && subscription.subscription_type === 'free' && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="w-6 h-6 text-yellow-500" />
+              升级到高级会员
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Monthly */}
+              <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                <CardContent className="p-4 text-center">
+                  <div className="text-lg font-bold text-primary">¥14</div>
+                  <div className="text-sm text-muted-foreground">月付</div>
+                  <div className="text-xs text-muted-foreground mt-1">每月</div>
+                  <Button className="w-full mt-3" size="sm">
+                    选择
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Quarterly */}
+              <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                <CardContent className="p-4 text-center">
+                  <div className="text-lg font-bold text-primary">¥30</div>
+                  <div className="text-sm text-muted-foreground">季付</div>
+                  <div className="text-xs text-muted-foreground mt-1">3个月</div>
+                  <div className="text-xs text-green-600">节省 ¥12</div>
+                  <Button className="w-full mt-3" size="sm">
+                    选择
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Annual */}
+              <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-orange-500 text-white">推荐</Badge>
+                </div>
+                <CardContent className="p-4 text-center">
+                  <div className="text-lg font-bold text-primary">¥98</div>
+                  <div className="text-sm text-muted-foreground">年付</div>
+                  <div className="text-xs text-muted-foreground mt-1">12个月</div>
+                  <div className="text-xs text-green-600">节省 ¥70</div>
+                  <Button className="w-full mt-3" size="sm">
+                    选择
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Lifetime */}
+              <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-purple-500 text-white">终生</Badge>
+                </div>
+                <CardContent className="p-4 text-center">
+                  <div className="text-lg font-bold text-primary">¥168</div>
+                  <div className="text-sm text-muted-foreground">终生会员</div>
+                  <div className="text-xs text-muted-foreground mt-1">永久使用</div>
+                  <div className="text-xs text-green-600">最超值</div>
+                  <Button className="w-full mt-3" size="sm">
+                    选择
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <h4 className="font-medium mb-2">高级会员特权:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• 无限次菜谱生成</li>
+                <li>• 根据人数智能搭配菜品</li>
+                <li>• 主菜 + 配菜完整搭配</li>
+                <li>• 优先客服支持</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Favorites */}
       <Card>
