@@ -33,7 +33,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
 
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+      toast.error(t('pleaseUploadImageFile'));
       return;
     }
 
@@ -69,15 +69,15 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
       
       if (newIngredients.length > 0) {
         onIngredientsChange([...ingredients, ...newIngredients]);
-        toast.success(`🎉 Found ${newIngredients.length} ingredients in your photo!`);
+        toast.success(`🎉 ${t('foundIngredients')} ${newIngredients.length} ${t('ingredientsInPhoto')}`);
       } else if (detectedIngredients.length > 0) {
-        toast.info('All detected ingredients are already in your list');
+        toast.info(t('allIngredientsAlreadyInList'));
       } else {
-        toast.info('No ingredients detected in this photo. Try a clearer image of food items.');
+        toast.info(t('noIngredientsDetected'));
       }
     } catch (error) {
       console.error('Image analysis error:', error);
-      toast.error('Failed to analyze image. Please try again or add ingredients manually.');
+      toast.error(t('failedToAnalyzeImage'));
     } finally {
       setIsProcessingImage(false);
     }
@@ -103,10 +103,10 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
       <CardContent className="p-6 space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            What's in your kitchen? 🥗
+            {t('whatsInYourKitchen')}
           </h3>
           <p className="text-muted-foreground text-sm">
-            Take a photo of your ingredients or add them manually
+            {t('takePhotoOrAddManually')}
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
             className="w-full"
           >
             <Camera className="w-5 h-5 mr-2" />
-            {isProcessingImage ? 'Analyzing...' : 'Take Photo'}
+            {isProcessingImage ? t('analyzing') : t('takePhoto')}
           </Button>
           
           <Button
@@ -131,7 +131,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
             className="w-full"
           >
             <Upload className="w-5 h-5 mr-2" />
-            Upload Photo
+            {t('uploadPhoto')}
           </Button>
         </div>
 
@@ -156,7 +156,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
         <div className="space-y-3">
           <div className="flex gap-2">
             <Input
-              placeholder="Type an ingredient (e.g., chicken, rice, tomatoes...)"
+              placeholder={t('typeIngredientPlaceholder')}
               value={newIngredient}
               onChange={(e) => setNewIngredient(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -178,7 +178,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
         {/* Ingredients List */}
         {ingredients.length > 0 && (
           <div className="space-y-3">
-            <h4 className="font-medium text-foreground">Your Ingredients:</h4>
+            <h4 className="font-medium text-foreground">{t('yourIngredients')}</h4>
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ingredient, index) => (
                 <Badge
@@ -203,7 +203,7 @@ export const IngredientInput = ({ ingredients, onIngredientsChange }: Ingredient
           <div className="text-center py-4">
             <div className="inline-flex items-center space-x-2 text-muted-foreground">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              <span>Analyzing your ingredients...</span>
+              <span>{t('analyzingIngredients')}</span>
             </div>
           </div>
         )}
