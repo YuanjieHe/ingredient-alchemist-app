@@ -55,14 +55,42 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching subscription:', error);
+        // 如果没有找到记录，创建一个默认的免费订阅
+        if (error.code === 'PGRST116') {
+          const { error: insertError } = await supabase
+            .from('user_subscriptions')
+            .insert({
+              user_id: user.id,
+              subscription_type: 'free',
+              subscription_status: 'active',
+              free_generations_used: 0,
+              free_generations_limit: 3
+            });
+          
+          if (insertError) {
+            console.error('Error creating subscription:', insertError);
+            return;
+          }
+          
+          // 重新获取数据
+          const { data: newData } = await supabase
+            .from('user_subscriptions')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          
+          setSubscription(newData as SubscriptionData);
+        }
         return;
       }
 
-      setSubscription(data as SubscriptionData);
+      if (data) {
+        setSubscription(data as SubscriptionData);
+      }
     } catch (error) {
       console.error('Error fetching subscription:', error);
     } finally {

@@ -171,50 +171,44 @@ export default function Profile() {
     setPaymentLoading(true);
 
     try {
-      // 这里模拟支付流程，实际项目中需要集成真实的支付接口
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 模拟支付成功后更新订阅状态
-      const endDate = new Date();
-      switch (planType) {
-        case 'monthly':
-          endDate.setMonth(endDate.getMonth() + 1);
-          break;
-        case 'quarterly':
-          endDate.setMonth(endDate.getMonth() + 3);
-          break;
-        case 'annual':
-          endDate.setFullYear(endDate.getFullYear() + 1);
-          break;
-        case 'lifetime':
-          endDate.setFullYear(endDate.getFullYear() + 100); // 设置为100年后
-          break;
+      // 调用 Stripe 创建检出会话
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+        body: { planType }
+      });
+
+      if (checkoutError) {
+        throw new Error(checkoutError.message);
       }
 
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({
-          subscription_type: 'premium',
-          subscription_status: 'active',
-          subscription_start_date: new Date().toISOString(),
-          subscription_end_date: planType === 'lifetime' ? null : endDate.toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      toast.success('购买成功！欢迎成为高级会员！');
-      // 刷新页面数据
-      window.location.reload();
-    } catch (error) {
+      if (checkoutData?.url) {
+        // 重定向到 Stripe 支付页面
+        window.location.href = checkoutData.url;
+      } else {
+        throw new Error('未能创建支付链接');
+      }
+    } catch (error: any) {
       console.error('Purchase error:', error);
-      toast.error('购买失败，请重试');
-    } finally {
+      toast.error(`购买失败: ${error.message || '请重试'}`);
       setPaymentLoading(false);
       setSelectedPlan(null);
     }
   };
+
+  // 检查 URL 参数，显示支付结果
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      toast.success('支付成功！欢迎成为高级会员！');
+      // 清除 URL 参数
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // 刷新订阅状态
+      window.location.reload();
+    } else if (urlParams.get('cancelled') === 'true') {
+      toast.error('支付已取消');
+      // 清除 URL 参数
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   if (!user) {
     return (
