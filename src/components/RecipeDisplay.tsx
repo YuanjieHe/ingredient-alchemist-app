@@ -14,6 +14,20 @@ interface Dish {
   description: string;
 }
 
+interface DishInstruction {
+  dishName: string;
+  type: 'main' | 'side' | 'soup';
+  steps: Array<{
+    stepNumber: number;
+    title: string;
+    description: string;
+    duration: string;
+    tips?: string;
+    imagePrompt?: string;
+    imageUrl?: string;
+  }>;
+}
+
 interface Recipe {
   id: string;
   title: string;
@@ -24,7 +38,9 @@ interface Recipe {
   difficulty: string;
   mealType?: string;
   dishes?: Dish[];
+  dishInstructions?: DishInstruction[];
   knowledgeBaseReferences?: string[];
+  coordinationTips?: string[];
   imageUrl?: string;
   ingredients: Array<{
     item: string;
@@ -367,8 +383,70 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* Detailed Cooking Steps */}
-              {recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
+              {/* Detailed Cooking Steps for Each Dish */}
+              {recipe.dishInstructions && recipe.dishInstructions.length > 0 ? (
+                <div className="space-y-6">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    {t('detailedCookingSteps')}
+                  </h4>
+                  
+                  {recipe.dishInstructions.map((dishInstruction, dishIndex) => (
+                    <div key={dishIndex} className="space-y-4">
+                      {/* Dish Name Header */}
+                      <div className="border-l-4 border-primary pl-4 bg-gradient-subtle p-3 rounded-r-lg">
+                        <h5 className="font-bold text-lg flex items-center gap-2">
+                          {getDishIcon(dishInstruction.type)}
+                          {dishInstruction.dishName}
+                        </h5>
+                        <Badge variant="outline" className="mt-1">
+                          {getDishTypeText(dishInstruction.type)}
+                        </Badge>
+                      </div>
+                      
+                      {/* Dish Steps */}
+                      <div className="space-y-4 pl-4">
+                        {dishInstruction.steps.map((step, stepIndex) => (
+                          <Card key={stepIndex} className="p-4 bg-muted/30">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
+                                  {step.stepNumber}
+                                </span>
+                                <div>
+                                  <h6 className="font-semibold">{step.title}</h6>
+                                  <span className="text-sm text-muted-foreground">{step.duration}</span>
+                                </div>
+                              </div>
+                              
+                              {step.imageUrl && (
+                                <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
+                                  <img 
+                                    src={step.imageUrl} 
+                                    alt={`${dishInstruction.dishName} - Step ${step.stepNumber}: ${step.title}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              
+                              <p className="text-sm leading-relaxed">{step.description}</p>
+                              
+                              {step.tips && (
+                                <div className="bg-cooking-cream p-3 rounded-lg">
+                                  <p className="text-sm text-muted-foreground">
+                                    <span className="font-medium">💡 {t('tip')}: </span>
+                                    {step.tips}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
                 <div className="space-y-6">
                   <h4 className="font-semibold flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
@@ -428,6 +506,27 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                     ))}
                   </ol>
                 </div>
+              )}
+
+              {/* Coordination Tips */}
+              {recipe.coordinationTips && recipe.coordinationTips.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <ChefHat className="h-4 w-4" />
+                      {t('coordinationTips') || '协调技巧'}
+                    </h4>
+                    <ul className="space-y-2">
+                      {recipe.coordinationTips.map((tip, index) => (
+                        <li key={index} className="text-sm bg-gradient-subtle p-3 rounded-md border-l-4 border-primary">
+                          <span className="font-medium">👨‍🍳 </span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
               )}
 
               {/* Cooking Tips */}
