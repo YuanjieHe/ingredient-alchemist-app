@@ -416,48 +416,110 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
        {"item": "${isEnglish ? 'Main ingredient' : '主要食材'}", "amount": "${isEnglish ? '300g, specific cut or preparation' : '300克，具体切法或处理方式'}", "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
        {"item": "${isEnglish ? 'Seasoning ingredient' : '调味食材'}", "amount": "${isEnglish ? '3 cloves, minced' : '3瓣，切碎'}", "usedIn": "${isEnglish ? 'flavoring' : '调味'}"}
      ],
-     "dishInstructions": [
-       {
-         "dishName": "${isEnglish ? '【Main Dish】Braised Pork Ribs' : '【主菜】红烧排骨'}",
-         "type": "main",
-         "steps": [
-           {
-             "stepNumber": 1,
-             "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
-             "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
-             "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
-             "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
-             "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
-           }
-         ]
-       },
-       {
-         "dishName": "${isEnglish ? '【Side Dish】Stir-fried Seasonal Vegetables' : '【配菜】清炒时蔬'}",
-         "type": "side",
-         "steps": [
-           {
-             "stepNumber": 1,
-             "title": "${isEnglish ? 'Vegetable Washing and Cutting' : '蔬菜清洗与切配'}",
-             "description": "${isEnglish ? 'Detailed vegetable processing steps, including washing, cutting, and seasoning preparation.' : '详细的蔬菜处理步骤，包括清洗、切配、调味准备。'}",
-             "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
-             "tips": "${isEnglish ? 'Vegetable cutting techniques and key points.' : '蔬菜切配的技巧和要点。'}"
-           }
-         ]
-       },
-       {
-         "dishName": "${isEnglish ? '【Soup】Seaweed and Egg Drop Soup' : '【汤品】紫菜蛋花汤'}",
-         "type": "soup",
-         "steps": [
-           {
-             "stepNumber": 1,
-             "title": "${isEnglish ? 'Soup Preparation' : '汤品制作'}",
-             "description": "${isEnglish ? 'Detailed soup making steps, including water amount, seasoning, and heat control.' : '详细的汤品制作步骤，包括水量、调味、火候控制。'}",
-             "duration": "${isEnglish ? '12 minutes' : '12分钟'}",
-             "tips": "${isEnglish ? 'Key points for soup making.' : '汤品制作的关键要点。'}"
-           }
-         ]
-       }
-     ],
+      "dishInstructions": [
+        {
+          "dishName": "${isEnglish ? '【Main Dish 1】Braised Pork Ribs' : '【主菜1】红烧排骨'}",
+          "type": "main",
+          "steps": [
+            {
+              "stepNumber": 1,
+              "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
+              "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
+              "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
+              "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
+              "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
+            },
+            {
+              "stepNumber": 2,
+              "title": "${isEnglish ? 'Stir-frying Sugar' : '炒糖色'}",
+              "description": "${isEnglish ? 'Heat oil in cold pan, add rock sugar and stir-fry until caramel colored...' : '冷锅放油，加冰糖炒至焦糖色...'}",
+              "duration": "${isEnglish ? '8 minutes' : '8分钟'}",
+              "tips": "${isEnglish ? 'Heat control is crucial for sugar color' : '火候控制是糖色关键'}"
+            },
+            {
+              "stepNumber": 3,
+              "title": "${isEnglish ? 'Braising' : '焖煮'}",
+              "description": "${isEnglish ? 'Add ribs and seasonings, braise until tender...' : '加入排骨和调料，焖煮至软烂...'}",
+              "duration": "${isEnglish ? '45 minutes' : '45分钟'}",
+              "tips": "${isEnglish ? 'Simmer on low heat to maintain texture' : '小火慢炖保持口感'}"
+            }
+          ]
+        },
+        {
+          "dishName": "${isEnglish ? '【Main Dish 2】Steamed Fish' : '【主菜2】清蒸鱼'}",
+          "type": "main",
+          "steps": [
+            {
+              "stepNumber": 1,
+              "title": "${isEnglish ? 'Fish Preparation' : '鱼类处理'}",
+              "description": "${isEnglish ? 'Select fresh fish, clean and score, marinate with salt and cooking wine...' : '选用新鲜鱼类，清洗打花刀，用盐和料酒腌制...'}",
+              "duration": "${isEnglish ? '20 minutes' : '20分钟'}",
+              "tips": "${isEnglish ? 'Proper scoring ensures even cooking' : '正确打花刀确保受热均匀'}"
+            },
+            {
+              "stepNumber": 2,
+              "title": "${isEnglish ? 'Steaming' : '蒸制'}",
+              "description": "${isEnglish ? 'Steam over high heat for 8-10 minutes until just cooked...' : '大火蒸8-10分钟至刚熟...'}",
+              "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
+              "tips": "${isEnglish ? 'Timing is critical for tender fish' : '时间掌控是鱼肉嫩滑关键'}"
+            },
+            {
+              "stepNumber": 3,
+              "title": "${isEnglish ? 'Sauce and Garnish' : '调汁装饰'}",
+              "description": "${isEnglish ? 'Heat oil with scallions and ginger, pour over fish with soy sauce...' : '爆香葱丝姜丝，配生抽淋在鱼上...'}",
+              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
+              "tips": "${isEnglish ? 'Hot oil releases aromatic compounds' : '热油激发香味化合物'}"
+            }
+          ]
+        },
+        {
+          "dishName": "${isEnglish ? '【Side Dish】Stir-fried Seasonal Vegetables' : '【配菜】清炒时蔬'}",
+          "type": "side",
+          "steps": [
+            {
+              "stepNumber": 1,
+              "title": "${isEnglish ? 'Vegetable Preparation' : '蔬菜处理'}",
+              "description": "${isEnglish ? 'Wash and cut vegetables, prepare aromatics and seasonings...' : '清洗切配蔬菜，准备香料和调味料...'}",
+              "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
+              "tips": "${isEnglish ? 'Cut vegetables uniformly for even cooking' : '蔬菜切配均匀确保受热一致'}"
+            },
+            {
+              "stepNumber": 2,
+              "title": "${isEnglish ? 'Stir-frying' : '爆炒'}",
+              "description": "${isEnglish ? 'Heat wok over high heat, add oil and aromatics, then vegetables...' : '热锅下油爆香，下蔬菜大火快炒...'}",
+              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
+              "tips": "${isEnglish ? 'High heat preserves color and crunch' : '大火保持色泽和脆嫩'}"
+            }
+          ]
+        },
+        {
+          "dishName": "${isEnglish ? '【Soup】Seaweed and Egg Drop Soup' : '【汤品】紫菜蛋花汤'}",
+          "type": "soup",
+          "steps": [
+            {
+              "stepNumber": 1,
+              "title": "${isEnglish ? 'Broth Preparation' : '汤底制作'}",
+              "description": "${isEnglish ? 'Bring water to boil, add seaweed and seasonings...' : '水开后加入紫菜和调味料...'}",
+              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
+              "tips": "${isEnglish ? 'Clean seaweed thoroughly before use' : '紫菜使用前要彻底清洗'}"
+            },
+            {
+              "stepNumber": 2,
+              "title": "${isEnglish ? 'Egg Drop Technique' : '蛋花技法'}",
+              "description": "${isEnglish ? 'Beat eggs and slowly drizzle into simmering soup while stirring...' : '鸡蛋打散，慢慢淋入汤中同时搅拌...'}",
+              "duration": "${isEnglish ? '3 minutes' : '3分钟'}",
+              "tips": "${isEnglish ? 'Slow pouring creates delicate egg flowers' : '缓慢倒入形成细腻蛋花'}"
+            },
+            {
+              "stepNumber": 3,
+              "title": "${isEnglish ? 'Final Seasoning' : '最后调味'}",
+              "description": "${isEnglish ? 'Adjust seasoning and add garnish before serving...' : '调整味道并添加装饰后盛装...'}",
+              "duration": "${isEnglish ? '2 minutes' : '2分钟'}",
+              "tips": "${isEnglish ? 'Taste and adjust seasoning at the end' : '最后品尝并调整味道'}"
+            }
+          ]
+        }
+      ],
      "dishes": [
        {"name": "${isEnglish ? 'Braised Pork Ribs' : '红烧排骨'}", "type": "main", "description": "${isEnglish ? 'Sweet and tender main dish' : '香甜软糯的主菜'}"},
        {"name": "${isEnglish ? 'Stir-fried Seasonal Vegetables' : '清炒时蔬'}", "type": "side", "description": "${isEnglish ? 'Fresh and light side dish' : '清爽解腻的配菜'}"},
