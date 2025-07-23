@@ -174,107 +174,97 @@ export class RecipeService {
     const { ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType, language } = request;
     const isEnglish = language === 'en';
     
-    // 根据用餐人数计算菜的数量：每2-3人一道菜，最少4道菜
-    const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
+    // 根据用餐人数计算菜的数量：每2-3人一道菜，最少3道菜，最多6道菜
+    const dishCount = Math.max(3, Math.min(6, Math.ceil(peopleCount / 2)));
     
     return `
-You are a professional cooking assistant helping home cooks create perfect meal combinations. Create 1 complete rich meal plan with ${dishCount} different dishes.
+You are a professional cooking assistant helping home cooks create several independent but well-matched dishes. Create ${dishCount} separate, independent recipes that work perfectly together as a meal.
 
 AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
 
 MEAL REQUIREMENTS:
 - Number of people: ${peopleCount}
-- Number of dishes needed: ${dishCount} (${isEnglish ? 'rich meal, not just one dish' : '丰富的一顿饭，不能只有一道菜'})
+- Number of independent dishes: ${dishCount} (${isEnglish ? 'separate recipes that complement each other' : '独立但相互搭配合理的菜谱'})
 - Meal type: ${mealType} (breakfast/lunch/dinner/brunch/snack)
 - Occasion: ${occasionType} (daily meal or gathering/party)
 - Cuisine preference: ${cuisineType}
 - Skill level: ${skillLevel}
-- Planning for: 1 meal (${isEnglish ? 'one complete rich meal' : '一顿丰富的饭'})
 - Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
 - Language: ${isEnglish ? 'Generate ALL content in English' : '所有内容必须用中文生成'}
 
-CRITICAL MEAL PLANNING PRINCIPLES:
-1. **RICH MEAL COMPOSITION**: Create exactly ${dishCount} different dishes for one complete meal
-2. **DISH VARIETY**: Must include at least: 1-2 main dishes, 2-3 side dishes, 1 soup or beverage
-3. **SMART INGREDIENT SELECTION**: Select 3-6 ingredients per dish that work well together
-4. **LOGICAL COMBINATIONS**: Choose ingredients that complement each other in flavor, texture, and cooking method
-5. **CUISINE CONSISTENCY**: Ensure selected ingredients align with ${cuisineType} cuisine traditions
-6. **NUTRITIONAL BALANCE**: Select ingredients that provide protein, vegetables, and carbohydrates in proper proportions
-7. Create complete meal combinations for ${peopleCount} people
-8. Match the ${mealType} meal type and ${occasionType} occasion style
-9. Match the ${skillLevel} skill level with appropriate techniques
-10. Consider cooking coordination and timing for all ${dishCount} dishes
+CRITICAL RECIPE MATCHING PRINCIPLES:
+1. **INDEPENDENT DISHES**: Create ${dishCount} completely separate recipes, each with its own ingredient list and cooking instructions
+2. **SMART COMBINATIONS**: Ensure the dishes complement each other in flavor, nutrition, and texture
+3. **BALANCED VARIETY**: Include 1-2 主菜 (main dishes), 1-2 配菜 (side dishes), and 1 汤品 (soup) if applicable
+4. **CUISINE HARMONY**: All dishes should follow ${cuisineType} cuisine style and flavor profiles  
+5. **NUTRITIONAL BALANCE**: Together, the dishes should provide protein, vegetables, and carbohydrates
+6. **COOKING COORDINATION**: Consider timing so all dishes can be prepared together efficiently
+7. **PORTION SIZING**: Each recipe should serve ${peopleCount} people appropriately
+8. **INGREDIENT EFFICIENCY**: Maximize use of available ingredients across all dishes
 
 ${isEnglish ? 'IMPORTANT: Generate ALL recipe content in English including dish names, descriptions, ingredients, and instructions.' : 'IMPORTANT: 所有食谱内容必须用中文生成，包括菜名、描述、食材和步骤说明。'}
 
-Please respond with meal plans in this JSON format:
+Please respond with ${dishCount} independent recipes in this JSON format:
 {
   "recipes": [
     {
-      "id": "rich-meal-1",
-      "title": "${isEnglish ? `Complete ${mealType} Meal (${dishCount} dishes)` : `丰富的${mealType}搭配 (${dishCount}道菜)`}",
-      "description": "${isEnglish ? `Balanced ${cuisineType} rich meal perfect for ${occasionType}, serving ${peopleCount} people with ${dishCount} dishes` : `适合${occasionType}的均衡${cuisineType}丰富餐食，为${peopleCount}人提供${dishCount}道菜`}",
-      "prepTime": 30,
-      "cookTime": 45,
+      "id": "recipe-1",
+      "title": "${isEnglish ? 'Main Dish Name' : '主菜名称'}",
+      "description": "${isEnglish ? 'Description of this individual dish and what makes it special' : '这道菜的描述以及其特色'}",
+      "prepTime": 15,
+      "cookTime": 25,
       "servings": ${peopleCount},
       "difficulty": "${skillLevel}",
       "mealType": "${mealType}",
-      "dishes": [
-        {
-          "name": "${isEnglish ? 'Main Dish Name' : '主菜名称'}",
-          "type": "main",
-          "description": "${isEnglish ? 'Main dish description' : '主菜描述'}"
-        },
-        {
-          "name": "${isEnglish ? 'Side Dish Name' : '配菜名称'}", 
-          "type": "side",
-          "description": "${isEnglish ? 'Side dish description' : '配菜描述'}"
-        },
-        {
-          "name": "${isEnglish ? 'Second Side Dish Name' : '第二个配菜名称'}",
-          "type": "side", 
-          "description": "${isEnglish ? 'Second side dish description' : '第二个配菜描述'}"
-        },
-        {
-          "name": "${isEnglish ? 'Soup/Beverage Name' : '汤/饮品名称'}",
-          "type": "soup",
-          "description": "${isEnglish ? 'Soup or beverage description' : '汤或饮品描述'}"
-        }
-      ],
       "ingredients": [
-        {"item": "${isEnglish ? 'ingredient name' : '食材名称'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": false, "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
-        {"item": "${isEnglish ? 'ingredient to buy' : '需购买食材'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": true, "usedIn": "${isEnglish ? 'side dish' : '配菜'}"}
+        {"item": "${isEnglish ? 'ingredient name' : '食材名称'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": false},
+        {"item": "${isEnglish ? 'ingredient to buy' : '需购买食材'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": true}
       ],
       "instructions": [
-        "${isEnglish ? 'Step 1: Detailed cooking instructions' : '步骤1：详细烹饪说明'}",
-        "${isEnglish ? 'Step 2: Detailed cooking instructions' : '步骤2：详细烹饪说明'}",
-        "${isEnglish ? 'Step 3: Coordination of all dishes and timing' : '步骤3：所有菜品的协调和时间安排'}"
+        "${isEnglish ? 'Step 1: Detailed cooking instructions for this dish' : '步骤1：这道菜的详细烹饪说明'}",
+        "${isEnglish ? 'Step 2: Continue with specific steps' : '步骤2：继续具体步骤'}"
       ],
       "detailedSteps": [
         {
           "stepNumber": 1,
           "title": "${isEnglish ? 'Preparation Phase' : '准备阶段'}",
-          "description": "${isEnglish ? 'Detailed step-by-step description of what to do, including exact measurements, techniques, and timing. Be very specific about cutting techniques, temperatures, and cooking methods.' : '详细的步骤说明，包括精确的用量、技巧和时间。具体说明切配技巧、温度和烹饪方法。'}",
+          "description": "${isEnglish ? 'Detailed step-by-step description with measurements and techniques' : '详细的步骤说明，包括用量和技巧'}",
           "duration": "${isEnglish ? '5-10 minutes' : '5-10分钟'}",
-          "tips": "${isEnglish ? 'Pro tip for this specific step' : '这个步骤的专业提示'}"
-        },
-        {
-          "stepNumber": 2,
-          "title": "${isEnglish ? 'Cooking Phase' : '烹饪阶段'}",
-          "description": "${isEnglish ? 'Very detailed cooking instructions with specific temperatures, timing, and visual cues to look for. Include what the food should look, smell, and sound like.' : '非常详细的烹饪说明，包括具体温度、时间和视觉提示。包括食物应该呈现的外观、气味和声音。'}",
-          "duration": "${isEnglish ? '15-20 minutes' : '15-20分钟'}",
-          "tips": "${isEnglish ? 'Important cooking tip for this step' : '这个步骤的重要烹饪提示'}"
+          "tips": "${isEnglish ? 'Pro tip for this step' : '这个步骤的专业提示'}"
         }
       ],
       "tips": [
-        "${isEnglish ? 'Cooking tip 1: How to coordinate timing' : '烹饪提示1：如何协调时间'}",
-        "${isEnglish ? 'Cooking tip 2: Nutritional balance suggestions' : '烹饪提示2：营养均衡建议'}"
+        "${isEnglish ? 'Cooking tip for this specific dish' : '这道菜的烹饪提示'}"
       ],
       "nutritionInfo": {
-        "calories": 650,
-        "protein": "35g", 
-        "carbs": "45g",
-        "fat": "18g"
+        "calories": 350,
+        "protein": "25g", 
+        "carbs": "30g",
+        "fat": "12g"
+      }
+    },
+    {
+      "id": "recipe-2", 
+      "title": "${isEnglish ? 'Side Dish Name' : '配菜名称'}",
+      "description": "${isEnglish ? 'Description of this side dish and how it complements the main dish' : '这道配菜的描述以及如何与主菜搭配'}",
+      "prepTime": 10,
+      "cookTime": 15,
+      "servings": ${peopleCount},
+      "difficulty": "${skillLevel}",
+      "mealType": "${mealType}",
+      "ingredients": [
+        {"item": "${isEnglish ? 'side dish ingredient' : '配菜食材'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": false}
+      ],
+      "instructions": [
+        "${isEnglish ? 'Step 1: Side dish preparation' : '步骤1：配菜制作'}"
+      ],
+      "detailedSteps": [],
+      "tips": [],
+      "nutritionInfo": {
+        "calories": 150,
+        "protein": "5g",
+        "carbs": "20g", 
+        "fat": "6g"
       }
     }
   ]
