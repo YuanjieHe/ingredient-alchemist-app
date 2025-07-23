@@ -195,46 +195,16 @@ const RecipeGenerator = () => {
                         )}
                       </div>
                     </div>
-                    {subscription.subscription_type === 'free' && (
+                    {subscription.subscription_type === 'free' && remainingGenerations === 0 && (
                       <div className="mt-3 pt-3 border-t border-muted-foreground/20">
-                        {remainingGenerations === 0 ? (
-                          <Button 
-                            size="sm" 
-                            onClick={() => navigate('/subscription')}
-                            className="w-full"
-                          >
-                            <Crown className="w-4 h-4 mr-2" />
-                            {t('language') === 'en' ? 'Upgrade to Premium' : '升级到高级版'}
-                          </Button>
-                        ) : (
-                          <div className="space-y-3">
-                            <p className="text-xs text-center text-muted-foreground">
-                              {t('language') === 'en' ? 'Upgrade to unlock unlimited generations' : '升级解锁无限生成'}
-                            </p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">月付</div>
-                                <div className="text-sm font-bold text-primary">¥14</div>
-                              </div>
-                              <div className="text-center p-2 border rounded-lg bg-primary/5 border-primary/20 hover:bg-primary/10 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-primary">季付</div>
-                                <div className="text-sm font-bold text-primary">¥30</div>
-                                <Badge className="text-xs mt-1 bg-primary/10 text-primary hover:bg-primary/20">省钱</Badge>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">年付</div>
-                                <div className="text-sm font-bold text-primary">¥98</div>
-                              </div>
-                              <div className="text-center p-2 border rounded-lg bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:from-yellow-100 hover:to-orange-100 transition-all cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-yellow-800">终身</div>
-                                <div className="text-sm font-bold text-yellow-800">¥168</div>
-                                <Badge className="text-xs mt-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">推荐</Badge>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        <Button 
+                          size="sm" 
+                          onClick={() => navigate('/subscription')}
+                          className="w-full"
+                        >
+                          <Crown className="w-4 h-4 mr-2" />
+                          {t('language') === 'en' ? 'Upgrade to Premium' : '升级到高级版'}
+                        </Button>
                       </div>
                     )}
                   </CardContent>
