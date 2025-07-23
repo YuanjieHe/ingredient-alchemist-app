@@ -45,7 +45,7 @@ interface FavoriteRecipe {
 export default function Profile() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
-  const { subscription, loading: subscriptionLoading } = useSubscription();
+  const { subscription, loading: subscriptionLoading, remainingGenerations } = useSubscription();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -294,9 +294,43 @@ export default function Profile() {
               </div>
               
               {subscription.subscription_type === 'free' && (
-                <p className="text-sm text-muted-foreground">
-                  已使用: {subscription.free_generations_used}/{subscription.free_generations_limit} 次免费生成
-                </p>
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-sm">免费试用进度</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        剩余 {remainingGenerations} 次免费生成机会
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-primary">
+                        {remainingGenerations}
+                      </div>
+                      <div className="text-xs text-muted-foreground">次剩余</div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <span>已使用 {subscription.free_generations_used}</span>
+                      <span>总共 {subscription.free_generations_limit}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${(subscription.free_generations_used / subscription.free_generations_limit) * 100}%` 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                  {remainingGenerations === 0 && (
+                    <div className="mt-3 p-2 bg-orange-100 dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
+                      <p className="text-xs text-orange-800 dark:text-orange-200 text-center">
+                        免费次数已用完，升级到高级会员享受无限生成
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
               
               {subscription.subscription_end_date && (
