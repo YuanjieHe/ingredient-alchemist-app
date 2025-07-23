@@ -2,31 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
 
 interface Dish {
   name: string;
   type: 'main' | 'side' | 'soup';
   description: string;
-  ingredients?: Array<{
-    item: string;
-    amount: string;
-    needed?: boolean;
-  }>;
-  instructions?: string[];
-  detailedSteps?: Array<{
-    stepNumber: number;
-    title: string;
-    description: string;
-    duration: string;
-    tips?: string;
-  }>;
 }
 
 interface Recipe {
@@ -75,7 +60,6 @@ interface RecipeDisplayProps {
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const [selectedDishes, setSelectedDishes] = useState<{[key: string]: string}>({});
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -125,93 +109,53 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
   const handleCookRecipe = async (recipe: Recipe) => {
     try {
-      // Get current ingredients from localStorage and Supabase
+      // Get current ingredients from localStorage
+      const bankIngredients = localStorage.getItem('ingredientsBank');
       let currentIngredients: any[] = [];
       
-      if (user) {
-        // Get from Supabase for authenticated users
-        const { data: bankData, error } = await supabase
-          .from('ingredients_bank')
-          .select('*')
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-        currentIngredients = bankData || [];
-      } else {
-        // Get from localStorage for non-authenticated users
-        const bankIngredients = localStorage.getItem('ingredientsBank');
-        if (bankIngredients) {
-          currentIngredients = JSON.parse(bankIngredients);
-        }
+      if (bankIngredients) {
+        currentIngredients = JSON.parse(bankIngredients);
       }
 
-      // Track ingredients that were used and missing
-      const usedIngredients: string[] = [];
+      // Track ingredients that couldn't be deducted
       const missingIngredients: string[] = [];
       
       // Deduct recipe ingredients from bank
       const updatedIngredients = currentIngredients.map(ingredient => {
-        const recipeIngredient = recipe.ingredients.find(ri => {
-          // More precise matching
-          const itemName = ri.item.toLowerCase().trim();
-          const ingredientName = ingredient.name.toLowerCase().trim();
-          return itemName.includes(ingredientName) || 
-                 ingredientName.includes(itemName) ||
-                 itemName === ingredientName;
-        });
+        const recipeIngredient = recipe.ingredients.find(ri => 
+          ri.item.toLowerCase().includes(ingredient.name.toLowerCase()) ||
+          ingredient.name.toLowerCase().includes(ri.item.toLowerCase())
+        );
         
         if (recipeIngredient) {
-          // Parse amount to get numeric value (simple parsing)
-          let amountNeeded = 1; // default to 1 if can't parse
-          const amountMatch = recipeIngredient.amount.match(/(\d+\.?\d*)/);
-          if (amountMatch) {
-            amountNeeded = Math.max(1, Math.ceil(parseFloat(amountMatch[1]) / 100)); // Convert to reasonable units
-          }
-          
-          const currentQty = Number(ingredient.quantity) || 0;
-          const newQuantity = Math.max(0, currentQty - amountNeeded);
-          
-          if (currentQty >= amountNeeded) {
-            usedIngredients.push(`${ingredient.name} (${amountNeeded}${ingredient.unit || ''})`);
-          } else if (currentQty > 0) {
-            usedIngredients.push(`${ingredient.name} (${currentQty}${ingredient.unit || ''}, 不足)`);
-            missingIngredients.push(ingredient.name);
-          } else {
+          const newQuantity = Math.max(0, ingredient.quantity - 1);
+          if (newQuantity === 0 && ingredient.quantity > 0) {
             missingIngredients.push(ingredient.name);
           }
-          
           return { ...ingredient, quantity: newQuantity };
         }
         return ingredient;
       });
 
-      // Update storage
+      // Save to localStorage
+      localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
+
+      // Update Supabase if user is authenticated
       if (user) {
-        // Update Supabase for authenticated users
         for (const ingredient of updatedIngredients) {
-          if (ingredient.quantity !== currentIngredients.find(ci => ci.id === ingredient.id)?.quantity) {
-            await supabase
-              .from('ingredients_bank')
-              .update({ quantity: ingredient.quantity })
-              .eq('id', ingredient.id);
-          }
+          await supabase
+            .from('ingredients_bank')
+            .update({ quantity: ingredient.quantity })
+            .eq('user_id', user.id)
+            .eq('name', ingredient.name);
         }
-      } else {
-        // Update localStorage for non-authenticated users
-        localStorage.setItem('ingredientsBank', JSON.stringify(updatedIngredients));
       }
 
-      // Show appropriate success message
-      if (usedIngredients.length > 0) {
-        if (missingIngredients.length > 0) {
-          toast.success(`${t('recipeCooked')} 使用了: ${usedIngredients.join(', ')}。部分食材不足: ${missingIngredients.join(', ')}`);
-        } else {
-          toast.success(`${t('recipeCooked')} 使用了: ${usedIngredients.join(', ')}`);
-        }
+      if (missingIngredients.length > 0) {
+        toast.success(t('recipeCooked') + ' ' + t('someIngredientsUsedUp'));
       } else {
-        toast.warning('没有找到匹配的食材可以扣除');
+        toast.success(t('recipeCooked'));
       }
-      
     } catch (error) {
       console.error('Error cooking recipe:', error);
       toast.error(t('cookingFailed'));
@@ -259,7 +203,13 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
         {recipes.map((recipe) => (
           <Card 
             key={recipe.id} 
-            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300"
+            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
+            onClick={() => {
+              // Store recipe in localStorage for detailed view
+              localStorage.setItem('selectedRecipe', JSON.stringify(recipe));
+              // Navigate to recipe detail page
+              window.location.href = `/recipe/${recipe.id}`;
+            }}
           >
             {/* Recipe Image */}
             {recipe.imageUrl && (
@@ -348,105 +298,29 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               {recipe.knowledgeBaseReferences && recipe.knowledgeBaseReferences.length > 0 && <Separator />}
 
-              {/* Meal combination display with tabs */}
+              {/* Meal combination display */}
               {recipe.dishes && recipe.dishes.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center">
                     <Coffee className="w-4 h-4 mr-2 text-primary" />
                     {t('mealCombination')}
                   </h4>
-                  <Tabs 
-                    value={selectedDishes[recipe.id] || recipe.dishes[0]?.name} 
-                    onValueChange={(value) => setSelectedDishes(prev => ({ ...prev, [recipe.id]: value }))}
-                    className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
-                      {recipe.dishes.map((dish, index) => (
-                        <TabsTrigger key={index} value={dish.name} className="text-sm">
-                          <span className="mr-2">{getDishIcon(dish.type)}</span>
-                          {dish.name}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                    
+                  <div className="grid gap-3">
                     {recipe.dishes.map((dish, index) => (
-                      <TabsContent key={index} value={dish.name} className="mt-4">
-                        <Card className="bg-cooking-cream/50">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-2xl">{getDishIcon(dish.type)}</span>
-                              <div>
-                                <CardTitle className="text-lg">{dish.name}</CardTitle>
-                                <Badge variant="outline" className="text-xs mt-1">
-                                  {getDishTypeText(dish.type)}
-                                </Badge>
-                              </div>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-2">{dish.description}</p>
-                          </CardHeader>
-                          
-                          {/* Dish-specific ingredients */}
-                          {dish.ingredients && dish.ingredients.length > 0 && (
-                            <CardContent className="pt-0">
-                              <h5 className="font-medium mb-2 text-sm">{t('ingredients')}:</h5>
-                              <div className="grid gap-1">
-                                {dish.ingredients.map((ingredient, idx) => (
-                                  <div key={idx} className="flex justify-between items-center text-xs p-2 bg-white/50 rounded">
-                                    <span>{ingredient.item}</span>
-                                    <span className="text-muted-foreground">{ingredient.amount}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          )}
-                          
-                          {/* Dish-specific instructions */}
-                          {dish.instructions && dish.instructions.length > 0 && (
-                            <CardContent className="pt-0">
-                              <h5 className="font-medium mb-2 text-sm">{t('instructions')}:</h5>
-                              <ol className="space-y-1">
-                                {dish.instructions.map((step, idx) => (
-                                  <li key={idx} className="flex space-x-2 text-xs">
-                                    <span className="flex-shrink-0 w-4 h-4 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-medium">
-                                      {idx + 1}
-                                    </span>
-                                    <span className="leading-relaxed">{step}</span>
-                                  </li>
-                                ))}
-                              </ol>
-                            </CardContent>
-                          )}
-                          
-                          {/* Dish-specific detailed steps */}
-                          {dish.detailedSteps && dish.detailedSteps.length > 0 && (
-                            <CardContent className="pt-0">
-                              <h5 className="font-medium mb-2 text-sm">{t('detailedSteps')}:</h5>
-                              <div className="space-y-2">
-                                {dish.detailedSteps.map((step, idx) => (
-                                  <div key={idx} className="p-2 bg-white/50 rounded">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                                        {step.stepNumber}
-                                      </span>
-                                      <span className="font-medium text-sm">{step.title}</span>
-                                      <span className="text-xs text-muted-foreground">({step.duration})</span>
-                                    </div>
-                                    <p className="text-xs leading-relaxed ml-7">{step.description}</p>
-                                    {step.tips && (
-                                      <div className="ml-7 mt-1 p-1 bg-cooking-herb/10 rounded text-xs">
-                                        <span className="font-medium">💡 {t('tip')}: </span>
-                                        {step.tips}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          )}
-                        </Card>
-                      </TabsContent>
+                      <div key={index} className="flex items-center p-3 bg-cooking-cream rounded-lg">
+                        <div className="text-2xl mr-3">{getDishIcon(dish.type)}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium">{dish.name}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {getDishTypeText(dish.type)}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{dish.description}</p>
+                        </div>
+                      </div>
                     ))}
-                  </Tabs>
+                  </div>
                 </div>
               )}
 
@@ -493,132 +367,67 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* Dynamic Detailed Cooking Steps based on selected dish */}
-              {recipe.dishes && recipe.dishes.length > 0 ? (
-                (() => {
-                  const selectedDishName = selectedDishes[recipe.id] || recipe.dishes[0]?.name;
-                  const selectedDish = recipe.dishes.find(dish => dish.name === selectedDishName);
-                  
-                  if (selectedDish && selectedDish.detailedSteps && selectedDish.detailedSteps.length > 0) {
-                    return (
-                      <div className="space-y-6">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          <BookOpen className="h-4 w-4" />
-                          {selectedDish.name} - {t('detailedCookingSteps')}
-                        </h4>
-                        <div className="space-y-6">
-                          {selectedDish.detailedSteps.map((step, index) => (
-                            <Card key={index} className="p-4 bg-muted/30">
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                  <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
-                                    {step.stepNumber}
-                                  </span>
-                                  <div>
-                                    <h5 className="font-semibold">{step.title}</h5>
-                                    <span className="text-sm text-muted-foreground">{step.duration}</span>
-                                  </div>
-                                </div>
-                                
-                                <p className="text-sm leading-relaxed">{step.description}</p>
-                                
-                                {step.tips && (
-                                  <div className="bg-cooking-cream p-3 rounded-lg">
-                                    <p className="text-sm text-muted-foreground">
-                                      <span className="font-medium">💡 {t('tip')}: </span>
-                                      {step.tips}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  } else if (selectedDish && selectedDish.instructions && selectedDish.instructions.length > 0) {
-                    return (
-                      <div>
-                        <h4 className="font-semibold mb-3">{selectedDish.name} - {t('cookingInstructions')}</h4>
-                        <ol className="space-y-3">
-                          {selectedDish.instructions.map((step, index) => (
-                            <li key={index} className="flex space-x-3">
-                              <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                                {index + 1}
-                              </div>
-                              <p className="text-sm leading-relaxed">{step}</p>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    );
-                  } else {
-                    return null;
-                  }
-                })()
-              ) : (
-                /* Fallback to recipe-level instructions if no dishes */
-                recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
+              {/* Detailed Cooking Steps */}
+              {recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
+                <div className="space-y-6">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    {t('detailedCookingSteps')}
+                  </h4>
                   <div className="space-y-6">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" />
-                      {t('detailedCookingSteps')}
-                    </h4>
-                    <div className="space-y-6">
-                      {recipe.detailedSteps.map((step, index) => (
-                        <Card key={index} className="p-4 bg-muted/30">
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
-                                {step.stepNumber}
-                              </span>
-                              <div>
-                                <h5 className="font-semibold">{step.title}</h5>
-                                <span className="text-sm text-muted-foreground">{step.duration}</span>
-                              </div>
+                    {recipe.detailedSteps.map((step, index) => (
+                      <Card key={index} className="p-4 bg-muted/30">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
+                              {step.stepNumber}
+                            </span>
+                            <div>
+                              <h5 className="font-semibold">{step.title}</h5>
+                              <span className="text-sm text-muted-foreground">{step.duration}</span>
                             </div>
-                            
-                            {step.imageUrl && (
-                              <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
-                                <img 
-                                  src={step.imageUrl} 
-                                  alt={`Step ${step.stepNumber}: ${step.title}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            
-                            <p className="text-sm leading-relaxed">{step.description}</p>
-                            
-                            {step.tips && (
-                              <div className="bg-cooking-cream p-3 rounded-lg">
-                                <p className="text-sm text-muted-foreground">
-                                  <span className="font-medium">💡 {t('tip')}: </span>
-                                  {step.tips}
-                                </p>
-                              </div>
-                            )}
                           </div>
-                        </Card>
-                      ))}
-                    </div>
+                          
+                          {step.imageUrl && (
+                            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
+                              <img 
+                                src={step.imageUrl} 
+                                alt={`Step ${step.stepNumber}: ${step.title}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          <p className="text-sm leading-relaxed">{step.description}</p>
+                          
+                          {step.tips && (
+                            <div className="bg-cooking-cream p-3 rounded-lg">
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-medium">💡 {t('tip')}: </span>
+                                {step.tips}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                ) : (
-                  /* Fallback to basic instructions */
-                  <div>
-                    <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
-                    <ol className="space-y-3">
-                      {recipe.instructions.map((step, index) => (
-                        <li key={index} className="flex space-x-3">
-                          <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                            {index + 1}
-                          </div>
-                          <p className="text-sm leading-relaxed">{step}</p>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                )
+                </div>
+              ) : (
+                /* Fallback to basic instructions */
+                <div>
+                  <h4 className="font-semibold mb-3">{t('cookingInstructions')}</h4>
+                  <ol className="space-y-3">
+                    {recipe.instructions.map((step, index) => (
+                      <li key={index} className="flex space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                          {index + 1}
+                        </div>
+                        <p className="text-sm leading-relaxed">{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               )}
 
               {/* Cooking Tips */}
