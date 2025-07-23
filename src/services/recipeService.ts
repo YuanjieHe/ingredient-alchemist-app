@@ -49,6 +49,7 @@ export interface RecipeRequest {
   occasionType: string;
   cuisineType: string;
   apiKey: string;
+  language?: string;
 }
 
 export class RecipeService {
@@ -91,7 +92,8 @@ export class RecipeService {
           peopleCount: request.peopleCount,
           mealType: request.mealType,
           occasionType: request.occasionType,
-          cuisineType: request.cuisineType
+          cuisineType: request.cuisineType,
+          language: request.language || 'zh'
         })
       });
       
@@ -169,11 +171,12 @@ export class RecipeService {
   }
 
   private createPrompt(request: RecipeRequest): string {
-    const { ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType } = request;
+    const { ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType, language } = request;
+    const isEnglish = language === 'en';
     
     // 根据用餐人数计算菜的数量：每2-3人一道菜，最少4道菜
     const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
-
+    
     return `
 You are a professional cooking assistant helping home cooks create perfect meal combinations. Create 1 complete rich meal plan with ${dishCount} different dishes.
 
@@ -181,13 +184,14 @@ AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
 
 MEAL REQUIREMENTS:
 - Number of people: ${peopleCount}
-- Number of dishes needed: ${dishCount} (丰富的一顿饭，不能只有一道菜)
+- Number of dishes needed: ${dishCount} (${isEnglish ? 'rich meal, not just one dish' : '丰富的一顿饭，不能只有一道菜'})
 - Meal type: ${mealType} (breakfast/lunch/dinner/brunch/snack)
 - Occasion: ${occasionType} (daily meal or gathering/party)
 - Cuisine preference: ${cuisineType}
 - Skill level: ${skillLevel}
-- Planning for: 1 meal (一顿丰富的饭)
+- Planning for: 1 meal (${isEnglish ? 'one complete rich meal' : '一顿丰富的饭'})
 - Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
+- Language: ${isEnglish ? 'Generate ALL content in English' : '所有内容必须用中文生成'}
 
 CRITICAL MEAL PLANNING PRINCIPLES:
 1. **RICH MEAL COMPOSITION**: Create exactly ${dishCount} different dishes for one complete meal
@@ -201,13 +205,15 @@ CRITICAL MEAL PLANNING PRINCIPLES:
 9. Match the ${skillLevel} skill level with appropriate techniques
 10. Consider cooking coordination and timing for all ${dishCount} dishes
 
+${isEnglish ? 'IMPORTANT: Generate ALL recipe content in English including dish names, descriptions, ingredients, and instructions.' : 'IMPORTANT: 所有食谱内容必须用中文生成，包括菜名、描述、食材和步骤说明。'}
+
 Please respond with meal plans in this JSON format:
 {
   "recipes": [
     {
       "id": "rich-meal-1",
-      "title": "丰富的${mealType}搭配 (${dishCount}道菜)",
-      "description": "Balanced ${cuisineType} rich meal perfect for ${occasionType}, serving ${peopleCount} people with ${dishCount} dishes",
+      "title": "${isEnglish ? `Complete ${mealType} Meal (${dishCount} dishes)` : `丰富的${mealType}搭配 (${dishCount}道菜)`}",
+      "description": "${isEnglish ? `Balanced ${cuisineType} rich meal perfect for ${occasionType}, serving ${peopleCount} people with ${dishCount} dishes` : `适合${occasionType}的均衡${cuisineType}丰富餐食，为${peopleCount}人提供${dishCount}道菜`}",
       "prepTime": 30,
       "cookTime": 45,
       "servings": ${peopleCount},
@@ -215,54 +221,54 @@ Please respond with meal plans in this JSON format:
       "mealType": "${mealType}",
       "dishes": [
         {
-          "name": "主菜名称",
+          "name": "${isEnglish ? 'Main Dish Name' : '主菜名称'}",
           "type": "main",
-          "description": "主菜描述"
+          "description": "${isEnglish ? 'Main dish description' : '主菜描述'}"
         },
         {
-          "name": "配菜名称", 
+          "name": "${isEnglish ? 'Side Dish Name' : '配菜名称'}", 
           "type": "side",
-          "description": "配菜描述"
+          "description": "${isEnglish ? 'Side dish description' : '配菜描述'}"
         },
         {
-          "name": "第二个配菜名称",
+          "name": "${isEnglish ? 'Second Side Dish Name' : '第二个配菜名称'}",
           "type": "side", 
-          "description": "第二个配菜描述"
+          "description": "${isEnglish ? 'Second side dish description' : '第二个配菜描述'}"
         },
         {
-          "name": "汤/饮品名称",
+          "name": "${isEnglish ? 'Soup/Beverage Name' : '汤/饮品名称'}",
           "type": "soup",
-          "description": "汤或饮品描述"
+          "description": "${isEnglish ? 'Soup or beverage description' : '汤或饮品描述'}"
         }
       ],
       "ingredients": [
-        {"item": "ingredient name", "amount": "quantity", "needed": false, "usedIn": "main dish"},
-        {"item": "ingredient to buy", "amount": "quantity", "needed": true, "usedIn": "side dish"}
+        {"item": "${isEnglish ? 'ingredient name' : '食材名称'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": false, "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
+        {"item": "${isEnglish ? 'ingredient to buy' : '需购买食材'}", "amount": "${isEnglish ? 'quantity' : '用量'}", "needed": true, "usedIn": "${isEnglish ? 'side dish' : '配菜'}"}
       ],
       "instructions": [
-        "Step 1: Detailed cooking instructions",
-        "Step 2: Detailed cooking instructions",
-        "Step 3: Coordination of all dishes and timing"
+        "${isEnglish ? 'Step 1: Detailed cooking instructions' : '步骤1：详细烹饪说明'}",
+        "${isEnglish ? 'Step 2: Detailed cooking instructions' : '步骤2：详细烹饪说明'}",
+        "${isEnglish ? 'Step 3: Coordination of all dishes and timing' : '步骤3：所有菜品的协调和时间安排'}"
       ],
       "detailedSteps": [
         {
           "stepNumber": 1,
-          "title": "Preparation Phase",
-          "description": "Detailed step-by-step description of what to do, including exact measurements, techniques, and timing. Be very specific about cutting techniques, temperatures, and cooking methods.",
-          "duration": "5-10 minutes",
-          "tips": "Pro tip for this specific step"
+          "title": "${isEnglish ? 'Preparation Phase' : '准备阶段'}",
+          "description": "${isEnglish ? 'Detailed step-by-step description of what to do, including exact measurements, techniques, and timing. Be very specific about cutting techniques, temperatures, and cooking methods.' : '详细的步骤说明，包括精确的用量、技巧和时间。具体说明切配技巧、温度和烹饪方法。'}",
+          "duration": "${isEnglish ? '5-10 minutes' : '5-10分钟'}",
+          "tips": "${isEnglish ? 'Pro tip for this specific step' : '这个步骤的专业提示'}"
         },
         {
           "stepNumber": 2,
-          "title": "Cooking Phase",
-          "description": "Very detailed cooking instructions with specific temperatures, timing, and visual cues to look for. Include what the food should look, smell, and sound like.",
-          "duration": "15-20 minutes",
-          "tips": "Important cooking tip for this step"
+          "title": "${isEnglish ? 'Cooking Phase' : '烹饪阶段'}",
+          "description": "${isEnglish ? 'Very detailed cooking instructions with specific temperatures, timing, and visual cues to look for. Include what the food should look, smell, and sound like.' : '非常详细的烹饪说明，包括具体温度、时间和视觉提示。包括食物应该呈现的外观、气味和声音。'}",
+          "duration": "${isEnglish ? '15-20 minutes' : '15-20分钟'}",
+          "tips": "${isEnglish ? 'Important cooking tip for this step' : '这个步骤的重要烹饪提示'}"
         }
       ],
       "tips": [
-        "Cooking tip 1: How to coordinate timing",
-        "Cooking tip 2: Nutritional balance suggestions"
+        "${isEnglish ? 'Cooking tip 1: How to coordinate timing' : '烹饪提示1：如何协调时间'}",
+        "${isEnglish ? 'Cooking tip 2: Nutritional balance suggestions' : '烹饪提示2：营养均衡建议'}"
       ],
       "nutritionInfo": {
         "calories": 650,
@@ -277,11 +283,12 @@ Please respond with meal plans in this JSON format:
 CRITICAL INSTRUCTIONS FOR DETAILED STEPS:
 - Generate 6-10 detailed cooking steps with specific techniques, temperatures, and timing
 - Each step should include a descriptive title, detailed instructions (100-200 words), estimated duration, and helpful tips
-- Include visual cues like "until golden brown", "when it sizzles", "soft to touch"
+- Include visual cues like "${isEnglish ? 'until golden brown' : '直到金黄色'}", "${isEnglish ? 'when it sizzles' : '当发出滋滋声'}", "${isEnglish ? 'soft to touch' : '触感柔软'}"
 - Provide specific measurements, temperatures (°C), and timing for each step
 - Add professional cooking tips for each step
 - Make instructions so detailed that a beginner could follow them successfully
 - Include coordination between ${dishCount} different dishes being prepared simultaneously
+- ${isEnglish ? 'ALL content must be in English' : '所有内容必须用中文'}
 
 Important Guidelines:
 - Create exactly ${dishCount} different dishes for this one meal
@@ -293,6 +300,7 @@ Important Guidelines:
 - Consider dietary needs for ${occasionType} occasions
 - Adapt portion sizes and complexity for ${peopleCount} people
 - Ensure the meal is rich and complete with ${dishCount} dishes
+- ${isEnglish ? 'Generate everything in English language' : '用中文生成所有内容'}
     `;
   }
 

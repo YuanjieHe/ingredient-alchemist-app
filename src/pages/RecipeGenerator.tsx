@@ -124,7 +124,8 @@ const RecipeGenerator = () => {
         mealType,
         occasionType,
         cuisineType,
-        apiKey: API_KEY
+        apiKey: API_KEY,
+        language: t('language') // 传递当前语言设置
       });
 
       setRecipes(generatedRecipes);
