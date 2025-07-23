@@ -366,21 +366,22 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
+  return `🍽️ ${isEnglish ? 'CRITICAL: Create' : '关键要求：创建'} ${dishCount} ${isEnglish ? 'SEPARATE RECIPES (NOT one combined meal)' : '个独立的食谱（不是一个组合套餐）'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
-${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
+${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create' : '料理大师，创造'} ${dishCount} ${isEnglish ? 'SEPARATE, INDIVIDUAL RECIPES using these ingredients' : '个独立的食谱，使用这些食材'}: ${ingredients.join(', ')}.
 ${knowledgeSection}
 
-🔥 ${isEnglish ? 'MEAL COMPOSITION REQUIREMENTS (MANDATORY)' : '套餐组成要求（必须）'}:
-- ${isEnglish ? 'Total dishes' : '总菜品数'}: ${dishCount} ${isEnglish ? 'different dishes for one complete meal' : '道不同菜品组成一顿完整餐食'}
-- ${isEnglish ? 'MUST include' : '必须包含'}: 1-2 ${isEnglish ? 'main dishes' : '主菜'} (${isEnglish ? '荤菜/主菜' : '荤菜/主菜'}) + 2-3 ${isEnglish ? 'side dishes' : '配菜'} (${isEnglish ? '素菜/配菜' : '素菜/配菜'}) + 1 ${isEnglish ? 'soup/drink' : '汤品/饮品'} (${isEnglish ? '汤/饮品' : '汤/饮品'})
-- ${isEnglish ? 'Create a BALANCED TABLE that feeds' : '创建一个均衡的餐桌，满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
-- ${isEnglish ? 'Each dish uses different cooking methods and ingredients' : '每道菜使用不同的烹饪方法和食材'}
-- ${isEnglish ? 'All dishes should complement each other in flavor and nutrition' : '所有菜品在口味和营养上应该相互补充'}
+🔥 ${isEnglish ? 'RECIPE REQUIREMENTS (MANDATORY)' : '食谱要求（必须）'}:
+- ${isEnglish ? 'Total recipes' : '总食谱数'}: ${dishCount} ${isEnglish ? 'SEPARATE recipes' : '个独立食谱'}
+- ${isEnglish ? 'Each recipe should be' : '每个食谱应该是'}: 1 ${isEnglish ? 'complete dish (main/side/soup)' : '道完整的菜（主菜/配菜/汤）'}
+- ${isEnglish ? 'Include variety' : '包含多样性'}: ${isEnglish ? 'main dishes, side dishes, soups' : '主菜、配菜、汤品'}
+- ${isEnglish ? 'Each recipe feeds' : '每个食谱满足'} ${peopleCount} ${isEnglish ? 'people' : '人'}
+- ${isEnglish ? 'Each recipe uses different cooking methods and ingredients' : '每个食谱使用不同的烹饪方法和食材'}
+- ${isEnglish ? 'All recipes should complement each other' : '所有食谱应该相互补充'}
 
 ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'Skill level' : '技能水平'}: ${skillLevel} (${isEnglish ? 'provide extremely detailed cooking techniques and precise instructions' : '提供极其详细的烹饪技法和精确说明'})
-- ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people' : '人'}
+- ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people per recipe' : '人每道食谱'}
 - ${isEnglish ? 'Focus' : '重点'}: ${isEnglish ? 'Authentic' : '正宗的'} ${cuisineType} ${isEnglish ? 'cooking methods and flavors' : '烹饪方法和口味'}
 - ${isEnglish ? 'Occasion' : '场合'}: ${occasionType}
 - ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance the dish' : '可以建议必要食材来提升菜品') : (isEnglish ? 'Must use only provided ingredients creatively' : '必须创造性地仅使用提供的食材')}
