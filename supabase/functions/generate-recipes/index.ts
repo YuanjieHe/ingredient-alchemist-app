@@ -424,7 +424,7 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
              "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
              "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
              "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
-             "tips": "${isEnglish ? 'Special technique: High-quality ribs don\\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
+             "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
              "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
            }
          ]
