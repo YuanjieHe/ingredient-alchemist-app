@@ -161,6 +161,7 @@ const translations = {
     more: 'more',
     mainIngredients: 'Main Ingredients',
     backToRecipes: 'Back to Recipes',
+    backToPreviousPage: 'Back to Previous',
     detailedRecipeGenerated: 'Detailed recipe generated successfully!',
     detailedRecipeGenerationFailed: 'Failed to generate detailed recipe. Please try again.',
     generatingDetailedSteps: 'Generating detailed cooking steps...',
@@ -643,7 +644,8 @@ const translations = {
     totalFavorites: '总收藏',
     recipes: '个菜谱',
     myFavorites: '我的收藏',
-    noFavorites: '还没有收藏的菜谱'
+    noFavorites: '还没有收藏的菜谱',
+    backToPreviousPage: '返回上一页'
   }
 };
 

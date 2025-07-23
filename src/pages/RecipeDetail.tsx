@@ -55,10 +55,7 @@ const RecipeDetail = () => {
         const parsedRecipe = JSON.parse(savedRecipe);
         setRecipe(parsedRecipe);
         
-        // If recipe doesn't have detailed steps, generate them
-        if (!parsedRecipe.detailedSteps || parsedRecipe.detailedSteps.length === 0) {
-          generateDetailedRecipe(parsedRecipe);
-        }
+        // Only generate detailed steps if explicitly requested, not automatically
       } catch (error) {
         console.error('Error parsing saved recipe:', error);
         navigate('/recipes');
@@ -182,14 +179,23 @@ const RecipeDetail = () => {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/recipes')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('backToRecipes')}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/recipes')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('backToRecipes')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2"
+          >
+            {t('backToPreviousPage')}
+          </Button>
+        </div>
         
         <div className="flex gap-2">
           <Button
