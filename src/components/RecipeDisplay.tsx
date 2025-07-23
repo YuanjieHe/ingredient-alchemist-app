@@ -219,13 +219,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
         {recipes.map((recipe) => (
           <Card 
             key={recipe.id} 
-            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
-            onClick={() => {
-              // Store recipe in localStorage for detailed view
-              localStorage.setItem('selectedRecipe', JSON.stringify(recipe));
-              // Navigate to recipe detail page
-              window.location.href = `/recipe/${recipe.id}`;
-            }}
+            className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300"
           >
             {/* Recipe Image */}
             {recipe.imageUrl && (
