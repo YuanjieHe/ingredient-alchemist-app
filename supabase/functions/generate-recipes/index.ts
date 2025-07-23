@@ -413,11 +413,17 @@ ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'INCORPORATE traditional techniques for each dish' : '为每道菜融入传统技法'}
 - ${isEnglish ? 'Generate ALL content in English language' : '所有内容必须用中文生成'}
 
+🚨🚨🚨 ${isEnglish ? 'ULTRA CRITICAL: EACH DISH NEEDS SEPARATE COOKING INSTRUCTIONS' : '超级关键：每道菜都需要独立的制作说明'} 🚨🚨🚨
+
+${isEnglish ? '⚠️ IMPORTANT: Even though this is ONE meal set, you must treat each dish as a COMPLETELY SEPARATE recipe with its own full cooking tutorial!' : '⚠️ 重要：虽然这是一个套餐，但你必须把每道菜当作完全独立的食谱，每道菜都有自己完整的制作教程！'}
+
 🚨 ${isEnglish ? 'CRITICAL INSTRUCTION FOR dishInstructions ARRAY' : 'dishInstructions数组的关键指令'}:
 ${isEnglish ? 'The dishInstructions array MUST contain exactly' : 'dishInstructions数组必须准确包含'} ${dishCount} ${isEnglish ? 'dish objects. Each dish object must have:' : '个菜品对象。每个菜品对象必须有：'}
 1. ${isEnglish ? 'dishName: Clear name with dish type (【Main Dish 1】, 【Side Dish 1】, etc.)' : 'dishName：清晰的菜名和类型（【主菜1】、【配菜1】等）'}
 2. ${isEnglish ? 'type: "main", "side", or "soup"' : 'type："main"、"side"或"soup"'}
-3. ${isEnglish ? 'steps: Array with 2-4 detailed cooking steps for THIS specific dish' : 'steps：包含此特定菜品2-4个详细制作步骤的数组'}
+3. ${isEnglish ? '🔥 steps: Array with 2-4 detailed cooking steps SPECIFICALLY for THIS individual dish (NOT shared steps!)' : '🔥 steps：包含此特定菜品2-4个详细制作步骤的数组（不是共享步骤！）'}
+
+${isEnglish ? '🚨 CRITICAL: Do NOT create general cooking steps that apply to multiple dishes. Each dish must have its OWN unique, specific cooking instructions!' : '🚨 关键：不要创建适用于多道菜的通用制作步骤。每道菜必须有自己独特、具体的制作说明！'}
 
 ${isEnglish ? 'Example structure you MUST follow' : '你必须遵循的示例结构'}:
 "dishInstructions": [
@@ -587,11 +593,14 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
    }
  ]
 
-🚨 ${isEnglish ? 'FINAL CRITICAL REMINDER' : '最后的关键提醒'}:
+🚨🚨🚨 ${isEnglish ? 'FINAL ULTRA CRITICAL REMINDER' : '最后的超级关键提醒'} 🚨🚨🚨:
 - ${isEnglish ? 'dishInstructions array must have exactly' : 'dishInstructions数组必须准确有'} ${dishCount} ${isEnglish ? 'dish objects' : '个菜品对象'}
-- ${isEnglish ? 'Each dish object must have detailed steps array (2-4 steps per dish)' : '每个菜品对象必须有详细的steps数组（每道菜2-4个步骤）'}
-- ${isEnglish ? 'NO DISH should be missing from dishInstructions' : '没有任何菜品可以在dishInstructions中缺失'}
-- ${isEnglish ? 'ALL' : '所有'} ${dishCount} ${isEnglish ? 'dishes mentioned in the dishes array must have corresponding detailed instructions in dishInstructions' : '道在dishes数组中提到的菜品必须在dishInstructions中有对应的详细制作说明'}
+- ${isEnglish ? '🔥 Each dish object must have its OWN detailed steps array (2-4 steps per dish)' : '🔥 每个菜品对象必须有自己的详细steps数组（每道菜2-4个步骤）'}
+- ${isEnglish ? '🔥 NO DISH should be missing from dishInstructions' : '🔥 没有任何菜品可以在dishInstructions中缺失'}
+- ${isEnglish ? '🔥 ALL' : '🔥 所有'} ${dishCount} ${isEnglish ? 'dishes mentioned in the dishes array must have corresponding detailed instructions in dishInstructions' : '道在dishes数组中提到的菜品必须在dishInstructions中有对应的详细制作说明'}
+- ${isEnglish ? '🔥 TREAT EACH DISH AS A SEPARATE RECIPE: 香煎鸡柳 has its own steps, 芦笋木耳 has its own steps, 鲜虾豆腐羹 has its own steps!' : '🔥 把每道菜当作独立食谱：香煎鸡柳有自己的步骤，芦笋木耳有自己的步骤，鲜虾豆腐羹有自己的步骤！'}
+
+${isEnglish ? '🚨 VERIFICATION CHECK: Before responding, count your dishInstructions array elements. You should have exactly' : '🚨 验证检查：回复前，计算你的dishInstructions数组元素。你应该正好有'} ${dishCount} ${isEnglish ? 'elements, each with complete cooking steps!' : '个元素，每个都有完整的制作步骤！'}
 
 ${isEnglish ? 'EXAMPLE OF EXTREME DETAIL REQUIRED' : '极度详细要求示例'} (${isEnglish ? 'like' : '如'} ${isEnglish ? 'Braised Pork' : '红烧肉'}):
 ${isEnglish ? 'Every step must include' : '每个步骤必须包含'}:
