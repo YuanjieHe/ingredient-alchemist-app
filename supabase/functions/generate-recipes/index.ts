@@ -338,8 +338,17 @@ function createEnhancedPrompt(params: any) {
   } = params;
 
   const isEnglish = language === 'en';
-  // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
-  const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
+  // 根据人数更合理地计算菜品数量
+  let dishCount;
+  if (peopleCount <= 2) {
+    dishCount = 3; // 1-2人：3道菜（1主菜+1配菜+1汤）
+  } else if (peopleCount <= 4) {
+    dishCount = 4; // 3-4人：4道菜（2主菜+1配菜+1汤）
+  } else if (peopleCount <= 6) {
+    dishCount = 5; // 5-6人：5道菜（2主菜+2配菜+1汤）
+  } else {
+    dishCount = 6; // 7人以上：6道菜（3主菜+2配菜+1汤）
+  }
 
   let knowledgeSection = '';
   
@@ -366,16 +375,30 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
+  // 添加随机性以避免重复菜品
+  const randomSeed = Date.now() % 10000;
+  const varietyInstructions = isEnglish 
+    ? `🎲 CREATIVITY REQUIREMENT: Be highly creative and diverse! Avoid repeating the same dishes. Create unique, unexpected combinations using the available ingredients. Random seed: ${randomSeed} - use this to generate different dish combinations each time.`
+    : `🎲 创意要求：要高度创新和多样化！避免重复相同的菜品。使用现有食材创造独特、意想不到的组合。随机种子：${randomSeed} - 用此生成每次不同的菜品组合。`;
+
   return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE MEAL SET' : '关键要求：创建完整套餐'} with ${dishCount} ${isEnglish ? 'different dishes, each with detailed cooking instructions' : '道不同菜品，每道菜都要有详细制作教程'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
+
+${varietyInstructions}
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 COMPLETE MEAL SET (with' : '料理大师，创造1个完整套餐（包含'} ${dishCount} ${isEnglish ? 'dishes, each with full cooking tutorial) using these ingredients' : '道菜，每道菜都有完整制作教程），使用这些食材'}: ${ingredients.join(', ')}.
 ${knowledgeSection}
 
+${isEnglish ? '🎯 DISH COMPOSITION REQUIREMENTS BY SERVING SIZE' : '🎯 根据用餐人数的菜品搭配要求'}:
+${peopleCount <= 2 ? (isEnglish ? '• 1-2 people: 1 main dish + 1 side dish + 1 soup (3 dishes total)' : '• 1-2人：1道主菜+1道配菜+1道汤（共3道菜）') : 
+  peopleCount <= 4 ? (isEnglish ? '• 3-4 people: 2 main dishes + 1 side dish + 1 soup (4 dishes total)' : '• 3-4人：2道主菜+1道配菜+1道汤（共4道菜）') :
+  peopleCount <= 6 ? (isEnglish ? '• 5-6 people: 2 main dishes + 2 side dishes + 1 soup (5 dishes total)' : '• 5-6人：2道主菜+2道配菜+1道汤（共5道菜）') :
+  (isEnglish ? '• 7+ people: 3 main dishes + 2 side dishes + 1 soup (6 dishes total)' : '• 7人以上：3道主菜+2道配菜+1道汤（共6道菜）')}
+
 🔥 ${isEnglish ? 'MEAL SET REQUIREMENTS (MANDATORY)' : '套餐要求（必须）'}:
-- ${isEnglish ? 'Create 1 complete meal set with' : '创建1个完整套餐，包含'} ${dishCount} ${isEnglish ? 'dishes' : '道菜'}
+- ${isEnglish ? 'Create 1 complete meal set with exactly' : '创建1个完整套餐，精确包含'} ${dishCount} ${isEnglish ? 'dishes' : '道菜'}
 - ${isEnglish ? '🚨 CRITICAL: Each dish must have its own detailed cooking tutorial with multiple steps' : '🚨 关键：每道菜都必须有自己的详细制作教程，包含多个步骤'}
 - ${isEnglish ? '🚨 MANDATORY: dishInstructions array must contain' : '🚨 强制要求：dishInstructions数组必须包含'} ${dishCount} ${isEnglish ? 'separate dish objects, each with complete step-by-step cooking instructions' : '个独立的菜品对象，每个都有完整的步骤制作说明'}
-- ${isEnglish ? 'MUST include' : '必须包含'}: 1-2 ${isEnglish ? 'main dishes' : '主菜'} + 2-3 ${isEnglish ? 'side dishes' : '配菜'} + 1 ${isEnglish ? 'soup/drink' : '汤品/饮品'}
+- ${isEnglish ? '🎲 VARIETY REQUIREMENT: Create DIFFERENT dishes each time, avoid repeating common combinations' : '🎲 多样性要求：每次创造不同的菜品，避免重复常见搭配'}
 - ${isEnglish ? 'The meal set feeds' : '套餐满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
 - ${isEnglish ? 'Each dish uses different cooking methods and ingredients' : '每道菜使用不同的烹饪方法和食材'}
 - ${isEnglish ? 'All dishes complement each other in flavor and nutrition' : '所有菜品在口味和营养上相互补充'}
