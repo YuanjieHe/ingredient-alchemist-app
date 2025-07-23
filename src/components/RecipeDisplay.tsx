@@ -2,11 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, Users, ChefHat, Utensils, Heart, Share, Coffee, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 
 interface Dish {
   name: string;
@@ -76,6 +78,7 @@ interface RecipeDisplayProps {
 export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDisplayProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const [selectedDishTab, setSelectedDishTab] = useState<string>("overview");
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -383,7 +386,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
 
               <Separator />
 
-              {/* Detailed Cooking Steps for Each Dish */}
+              {/* Dish-by-Dish Cooking Instructions */}
               {recipe.dishInstructions && recipe.dishInstructions.length > 0 ? (
                 <div className="space-y-6">
                   <h4 className="font-semibold flex items-center gap-2">
@@ -391,60 +394,174 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                     {t('detailedCookingSteps')}
                   </h4>
                   
-                  {recipe.dishInstructions.map((dishInstruction, dishIndex) => (
-                    <div key={dishIndex} className="space-y-4">
-                      {/* Dish Name Header */}
-                      <div className="border-l-4 border-primary pl-4 bg-gradient-subtle p-3 rounded-r-lg">
-                        <h5 className="font-bold text-lg flex items-center gap-2">
+                  <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 gap-1">
+                      <TabsTrigger value="overview" className="text-xs px-2">
+                        📋 总览
+                      </TabsTrigger>
+                      {recipe.dishInstructions.map((dishInstruction, index) => (
+                        <TabsTrigger 
+                          key={index} 
+                          value={`dish-${index}`}
+                          className="text-xs px-2 flex items-center gap-1"
+                        >
                           {getDishIcon(dishInstruction.type)}
-                          {dishInstruction.dishName}
-                        </h5>
-                        <Badge variant="outline" className="mt-1">
-                          {getDishTypeText(dishInstruction.type)}
-                        </Badge>
-                      </div>
-                      
-                      {/* Dish Steps */}
-                      <div className="space-y-4 pl-4">
-                        {dishInstruction.steps.map((step, stepIndex) => (
-                          <Card key={stepIndex} className="p-4 bg-muted/30">
-                            <div className="space-y-4">
+                          <span className="hidden sm:inline">
+                            {dishInstruction.dishName.replace(/【.*】/, '').substring(0, 6)}
+                          </span>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+
+                    {/* Overview Tab */}
+                    <TabsContent value="overview" className="space-y-4">
+                      <Card className="p-4 bg-gradient-subtle">
+                        <h5 className="font-bold mb-3">🍽️ 套餐制作总览</h5>
+                        <div className="grid gap-3">
+                          {recipe.dishInstructions.map((dishInstruction, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
                               <div className="flex items-center gap-3">
-                                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
-                                  {step.stepNumber}
-                                </span>
+                                <div className="text-2xl">{getDishIcon(dishInstruction.type)}</div>
                                 <div>
-                                  <h6 className="font-semibold">{step.title}</h6>
-                                  <span className="text-sm text-muted-foreground">{step.duration}</span>
+                                  <div className="font-medium">{dishInstruction.dishName}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {dishInstruction.steps.length} 个制作步骤
+                                  </div>
                                 </div>
                               </div>
-                              
-                              {step.imageUrl && (
-                                <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
-                                  <img 
-                                    src={step.imageUrl} 
-                                    alt={`${dishInstruction.dishName} - Step ${step.stepNumber}: ${step.title}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              
-                              <p className="text-sm leading-relaxed">{step.description}</p>
-                              
-                              {step.tips && (
-                                <div className="bg-cooking-cream p-3 rounded-lg">
-                                  <p className="text-sm text-muted-foreground">
-                                    <span className="font-medium">💡 {t('tip')}: </span>
-                                    {step.tips}
-                                  </p>
-                                </div>
-                              )}
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  const tabTrigger = document.querySelector(`[data-state="inactive"][value="dish-${index}"]`) as HTMLElement;
+                                  if (tabTrigger) tabTrigger.click();
+                                }}
+                              >
+                                查看制作
+                              </Button>
                             </div>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                          ))}
+                        </div>
+                        
+                        {/* Coordination Tips in Overview */}
+                        {recipe.coordinationTips && recipe.coordinationTips.length > 0 && (
+                          <div className="mt-4">
+                            <h6 className="font-semibold mb-2 flex items-center gap-2">
+                              <ChefHat className="h-4 w-4" />
+                              协调技巧
+                            </h6>
+                            <ul className="space-y-2">
+                              {recipe.coordinationTips.map((tip, index) => (
+                                <li key={index} className="text-sm bg-cooking-cream p-3 rounded-md border-l-4 border-primary">
+                                  <span className="font-medium">👨‍🍳 </span>
+                                  {tip}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </Card>
+                    </TabsContent>
+
+                    {/* Individual Dish Tabs */}
+                    {recipe.dishInstructions.map((dishInstruction, dishIndex) => (
+                      <TabsContent key={dishIndex} value={`dish-${dishIndex}`} className="space-y-4">
+                        {/* Dish Header */}
+                        <Card className="p-4 bg-gradient-subtle">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="text-3xl">{getDishIcon(dishInstruction.type)}</div>
+                            <div>
+                              <h5 className="font-bold text-lg">{dishInstruction.dishName}</h5>
+                              <Badge variant="outline">
+                                {getDishTypeText(dishInstruction.type)}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          {/* Dish-specific Ingredients */}
+                          <div className="mt-4">
+                            <h6 className="font-semibold mb-2 flex items-center gap-2">
+                              <Utensils className="h-4 w-4" />
+                              本菜所需食材
+                            </h6>
+                            <div className="grid gap-2">
+                              {recipe.ingredients
+                                .filter(ingredient => 
+                                  ingredient.usedIn?.includes(dishInstruction.dishName.replace(/【.*】/, '')) ||
+                                  ingredient.usedIn?.includes(getDishTypeText(dishInstruction.type))
+                                )
+                                .map((ingredient, index) => (
+                                <div
+                                  key={index}
+                                  className={`
+                                    flex justify-between items-center p-2 rounded-md
+                                    ${ingredient.needed 
+                                      ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-800' 
+                                      : 'bg-muted'
+                                    }
+                                  `}
+                                >
+                                  <span className="font-medium">{ingredient.item}</span>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-muted-foreground text-sm">{ingredient.amount}</span>
+                                    {ingredient.needed && (
+                                      <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
+                                        {t('needToBuy')}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </Card>
+                        
+                        {/* Dish Steps */}
+                        <div className="space-y-4">
+                          <h6 className="font-semibold flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            制作步骤
+                          </h6>
+                          {dishInstruction.steps.map((step, stepIndex) => (
+                            <Card key={stepIndex} className="p-4 bg-muted/30">
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium">
+                                    {step.stepNumber}
+                                  </span>
+                                  <div>
+                                    <h6 className="font-semibold">{step.title}</h6>
+                                    <span className="text-sm text-muted-foreground">{step.duration}</span>
+                                  </div>
+                                </div>
+                                
+                                {step.imageUrl && (
+                                  <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
+                                    <img 
+                                      src={step.imageUrl} 
+                                      alt={`${dishInstruction.dishName} - Step ${step.stepNumber}: ${step.title}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                
+                                <p className="text-sm leading-relaxed">{step.description}</p>
+                                
+                                {step.tips && (
+                                  <div className="bg-cooking-cream p-3 rounded-lg">
+                                    <p className="text-sm text-muted-foreground">
+                                      <span className="font-medium">💡 {t('tip')}: </span>
+                                      {step.tips}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
                 </div>
               ) : recipe.detailedSteps && recipe.detailedSteps.length > 0 ? (
                 <div className="space-y-6">
