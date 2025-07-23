@@ -338,17 +338,8 @@ function createEnhancedPrompt(params: any) {
   } = params;
 
   const isEnglish = language === 'en';
-  // 根据人数更合理地计算菜品数量
-  let dishCount;
-  if (peopleCount <= 2) {
-    dishCount = 3; // 1-2人：3道菜（1主菜+1配菜+1汤）
-  } else if (peopleCount <= 4) {
-    dishCount = 4; // 3-4人：4道菜（2主菜+1配菜+1汤）
-  } else if (peopleCount <= 6) {
-    dishCount = 5; // 5-6人：5道菜（2主菜+2配菜+1汤）
-  } else {
-    dishCount = 6; // 7人以上：6道菜（3主菜+2配菜+1汤）
-  }
+  // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
+  const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
 
   let knowledgeSection = '';
   
@@ -375,89 +366,38 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  // 添加随机性以避免重复菜品
-  const randomSeed = Date.now() % 10000;
-  const varietyInstructions = isEnglish 
-    ? `🎲 CREATIVITY REQUIREMENT: Be highly creative and diverse! Avoid repeating the same dishes. Create unique, unexpected combinations using the available ingredients. Random seed: ${randomSeed} - use this to generate different dish combinations each time.`
-    : `🎲 创意要求：要高度创新和多样化！避免重复相同的菜品。使用现有食材创造独特、意想不到的组合。随机种子：${randomSeed} - 用此生成每次不同的菜品组合。`;
+  return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
-  return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE MEAL SET' : '关键要求：创建完整套餐'} with ${dishCount} ${isEnglish ? 'different dishes, each with detailed cooking instructions' : '道不同菜品，每道菜都要有详细制作教程'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
-
-${varietyInstructions}
-
-${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 COMPLETE MEAL SET (with' : '料理大师，创造1个完整套餐（包含'} ${dishCount} ${isEnglish ? 'dishes, each with full cooking tutorial) using these ingredients' : '道菜，每道菜都有完整制作教程），使用这些食材'}: ${ingredients.join(', ')}.
+${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 ${knowledgeSection}
 
-${isEnglish ? '🎯 DISH COMPOSITION REQUIREMENTS BY SERVING SIZE' : '🎯 根据用餐人数的菜品搭配要求'}:
-${peopleCount <= 2 ? (isEnglish ? '• 1-2 people: 1 main dish + 1 side dish + 1 soup (3 dishes total)' : '• 1-2人：1道主菜+1道配菜+1道汤（共3道菜）') : 
-  peopleCount <= 4 ? (isEnglish ? '• 3-4 people: 2 main dishes + 1 side dish + 1 soup (4 dishes total)' : '• 3-4人：2道主菜+1道配菜+1道汤（共4道菜）') :
-  peopleCount <= 6 ? (isEnglish ? '• 5-6 people: 2 main dishes + 2 side dishes + 1 soup (5 dishes total)' : '• 5-6人：2道主菜+2道配菜+1道汤（共5道菜）') :
-  (isEnglish ? '• 7+ people: 3 main dishes + 2 side dishes + 1 soup (6 dishes total)' : '• 7人以上：3道主菜+2道配菜+1道汤（共6道菜）')}
-
-🔥 ${isEnglish ? 'MEAL SET REQUIREMENTS (MANDATORY)' : '套餐要求（必须）'}:
-- ${isEnglish ? 'Create 1 complete meal set with exactly' : '创建1个完整套餐，精确包含'} ${dishCount} ${isEnglish ? 'dishes' : '道菜'}
-- ${isEnglish ? '🚨 CRITICAL: Each dish must have its own detailed cooking tutorial with multiple steps' : '🚨 关键：每道菜都必须有自己的详细制作教程，包含多个步骤'}
-- ${isEnglish ? '🚨 MANDATORY: dishInstructions array must contain' : '🚨 强制要求：dishInstructions数组必须包含'} ${dishCount} ${isEnglish ? 'separate dish objects, each with complete step-by-step cooking instructions' : '个独立的菜品对象，每个都有完整的步骤制作说明'}
-- ${isEnglish ? '🎲 VARIETY REQUIREMENT: Create DIFFERENT dishes each time, avoid repeating common combinations' : '🎲 多样性要求：每次创造不同的菜品，避免重复常见搭配'}
-- ${isEnglish ? 'The meal set feeds' : '套餐满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
+🔥 ${isEnglish ? 'MEAL COMPOSITION REQUIREMENTS (MANDATORY)' : '套餐组成要求（必须）'}:
+- ${isEnglish ? 'Total dishes' : '总菜品数'}: ${dishCount} ${isEnglish ? 'different dishes for one complete meal' : '道不同菜品组成一顿完整餐食'}
+- ${isEnglish ? 'MUST include' : '必须包含'}: 1-2 ${isEnglish ? 'main dishes' : '主菜'} (${isEnglish ? '荤菜/主菜' : '荤菜/主菜'}) + 2-3 ${isEnglish ? 'side dishes' : '配菜'} (${isEnglish ? '素菜/配菜' : '素菜/配菜'}) + 1 ${isEnglish ? 'soup/drink' : '汤品/饮品'} (${isEnglish ? '汤/饮品' : '汤/饮品'})
+- ${isEnglish ? 'Create a BALANCED TABLE that feeds' : '创建一个均衡的餐桌，满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
 - ${isEnglish ? 'Each dish uses different cooking methods and ingredients' : '每道菜使用不同的烹饪方法和食材'}
-- ${isEnglish ? 'All dishes complement each other in flavor and nutrition' : '所有菜品在口味和营养上相互补充'}
+- ${isEnglish ? 'All dishes should complement each other in flavor and nutrition' : '所有菜品在口味和营养上应该相互补充'}
 
 ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
-- ${isEnglish ? 'Skill level' : '技能水平'}: ${skillLevel} (${isEnglish ? 'provide extremely detailed cooking techniques for each dish' : '为每道菜提供极其详细的烹饪技法'})
-- ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people total' : '人总计'}
+- ${isEnglish ? 'Skill level' : '技能水平'}: ${skillLevel} (${isEnglish ? 'provide extremely detailed cooking techniques and precise instructions' : '提供极其详细的烹饪技法和精确说明'})
+- ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people' : '人'}
 - ${isEnglish ? 'Focus' : '重点'}: ${isEnglish ? 'Authentic' : '正宗的'} ${cuisineType} ${isEnglish ? 'cooking methods and flavors' : '烹饪方法和口味'}
 - ${isEnglish ? 'Occasion' : '场合'}: ${occasionType}
-- ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance dishes' : '可以建议必要食材来提升菜品') : (isEnglish ? 'Must use only provided ingredients creatively' : '必须创造性地仅使用提供的食材')}
-- ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW recipes' : '使用知识库菜品作为灵感，但创造新食谱'}
-- ${isEnglish ? 'INCORPORATE traditional techniques for each dish' : '为每道菜融入传统技法'}
+- ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance the dish' : '可以建议必要食材来提升菜品') : (isEnglish ? 'Must use only provided ingredients creatively' : '必须创造性地仅使用提供的食材')}
+- ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes' : '使用知识库菜品作为灵感，但创造新的创新食谱'}
+- ${isEnglish ? 'INCORPORATE traditional techniques mentioned above when relevant' : '在相关时融入上述传统技法'}
+- ${isEnglish ? 'EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques' : '每个步骤都必须极其详细，包含精确的时间、温度和技法'}
 - ${isEnglish ? 'Generate ALL content in English language' : '所有内容必须用中文生成'}
 
-🚨🚨🚨 ${isEnglish ? 'ULTRA CRITICAL: EACH DISH NEEDS SEPARATE COOKING INSTRUCTIONS' : '超级关键：每道菜都需要独立的制作说明'} 🚨🚨🚨
-
-${isEnglish ? '⚠️ IMPORTANT: Even though this is ONE meal set, you must treat each dish as a COMPLETELY SEPARATE recipe with its own full cooking tutorial!' : '⚠️ 重要：虽然这是一个套餐，但你必须把每道菜当作完全独立的食谱，每道菜都有自己完整的制作教程！'}
-
-🚨 ${isEnglish ? 'CRITICAL INSTRUCTION FOR dishInstructions ARRAY' : 'dishInstructions数组的关键指令'}:
-${isEnglish ? 'The dishInstructions array MUST contain exactly' : 'dishInstructions数组必须准确包含'} ${dishCount} ${isEnglish ? 'dish objects. Each dish object must have:' : '个菜品对象。每个菜品对象必须有：'}
-1. ${isEnglish ? 'dishName: Clear name with dish type (【Main Dish 1】, 【Side Dish 1】, etc.)' : 'dishName：清晰的菜名和类型（【主菜1】、【配菜1】等）'}
-2. ${isEnglish ? 'type: "main", "side", or "soup"' : 'type："main"、"side"或"soup"'}
-3. ${isEnglish ? '🔥 steps: Array with 2-4 detailed cooking steps SPECIFICALLY for THIS individual dish (NOT shared steps!)' : '🔥 steps：包含此特定菜品2-4个详细制作步骤的数组（不是共享步骤！）'}
-
-${isEnglish ? '🚨 CRITICAL: Do NOT create general cooking steps that apply to multiple dishes. Each dish must have its OWN unique, specific cooking instructions!' : '🚨 关键：不要创建适用于多道菜的通用制作步骤。每道菜必须有自己独特、具体的制作说明！'}
-
-${isEnglish ? 'Example structure you MUST follow' : '你必须遵循的示例结构'}:
-"dishInstructions": [
-  {
-    "dishName": "${isEnglish ? '【Main Dish 1】Braised Pork Ribs' : '【主菜1】红烧排骨'}",
-    "type": "main",
-    "steps": [${isEnglish ? '3-4 detailed steps for braised pork ribs' : '红烧排骨的3-4个详细步骤'}]
-  },
-  {
-    "dishName": "${isEnglish ? '【Main Dish 2】Steamed Fish' : '【主菜2】清蒸鱼'}",
-    "type": "main", 
-    "steps": [${isEnglish ? '3-4 detailed steps for steamed fish' : '清蒸鱼的3-4个详细步骤'}]
-  },
-  {
-    "dishName": "${isEnglish ? '【Side Dish】Stir-fried Vegetables' : '【配菜】清炒时蔬'}",
-    "type": "side",
-    "steps": [${isEnglish ? '2-3 detailed steps for vegetables' : '时蔬的2-3个详细步骤'}]
-  },
-  {
-    "dishName": "${isEnglish ? '【Soup】Seaweed Soup' : '【汤品】紫菜汤'}",
-    "type": "soup",
-    "steps": [${isEnglish ? '2-3 detailed steps for soup' : '汤品的2-3个详细步骤'}]
-  }
-]
-
-${isEnglish ? 'REQUIRED DETAILS FOR THE MEAL SET' : '套餐的必需详情'}:
-1. ${isEnglish ? 'One meal set title describing the complete meal' : '一个套餐标题，描述完整餐食'}
-2. ${isEnglish ? 'Overall meal description and cultural context' : '整体餐食描述和文化背景'}
-3. ${isEnglish ? 'Complete ingredient list for all dishes' : '所有菜品的完整食材清单'}
-4. ${isEnglish ? '🚨 MANDATORY: Detailed cooking instructions for ALL' : '🚨 强制要求：所有'} ${dishCount} ${isEnglish ? 'dishes in dishInstructions array' : '道菜的详细制作说明都要在dishInstructions数组中'}
-5. ${isEnglish ? 'Coordination tips for preparing all dishes together' : '同时准备所有菜品的协调技巧'}
-6. ${isEnglish ? 'Traditional serving order and presentation' : '传统上菜顺序和摆盘'}
-7. ${isEnglish ? 'Each dish must have: ingredients, steps, timing, tips' : '每道菜必须有：食材、步骤、时间、技巧'}
-8. ${isEnglish ? 'Nutritional balance across all dishes' : '所有菜品的营养平衡'}
+${isEnglish ? 'REQUIRED DETAILS FOR EACH RECIPE' : '每个食谱的必需详情'}:
+1. ${isEnglish ? 'Authentic dish name with cultural context' : '正宗菜名及文化背景'}
+2. ${isEnglish ? 'Cultural significance and regional origin' : '文化意义和地域起源'}
+3. ${isEnglish ? 'Essential cooking techniques specific to the cuisine' : '该菜系特有的基本烹饪技法'}
+4. ${isEnglish ? 'Precise temperature and timing instructions' : '精确的温度和时间说明'}
+5. ${isEnglish ? 'Detailed ingredient preparation methods' : '详细的食材准备方法'}
+6. ${isEnglish ? 'Step-by-step cooking process with professional tips' : '逐步烹饪过程及专业提示'}
+7. ${isEnglish ? 'Traditional serving and presentation methods' : '传统上菜和摆盘方法'}
+8. ${isEnglish ? 'Texture, aroma, and visual indicators for each step' : '每个步骤的质地、香气和视觉指标'}
 
 ${isEnglish ? 'Format the response as a JSON array with this exact structure' : '按照以下精确的JSON数组结构格式化回复'}:
 [
@@ -474,110 +414,48 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
        {"item": "${isEnglish ? 'Main ingredient' : '主要食材'}", "amount": "${isEnglish ? '300g, specific cut or preparation' : '300克，具体切法或处理方式'}", "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
        {"item": "${isEnglish ? 'Seasoning ingredient' : '调味食材'}", "amount": "${isEnglish ? '3 cloves, minced' : '3瓣，切碎'}", "usedIn": "${isEnglish ? 'flavoring' : '调味'}"}
      ],
-      "dishInstructions": [
-        {
-          "dishName": "${isEnglish ? '【Main Dish 1】Braised Pork Ribs' : '【主菜1】红烧排骨'}",
-          "type": "main",
-          "steps": [
-            {
-              "stepNumber": 1,
-              "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
-              "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
-              "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
-              "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
-              "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
-            },
-            {
-              "stepNumber": 2,
-              "title": "${isEnglish ? 'Stir-frying Sugar' : '炒糖色'}",
-              "description": "${isEnglish ? 'Heat oil in cold pan, add rock sugar and stir-fry until caramel colored...' : '冷锅放油，加冰糖炒至焦糖色...'}",
-              "duration": "${isEnglish ? '8 minutes' : '8分钟'}",
-              "tips": "${isEnglish ? 'Heat control is crucial for sugar color' : '火候控制是糖色关键'}"
-            },
-            {
-              "stepNumber": 3,
-              "title": "${isEnglish ? 'Braising' : '焖煮'}",
-              "description": "${isEnglish ? 'Add ribs and seasonings, braise until tender...' : '加入排骨和调料，焖煮至软烂...'}",
-              "duration": "${isEnglish ? '45 minutes' : '45分钟'}",
-              "tips": "${isEnglish ? 'Simmer on low heat to maintain texture' : '小火慢炖保持口感'}"
-            }
-          ]
-        },
-        {
-          "dishName": "${isEnglish ? '【Main Dish 2】Steamed Fish' : '【主菜2】清蒸鱼'}",
-          "type": "main",
-          "steps": [
-            {
-              "stepNumber": 1,
-              "title": "${isEnglish ? 'Fish Preparation' : '鱼类处理'}",
-              "description": "${isEnglish ? 'Select fresh fish, clean and score, marinate with salt and cooking wine...' : '选用新鲜鱼类，清洗打花刀，用盐和料酒腌制...'}",
-              "duration": "${isEnglish ? '20 minutes' : '20分钟'}",
-              "tips": "${isEnglish ? 'Proper scoring ensures even cooking' : '正确打花刀确保受热均匀'}"
-            },
-            {
-              "stepNumber": 2,
-              "title": "${isEnglish ? 'Steaming' : '蒸制'}",
-              "description": "${isEnglish ? 'Steam over high heat for 8-10 minutes until just cooked...' : '大火蒸8-10分钟至刚熟...'}",
-              "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
-              "tips": "${isEnglish ? 'Timing is critical for tender fish' : '时间掌控是鱼肉嫩滑关键'}"
-            },
-            {
-              "stepNumber": 3,
-              "title": "${isEnglish ? 'Sauce and Garnish' : '调汁装饰'}",
-              "description": "${isEnglish ? 'Heat oil with scallions and ginger, pour over fish with soy sauce...' : '爆香葱丝姜丝，配生抽淋在鱼上...'}",
-              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
-              "tips": "${isEnglish ? 'Hot oil releases aromatic compounds' : '热油激发香味化合物'}"
-            }
-          ]
-        },
-        {
-          "dishName": "${isEnglish ? '【Side Dish】Stir-fried Seasonal Vegetables' : '【配菜】清炒时蔬'}",
-          "type": "side",
-          "steps": [
-            {
-              "stepNumber": 1,
-              "title": "${isEnglish ? 'Vegetable Preparation' : '蔬菜处理'}",
-              "description": "${isEnglish ? 'Wash and cut vegetables, prepare aromatics and seasonings...' : '清洗切配蔬菜，准备香料和调味料...'}",
-              "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
-              "tips": "${isEnglish ? 'Cut vegetables uniformly for even cooking' : '蔬菜切配均匀确保受热一致'}"
-            },
-            {
-              "stepNumber": 2,
-              "title": "${isEnglish ? 'Stir-frying' : '爆炒'}",
-              "description": "${isEnglish ? 'Heat wok over high heat, add oil and aromatics, then vegetables...' : '热锅下油爆香，下蔬菜大火快炒...'}",
-              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
-              "tips": "${isEnglish ? 'High heat preserves color and crunch' : '大火保持色泽和脆嫩'}"
-            }
-          ]
-        },
-        {
-          "dishName": "${isEnglish ? '【Soup】Seaweed and Egg Drop Soup' : '【汤品】紫菜蛋花汤'}",
-          "type": "soup",
-          "steps": [
-            {
-              "stepNumber": 1,
-              "title": "${isEnglish ? 'Broth Preparation' : '汤底制作'}",
-              "description": "${isEnglish ? 'Bring water to boil, add seaweed and seasonings...' : '水开后加入紫菜和调味料...'}",
-              "duration": "${isEnglish ? '5 minutes' : '5分钟'}",
-              "tips": "${isEnglish ? 'Clean seaweed thoroughly before use' : '紫菜使用前要彻底清洗'}"
-            },
-            {
-              "stepNumber": 2,
-              "title": "${isEnglish ? 'Egg Drop Technique' : '蛋花技法'}",
-              "description": "${isEnglish ? 'Beat eggs and slowly drizzle into simmering soup while stirring...' : '鸡蛋打散，慢慢淋入汤中同时搅拌...'}",
-              "duration": "${isEnglish ? '3 minutes' : '3分钟'}",
-              "tips": "${isEnglish ? 'Slow pouring creates delicate egg flowers' : '缓慢倒入形成细腻蛋花'}"
-            },
-            {
-              "stepNumber": 3,
-              "title": "${isEnglish ? 'Final Seasoning' : '最后调味'}",
-              "description": "${isEnglish ? 'Adjust seasoning and add garnish before serving...' : '调整味道并添加装饰后盛装...'}",
-              "duration": "${isEnglish ? '2 minutes' : '2分钟'}",
-              "tips": "${isEnglish ? 'Taste and adjust seasoning at the end' : '最后品尝并调整味道'}"
-            }
-          ]
-        }
-      ],
+     "dishInstructions": [
+       {
+         "dishName": "${isEnglish ? '【Main Dish】Braised Pork Ribs' : '【主菜】红烧排骨'}",
+         "type": "main",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
+             "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
+             "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
+             "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
+             "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
+           }
+         ]
+       },
+       {
+         "dishName": "${isEnglish ? '【Side Dish】Stir-fried Seasonal Vegetables' : '【配菜】清炒时蔬'}",
+         "type": "side",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Vegetable Washing and Cutting' : '蔬菜清洗与切配'}",
+             "description": "${isEnglish ? 'Detailed vegetable processing steps, including washing, cutting, and seasoning preparation.' : '详细的蔬菜处理步骤，包括清洗、切配、调味准备。'}",
+             "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
+             "tips": "${isEnglish ? 'Vegetable cutting techniques and key points.' : '蔬菜切配的技巧和要点。'}"
+           }
+         ]
+       },
+       {
+         "dishName": "${isEnglish ? '【Soup】Seaweed and Egg Drop Soup' : '【汤品】紫菜蛋花汤'}",
+         "type": "soup",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Soup Preparation' : '汤品制作'}",
+             "description": "${isEnglish ? 'Detailed soup making steps, including water amount, seasoning, and heat control.' : '详细的汤品制作步骤，包括水量、调味、火候控制。'}",
+             "duration": "${isEnglish ? '12 minutes' : '12分钟'}",
+             "tips": "${isEnglish ? 'Key points for soup making.' : '汤品制作的关键要点。'}"
+           }
+         ]
+       }
+     ],
      "dishes": [
        {"name": "${isEnglish ? 'Braised Pork Ribs' : '红烧排骨'}", "type": "main", "description": "${isEnglish ? 'Sweet and tender main dish' : '香甜软糯的主菜'}"},
        {"name": "${isEnglish ? 'Stir-fried Seasonal Vegetables' : '清炒时蔬'}", "type": "side", "description": "${isEnglish ? 'Fresh and light side dish' : '清爽解腻的配菜'}"},
@@ -592,15 +470,6 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
      "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions", "professional technique"]
    }
  ]
-
-🚨🚨🚨 ${isEnglish ? 'FINAL ULTRA CRITICAL REMINDER' : '最后的超级关键提醒'} 🚨🚨🚨:
-- ${isEnglish ? 'dishInstructions array must have exactly' : 'dishInstructions数组必须准确有'} ${dishCount} ${isEnglish ? 'dish objects' : '个菜品对象'}
-- ${isEnglish ? '🔥 Each dish object must have its OWN detailed steps array (2-4 steps per dish)' : '🔥 每个菜品对象必须有自己的详细steps数组（每道菜2-4个步骤）'}
-- ${isEnglish ? '🔥 NO DISH should be missing from dishInstructions' : '🔥 没有任何菜品可以在dishInstructions中缺失'}
-- ${isEnglish ? '🔥 ALL' : '🔥 所有'} ${dishCount} ${isEnglish ? 'dishes mentioned in the dishes array must have corresponding detailed instructions in dishInstructions' : '道在dishes数组中提到的菜品必须在dishInstructions中有对应的详细制作说明'}
-- ${isEnglish ? '🔥 TREAT EACH DISH AS A SEPARATE RECIPE: 香煎鸡柳 has its own steps, 芦笋木耳 has its own steps, 鲜虾豆腐羹 has its own steps!' : '🔥 把每道菜当作独立食谱：香煎鸡柳有自己的步骤，芦笋木耳有自己的步骤，鲜虾豆腐羹有自己的步骤！'}
-
-${isEnglish ? '🚨 VERIFICATION CHECK: Before responding, count your dishInstructions array elements. You should have exactly' : '🚨 验证检查：回复前，计算你的dishInstructions数组元素。你应该正好有'} ${dishCount} ${isEnglish ? 'elements, each with complete cooking steps!' : '个元素，每个都有完整的制作步骤！'}
 
 ${isEnglish ? 'EXAMPLE OF EXTREME DETAIL REQUIRED' : '极度详细要求示例'} (${isEnglish ? 'like' : '如'} ${isEnglish ? 'Braised Pork' : '红烧肉'}):
 ${isEnglish ? 'Every step must include' : '每个步骤必须包含'}:
