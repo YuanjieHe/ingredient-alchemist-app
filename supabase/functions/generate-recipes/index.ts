@@ -373,12 +373,12 @@ ${knowledgeSection}
 
 🔥 ${isEnglish ? 'MEAL SET REQUIREMENTS (MANDATORY)' : '套餐要求（必须）'}:
 - ${isEnglish ? 'Create 1 complete meal set with' : '创建1个完整套餐，包含'} ${dishCount} ${isEnglish ? 'dishes' : '道菜'}
-- ${isEnglish ? 'Each dish must have its own detailed cooking tutorial' : '每道菜都必须有自己的详细制作教程'}
+- ${isEnglish ? '🚨 CRITICAL: Each dish must have its own detailed cooking tutorial with multiple steps' : '🚨 关键：每道菜都必须有自己的详细制作教程，包含多个步骤'}
+- ${isEnglish ? '🚨 MANDATORY: dishInstructions array must contain' : '🚨 强制要求：dishInstructions数组必须包含'} ${dishCount} ${isEnglish ? 'separate dish objects, each with complete step-by-step cooking instructions' : '个独立的菜品对象，每个都有完整的步骤制作说明'}
 - ${isEnglish ? 'MUST include' : '必须包含'}: 1-2 ${isEnglish ? 'main dishes' : '主菜'} + 2-3 ${isEnglish ? 'side dishes' : '配菜'} + 1 ${isEnglish ? 'soup/drink' : '汤品/饮品'}
 - ${isEnglish ? 'The meal set feeds' : '套餐满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
 - ${isEnglish ? 'Each dish uses different cooking methods and ingredients' : '每道菜使用不同的烹饪方法和食材'}
 - ${isEnglish ? 'All dishes complement each other in flavor and nutrition' : '所有菜品在口味和营养上相互补充'}
-- ${isEnglish ? 'CRITICAL: Every single dish must have complete step-by-step instructions' : 'CRITICAL: 每一道菜都必须有完整的步骤说明'}
 
 ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'Skill level' : '技能水平'}: ${skillLevel} (${isEnglish ? 'provide extremely detailed cooking techniques for each dish' : '为每道菜提供极其详细的烹饪技法'})
@@ -388,14 +388,43 @@ ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance dishes' : '可以建议必要食材来提升菜品') : (isEnglish ? 'Must use only provided ingredients creatively' : '必须创造性地仅使用提供的食材')}
 - ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW recipes' : '使用知识库菜品作为灵感，但创造新食谱'}
 - ${isEnglish ? 'INCORPORATE traditional techniques for each dish' : '为每道菜融入传统技法'}
-- ${isEnglish ? 'EVERY DISH must have extremely detailed step-by-step instructions' : '每道菜都必须有极其详细的步骤说明'}
 - ${isEnglish ? 'Generate ALL content in English language' : '所有内容必须用中文生成'}
+
+🚨 ${isEnglish ? 'CRITICAL INSTRUCTION FOR dishInstructions ARRAY' : 'dishInstructions数组的关键指令'}:
+${isEnglish ? 'The dishInstructions array MUST contain exactly' : 'dishInstructions数组必须准确包含'} ${dishCount} ${isEnglish ? 'dish objects. Each dish object must have:' : '个菜品对象。每个菜品对象必须有：'}
+1. ${isEnglish ? 'dishName: Clear name with dish type (【Main Dish 1】, 【Side Dish 1】, etc.)' : 'dishName：清晰的菜名和类型（【主菜1】、【配菜1】等）'}
+2. ${isEnglish ? 'type: "main", "side", or "soup"' : 'type："main"、"side"或"soup"'}
+3. ${isEnglish ? 'steps: Array with 2-4 detailed cooking steps for THIS specific dish' : 'steps：包含此特定菜品2-4个详细制作步骤的数组'}
+
+${isEnglish ? 'Example structure you MUST follow' : '你必须遵循的示例结构'}:
+"dishInstructions": [
+  {
+    "dishName": "${isEnglish ? '【Main Dish 1】Braised Pork Ribs' : '【主菜1】红烧排骨'}",
+    "type": "main",
+    "steps": [${isEnglish ? '3-4 detailed steps for braised pork ribs' : '红烧排骨的3-4个详细步骤'}]
+  },
+  {
+    "dishName": "${isEnglish ? '【Main Dish 2】Steamed Fish' : '【主菜2】清蒸鱼'}",
+    "type": "main", 
+    "steps": [${isEnglish ? '3-4 detailed steps for steamed fish' : '清蒸鱼的3-4个详细步骤'}]
+  },
+  {
+    "dishName": "${isEnglish ? '【Side Dish】Stir-fried Vegetables' : '【配菜】清炒时蔬'}",
+    "type": "side",
+    "steps": [${isEnglish ? '2-3 detailed steps for vegetables' : '时蔬的2-3个详细步骤'}]
+  },
+  {
+    "dishName": "${isEnglish ? '【Soup】Seaweed Soup' : '【汤品】紫菜汤'}",
+    "type": "soup",
+    "steps": [${isEnglish ? '2-3 detailed steps for soup' : '汤品的2-3个详细步骤'}]
+  }
+]
 
 ${isEnglish ? 'REQUIRED DETAILS FOR THE MEAL SET' : '套餐的必需详情'}:
 1. ${isEnglish ? 'One meal set title describing the complete meal' : '一个套餐标题，描述完整餐食'}
 2. ${isEnglish ? 'Overall meal description and cultural context' : '整体餐食描述和文化背景'}
 3. ${isEnglish ? 'Complete ingredient list for all dishes' : '所有菜品的完整食材清单'}
-4. ${isEnglish ? 'Detailed cooking instructions for EACH individual dish' : '每一道菜的详细制作说明'}
+4. ${isEnglish ? '🚨 MANDATORY: Detailed cooking instructions for ALL' : '🚨 强制要求：所有'} ${dishCount} ${isEnglish ? 'dishes in dishInstructions array' : '道菜的详细制作说明都要在dishInstructions数组中'}
 5. ${isEnglish ? 'Coordination tips for preparing all dishes together' : '同时准备所有菜品的协调技巧'}
 6. ${isEnglish ? 'Traditional serving order and presentation' : '传统上菜顺序和摆盘'}
 7. ${isEnglish ? 'Each dish must have: ingredients, steps, timing, tips' : '每道菜必须有：食材、步骤、时间、技巧'}
@@ -534,6 +563,12 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
      "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions", "professional technique"]
    }
  ]
+
+🚨 ${isEnglish ? 'FINAL CRITICAL REMINDER' : '最后的关键提醒'}:
+- ${isEnglish ? 'dishInstructions array must have exactly' : 'dishInstructions数组必须准确有'} ${dishCount} ${isEnglish ? 'dish objects' : '个菜品对象'}
+- ${isEnglish ? 'Each dish object must have detailed steps array (2-4 steps per dish)' : '每个菜品对象必须有详细的steps数组（每道菜2-4个步骤）'}
+- ${isEnglish ? 'NO DISH should be missing from dishInstructions' : '没有任何菜品可以在dishInstructions中缺失'}
+- ${isEnglish ? 'ALL' : '所有'} ${dishCount} ${isEnglish ? 'dishes mentioned in the dishes array must have corresponding detailed instructions in dishInstructions' : '道在dishes数组中提到的菜品必须在dishInstructions中有对应的详细制作说明'}
 
 ${isEnglish ? 'EXAMPLE OF EXTREME DETAIL REQUIRED' : '极度详细要求示例'} (${isEnglish ? 'like' : '如'} ${isEnglish ? 'Braised Pork' : '红烧肉'}):
 ${isEnglish ? 'Every step must include' : '每个步骤必须包含'}:
