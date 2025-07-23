@@ -59,8 +59,43 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (error) {
         console.error('Error fetching subscription:', error);
-        // 如果没有找到记录，创建一个默认的免费订阅
-        if (error.code === 'PGRST116') {
+        
+        // 如果是网络错误或其他严重错误，创建默认订阅记录
+        if (error.message.includes('Load failed') || error.code === 'PGRST116') {
+          console.log('Creating default subscription due to error:', error.message);
+          
+          // 创建默认的免费订阅对象，避免显示"加载失败"
+          const defaultSubscription = {
+            id: 'temp-' + user.id,
+            user_id: user.id,
+            subscription_type: 'free' as const,
+            subscription_status: 'active' as const,
+            free_generations_used: 0,
+            free_generations_limit: 3,
+            subscription_start_date: null,
+            subscription_end_date: null,
+            apple_transaction_id: null,
+            apple_original_transaction_id: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          setSubscription(defaultSubscription);
+          setLoading(false);
+          return;
+        }
+        
+        // 其他错误仍然设置为null
+        setSubscription(null);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        setSubscription(data as SubscriptionData);
+      } else {
+        // 如果没有数据，尝试创建默认记录
+        try {
           const { error: insertError } = await supabase
             .from('user_subscriptions')
             .insert({
@@ -71,28 +106,61 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
               free_generations_limit: 3
             });
           
-          if (insertError) {
-            console.error('Error creating subscription:', insertError);
-            return;
+          if (!insertError) {
+            // 重新获取数据
+            const { data: newData } = await supabase
+              .from('user_subscriptions')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (newData) {
+              setSubscription(newData as SubscriptionData);
+            }
+          } else {
+            // 如果插入失败，使用默认对象
+            const defaultSubscription = {
+              id: 'temp-' + user.id,
+              user_id: user.id,
+              subscription_type: 'free' as const,
+              subscription_status: 'active' as const,
+              free_generations_used: 0,
+              free_generations_limit: 3,
+              subscription_start_date: null,
+              subscription_end_date: null,
+              apple_transaction_id: null,
+              apple_original_transaction_id: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            
+            setSubscription(defaultSubscription);
           }
-          
-          // 重新获取数据
-          const { data: newData } = await supabase
-            .from('user_subscriptions')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-          
-          setSubscription(newData as SubscriptionData);
+        } catch (fallbackError) {
+          console.error('Fallback subscription creation failed:', fallbackError);
+          setSubscription(null);
         }
-        return;
-      }
-
-      if (data) {
-        setSubscription(data as SubscriptionData);
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
+      
+      // 网络或其他严重错误时，创建默认订阅以避免显示错误
+      const defaultSubscription = {
+        id: 'temp-' + user.id,
+        user_id: user.id,
+        subscription_type: 'free' as const,
+        subscription_status: 'active' as const,
+        free_generations_used: 0,
+        free_generations_limit: 3,
+        subscription_start_date: null,
+        subscription_end_date: null,
+        apple_transaction_id: null,
+        apple_original_transaction_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setSubscription(defaultSubscription);
     } finally {
       setLoading(false);
     }
