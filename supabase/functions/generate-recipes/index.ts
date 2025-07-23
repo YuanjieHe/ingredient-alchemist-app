@@ -383,7 +383,7 @@ ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people' : '人'}
 - ${isEnglish ? 'Focus' : '重点'}: ${isEnglish ? 'Authentic' : '正宗的'} ${cuisineType} ${isEnglish ? 'cooking methods and flavors' : '烹饪方法和口味'}
 - ${isEnglish ? 'Occasion' : '场合'}: ${occasionType}
-- ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance the dish' : '可以建议必要食材来提升菜品') : (isEnglish ? 'Must use only provided ingredients creatively' : '必须创造性地仅使用提供的食材')}
+- ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance the dish' : '可以建议必要食材来提升菜品') : (isEnglish ? '🚨 STRICT CONSTRAINT: Must use ONLY the provided ingredients. DO NOT add any ingredients not in the list. Be creative with ONLY these ingredients' : '🚨 严格约束：必须仅使用提供的食材。不要添加任何不在列表中的食材。仅用这些食材进行创意烹饪')}
 - ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes' : '使用知识库菜品作为灵感，但创造新的创新食谱'}
 - ${isEnglish ? 'INCORPORATE traditional techniques mentioned above when relevant' : '在相关时融入上述传统技法'}
 - ${isEnglish ? 'EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques' : '每个步骤都必须极其详细，包含精确的时间、温度和技法'}
@@ -411,8 +411,11 @@ ${isEnglish ? 'Format the response as a JSON array with this exact structure' : 
     "difficulty": "${skillLevel}",
     "knowledgeBaseReferences": ${knowledgeBaseInfo.matchedDishes.length > 0 ? JSON.stringify(knowledgeBaseInfo.matchedDishes.map((d: any) => d.name)) : '[]'},
      "ingredients": [
-       {"item": "${isEnglish ? 'Main ingredient' : '主要食材'}", "amount": "${isEnglish ? '300g, specific cut or preparation' : '300克，具体切法或处理方式'}", "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
-       {"item": "${isEnglish ? 'Seasoning ingredient' : '调味食材'}", "amount": "${isEnglish ? '3 cloves, minced' : '3瓣，切碎'}", "usedIn": "${isEnglish ? 'flavoring' : '调味'}"}
+       ${allowShopping ? 
+         `{"item": "${isEnglish ? 'Main ingredient' : '主要食材'}", "amount": "${isEnglish ? '300g, specific cut or preparation' : '300克，具体切法或处理方式'}", "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
+       {"item": "${isEnglish ? 'Seasoning ingredient' : '调味食材'}", "amount": "${isEnglish ? '3 cloves, minced' : '3瓣，切碎'}", "usedIn": "${isEnglish ? 'flavoring' : '调味'}"}` :
+         `${ingredients.slice(0, 3).map(ing => `{"item": "${ing}", "amount": "${isEnglish ? 'adequate amount' : '适量'}", "usedIn": "${isEnglish ? 'various dishes' : '各种菜品'}"}`).join(',\n       ')}`
+       }
      ],
      "dishInstructions": [
        {
