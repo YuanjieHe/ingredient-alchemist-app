@@ -187,37 +187,41 @@ serve(async (req) => {
       console.error('Response text:', generatedText);
       
       // Fallback: create a simple recipe structure
+      const isEnglish = language === 'en';
       recipes = [{
         id: "fallback-recipe",
-        title: `${cuisineType} ${mealType} with Available Ingredients`,
-        description: `A delicious ${mealType} recipe using your available ingredients in authentic ${cuisineType} style.`,
+        title: isEnglish ? `${cuisineType} ${mealType} with Available Ingredients` : `${cuisineType}风味${mealType}配现有食材`,
+        description: isEnglish ? `A delicious ${mealType} recipe using your available ingredients in authentic ${cuisineType} style.` : `使用您现有食材制作的美味${mealType}，采用正宗${cuisineType}风味。`,
         prepTime: 15,
         cookTime: 30,
         servings: peopleCount,
         difficulty: skillLevel,
         ingredients: ingredients.map(ing => ({item: ing, amount: "1 portion", usedIn: "main dish"})),
         dishInstructions: [{
-          dishName: "Main Dish",
+          dishName: isEnglish ? "Main Dish" : "主菜",
           steps: [
             {
               stepNumber: 1,
-              title: "Prepare Ingredients",
-              description: `Clean and prepare all your ingredients: ${ingredients.join(', ')}. Cut ingredients according to traditional ${cuisineType} techniques for optimal cooking and presentation.`,
-              duration: "10 minutes",
-              tips: "Proper ingredient preparation is crucial for authentic results. Take time to cut ingredients uniformly.",
+              title: isEnglish ? "Prepare Ingredients" : "食材准备",
+              description: isEnglish ? `Clean and prepare all your ingredients: ${ingredients.join(', ')}. Cut ingredients according to traditional ${cuisineType} techniques for optimal cooking and presentation.` : `清洗并准备所有食材：${ingredients.join('、')}。根据传统${cuisineType}技法切配食材，以获得最佳的烹饪效果和摆盘效果。`,
+              duration: isEnglish ? "10 minutes" : "10分钟",
+              tips: isEnglish ? "Proper ingredient preparation is crucial for authentic results. Take time to cut ingredients uniformly." : "正确的食材准备是获得正宗口味的关键。花时间将食材切得均匀。",
               imagePrompt: `${cuisineType} ingredients prepared and arranged on cutting board with traditional tools`
             },
             {
               stepNumber: 2,
-              title: "Cook the Dish",
-              description: `Heat your cooking vessel and combine ingredients using traditional ${cuisineType} cooking methods. Pay attention to timing and temperature for authentic flavors.`,
-              duration: "20 minutes",
-              tips: "Taste as you go and adjust seasoning according to traditional flavor profiles.",
+              title: isEnglish ? "Cook the Dish" : "烹饪菜品",
+              description: isEnglish ? `Heat your cooking vessel and combine ingredients using traditional ${cuisineType} cooking methods. Pay attention to timing and temperature for authentic flavors.` : `加热烹饪器具，使用传统${cuisineType}烹饪方法组合食材。注意时间和温度控制，以获得正宗风味。`,
+              duration: isEnglish ? "20 minutes" : "20分钟",
+              tips: isEnglish ? "Taste as you go and adjust seasoning according to traditional flavor profiles." : "边做边尝味，根据传统风味特点调整调料。",
               imagePrompt: `Traditional ${cuisineType} cooking technique being demonstrated`
             }
           ]
         }],
-        coordinationTips: ["Prep all ingredients first using proper techniques", "Follow traditional cooking order for best results"],
+        coordinationTips: [
+          isEnglish ? "Prep all ingredients first using proper techniques" : "首先使用正确技法准备所有食材",
+          isEnglish ? "Follow traditional cooking order for best results" : "遵循传统烹饪顺序以获得最佳效果"
+        ],
         tags: ["homemade", "simple", cuisineType.toLowerCase()]
       }];
     }
@@ -397,7 +401,7 @@ function createEnhancedPrompt(params: any) {
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 
-CRITICAL LANGUAGE CHECK: language=${language}, isEnglish=${isEnglish}
+
 ${knowledgeSection}
 
 🔥 ${isEnglish ? 'MEAL COMPOSITION REQUIREMENTS (MANDATORY)' : '套餐组成要求（必须）'}:

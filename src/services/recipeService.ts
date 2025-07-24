@@ -68,7 +68,6 @@ export class RecipeService {
   }
 
   async generateRecipes(request: RecipeRequest): Promise<Recipe[]> {
-    console.log('RecipeService received language:', request.language);
     console.log('Starting recipe generation with request:', {
       ingredients: request.ingredients,
       skillLevel: request.skillLevel,
