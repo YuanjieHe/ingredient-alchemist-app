@@ -190,7 +190,7 @@ MEAL REQUIREMENTS:
 - Cuisine preference: ${cuisineType}
 - Skill level: ${skillLevel}
 - Shopping allowed: ${allowShopping ? 'Yes (can suggest a few additional ingredients)' : 'No (use only available ingredients)'}
-- Language: ${isEnglish ? 'Generate ALL content in English' : '所有内容必须用中文生成'}
+- Language: ${isEnglish ? 'IMPORTANT: Generate ALL content strictly in English language only. Recipe names, ingredients, instructions, descriptions - everything must be in English.' : '重要：所有内容严格用中文生成。食谱名称、食材、制作步骤、描述等一切内容都必须是中文。'}
 
 CRITICAL RECIPE MATCHING PRINCIPLES:
 1. **INDEPENDENT DISHES**: Create ${dishCount} completely separate recipes, each with its own ingredient list and cooking instructions

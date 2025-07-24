@@ -341,8 +341,8 @@ function getSystemPrompt(cuisineType: string, language: string = 'zh') {
 
   const profile = chefProfiles[cuisineType.toLowerCase()] || chefProfiles.other;
   const instruction = isEnglish 
-    ? 'Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only. Generate ALL content in English.'
-    : '创造令人兴奋的正宗食谱，提供极其详细的步骤说明。每个步骤都应该详细解释，包含精确的时间、温度和技法细节。始终只用有效的JSON格式回复。所有内容必须用中文生成。';
+    ? 'Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only. CRITICAL: Generate ALL content strictly in English language only - recipe names, ingredients, instructions, descriptions, everything must be in English.'
+    : '创造令人兴奋的正宗食谱，提供极其详细的步骤说明。每个步骤都应该详细解释，包含精确的时间、温度和技法细节。始终只用有效的JSON格式回复。关键要求：所有内容严格用中文生成 - 食谱名称、食材、制作步骤、描述等一切内容都必须是中文。';
   
   return `${profile} ${instruction}`;
 }
