@@ -39,7 +39,10 @@ export class ApplePaymentService {
   }
 
   isApplePayAvailable(): boolean {
-    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+    const isNative = Capacitor.isNativePlatform();
+    const platform = Capacitor.getPlatform();
+    console.log('Platform check:', { isNative, platform });
+    return isNative && platform === 'ios';
   }
 
   async initialize(apiKey: string, userId?: string): Promise<void> {
