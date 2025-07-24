@@ -27,7 +27,7 @@ const Subscription = () => {
       if (paymentService.isApplePayAvailable() && !isInitialized) {
         try {
           // 从RevenueCat Dashboard获取您的API Key
-          await paymentService.initialize('appl_YOUR_ACTUAL_API_KEY_HERE', user?.id);
+          await paymentService.initialize('appl_LEqcSLDEpQZHdoExLXklqriNXPs', user?.id);
           setIsInitialized(true);
         } catch (error) {
           console.error('Failed to initialize payments:', error);
