@@ -55,6 +55,8 @@ const Index = () => {
   };
 
   const handleGenerateRecipes = async () => {
+    console.log('Current language from useLanguage:', language);
+    console.log('Type of language:', typeof language);
     if (ingredients.length === 0) {
       toast.error(t('addIngredientsFirst'));
       return;
@@ -64,6 +66,7 @@ const Index = () => {
     setStep('generating');
 
     try {
+      console.log('Generating recipes with language:', language);
       const generatedRecipes = await recipeService.generateRecipes({
         ingredients,
         skillLevel,
