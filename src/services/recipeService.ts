@@ -178,6 +178,8 @@ export class RecipeService {
     const dishCount = Math.max(3, Math.min(6, Math.ceil(peopleCount / 2)));
     
     return `
+${isEnglish ? 'CRITICAL LANGUAGE REQUIREMENT: You MUST respond only in English. All recipe names, ingredients, instructions, and descriptions must be in English language.' : '关键语言要求：你必须只用中文回复。所有食谱名称、食材、说明和描述都必须是中文。'}
+
 You are a professional cooking assistant helping home cooks create several independent but well-matched dishes. Create ${dishCount} separate, independent recipes that work perfectly together as a meal.
 
 AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
@@ -195,7 +197,7 @@ MEAL REQUIREMENTS:
 CRITICAL RECIPE MATCHING PRINCIPLES:
 1. **INDEPENDENT DISHES**: Create ${dishCount} completely separate recipes, each with its own ingredient list and cooking instructions
 2. **SMART COMBINATIONS**: Ensure the dishes complement each other in flavor, nutrition, and texture
-3. **BALANCED VARIETY**: Include 1-2 主菜 (main dishes), 1-2 配菜 (side dishes), and 1 汤品 (soup) if applicable
+3. **BALANCED VARIETY**: Include 1-2 ${isEnglish ? 'main dishes' : '主菜'} (${isEnglish ? 'main dishes' : '主菜'}), 1-2 ${isEnglish ? 'side dishes' : '配菜'} (${isEnglish ? 'side dishes' : '配菜'}), and 1 ${isEnglish ? 'soup' : '汤品'} (${isEnglish ? 'soup' : '汤品'}) if applicable
 4. **CUISINE HARMONY**: All dishes should follow ${cuisineType} cuisine style and flavor profiles  
 5. **NUTRITIONAL BALANCE**: Together, the dishes should provide protein, vegetables, and carbohydrates
 6. **COOKING COORDINATION**: Consider timing so all dishes can be prepared together efficiently

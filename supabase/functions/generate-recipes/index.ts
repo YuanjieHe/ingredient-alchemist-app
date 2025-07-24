@@ -412,7 +412,7 @@ ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes' : '使用知识库菜品作为灵感，但创造新的创新食谱'}
 - ${isEnglish ? 'INCORPORATE traditional techniques mentioned above when relevant' : '在相关时融入上述传统技法'}
 - ${isEnglish ? 'EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques' : '每个步骤都必须极其详细，包含精确的时间、温度和技法'}
-- ${isEnglish ? 'Generate ALL content in English language' : '所有内容必须用中文生成'}
+- ${isEnglish ? 'CRITICAL LANGUAGE REQUIREMENT: Generate ALL content strictly in English language - dish names, descriptions, ingredients, instructions, everything must be in English' : '关键语言要求：所有内容严格用中文生成 - 菜名、描述、食材、说明，一切都必须是中文'}
 
 ${isEnglish ? 'REQUIRED DETAILS FOR EACH RECIPE' : '每个食谱的必需详情'}:
 1. ${isEnglish ? 'Authentic dish name with cultural context' : '正宗菜名及文化背景'}
