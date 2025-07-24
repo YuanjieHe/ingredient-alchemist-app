@@ -178,7 +178,7 @@ export class RecipeService {
     const dishCount = Math.max(3, Math.min(6, Math.ceil(peopleCount / 2)));
     
     return `
-${isEnglish ? 'CRITICAL LANGUAGE REQUIREMENT: You MUST respond only in English. All recipe names, ingredients, instructions, and descriptions must be in English language.' : '关键语言要求：你必须只用中文回复。所有食谱名称、食材、说明和描述都必须是中文。'}
+${isEnglish ? 'RESPOND ONLY IN ENGLISH: You must use English for all content including recipe names, ingredients, and instructions.' : '只用中文回复：你必须用中文生成所有内容，包括食谱名称、食材和说明。'}
 
 You are a professional cooking assistant helping home cooks create several independent but well-matched dishes. Create ${dishCount} separate, independent recipes that work perfectly together as a meal.
 

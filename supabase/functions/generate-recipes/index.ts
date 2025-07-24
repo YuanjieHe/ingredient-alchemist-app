@@ -341,8 +341,8 @@ function getSystemPrompt(cuisineType: string, language: string = 'zh') {
 
   const profile = chefProfiles[cuisineType.toLowerCase()] || chefProfiles.other;
   const instruction = isEnglish 
-    ? 'Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only. CRITICAL: Generate ALL content strictly in English language only - recipe names, ingredients, instructions, descriptions, everything must be in English.'
-    : '创造令人兴奋的正宗食谱，提供极其详细的步骤说明。每个步骤都应该详细解释，包含精确的时间、温度和技法细节。始终只用有效的JSON格式回复。关键要求：所有内容严格用中文生成 - 食谱名称、食材、制作步骤、描述等一切内容都必须是中文。';
+    ? 'IMPORTANT: You must respond ONLY in English. All recipe names, ingredients, instructions, descriptions must be in English language. Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only.'
+    : '重要：你必须只用中文回复。所有食谱名称、食材、制作步骤、描述都必须是中文。创造令人兴奋的正宗食谱，提供极其详细的步骤说明。每个步骤都应该详细解释，包含精确的时间、温度和技法细节。始终只用有效的JSON格式回复。';
   
   return `${profile} ${instruction}`;
 }
@@ -393,7 +393,7 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
+  return `${isEnglish ? 'RESPOND ONLY IN ENGLISH' : '只用中文回复'}: ${isEnglish ? 'Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 
