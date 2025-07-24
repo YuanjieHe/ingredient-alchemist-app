@@ -362,6 +362,8 @@ function createEnhancedPrompt(params: any) {
     language = 'zh'
   } = params;
 
+  console.log('Current language in prompt creation:', language);
+
   const isEnglish = language === 'en';
   // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
   const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
@@ -394,6 +396,8 @@ function createEnhancedPrompt(params: any) {
   return `🍽️ ${isEnglish ? 'CRITICAL: Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
+
+CRITICAL LANGUAGE CHECK: language=${language}, isEnglish=${isEnglish}
 ${knowledgeSection}
 
 🔥 ${isEnglish ? 'MEAL COMPOSITION REQUIREMENTS (MANDATORY)' : '套餐组成要求（必须）'}:
