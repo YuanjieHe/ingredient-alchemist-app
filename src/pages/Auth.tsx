@@ -7,17 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { ChefHat, ArrowRight } from 'lucide-react';
+import { ChefHat, ArrowRight, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
 
 const Auth = () => {
   const { t } = useLanguage();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [showOtpInput, setShowOtpInput] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +60,44 @@ const Auth = () => {
     }
   };
 
+  const handlePhoneSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await signInWithOtp(phone);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        setShowOtpInput(true);
+        toast.success('验证码已发送到您的手机');
+      }
+    } catch (error) {
+      toast.error('发送验证码失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await verifyOtp(phone, otp);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('登录成功');
+        navigate('/');
+      }
+    } catch (error) {
+      toast.error('验证失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSkip = () => {
     navigate('/');
   };
@@ -80,8 +121,9 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
+                <TabsTrigger value="phone">手机登录</TabsTrigger>
                 <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
               </TabsList>
               
@@ -119,6 +161,65 @@ const Auth = () => {
                     {loading ? t('signingIn') : t('signIn')}
                   </Button>
                 </form>
+              </TabsContent>
+
+              <TabsContent value="phone" className="space-y-4 mt-6">
+                <CardHeader className="px-0 pb-4">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Phone className="w-5 h-5" />
+                    手机号登录
+                  </CardTitle>
+                  <CardDescription>
+                    使用手机号接收验证码登录
+                  </CardDescription>
+                </CardHeader>
+                
+                {!showOtpInput ? (
+                  <form onSubmit={handlePhoneSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">手机号</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+86 138 0013 8000"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? '发送中...' : '发送验证码'}
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleOtpVerify} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">验证码</Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder="请输入6位验证码"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowOtpInput(false)}
+                        className="flex-1"
+                      >
+                        重新发送
+                      </Button>
+                      <Button type="submit" className="flex-1" disabled={loading}>
+                        {loading ? '验证中...' : '验证登录'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 mt-6">
