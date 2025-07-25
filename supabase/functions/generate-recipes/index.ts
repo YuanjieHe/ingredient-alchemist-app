@@ -22,9 +22,16 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== EDGE FUNCTION STARTED ===');
+    
     if (!geminiApiKey) {
+      console.error('Gemini API key not configured');
       throw new Error('Gemini API key not configured');
     }
+
+    const requestBody = await req.json();
+    console.log('=== REQUEST BODY RECEIVED ===');
+    console.log(JSON.stringify(requestBody, null, 2));
 
     const { 
       ingredients, 
@@ -40,10 +47,16 @@ serve(async (req) => {
       singleDishMode = false,
       dishName,
       dishDescription
-    } = await req.json();
+    } = requestBody;
+
+    console.log('=== PARSED PARAMETERS ===');
+    console.log('Language:', language);
+    console.log('Cuisine Type:', cuisineType);
+    console.log('Ingredients:', ingredients);
 
     // Handle single dish detail generation
     if (singleDishMode) {
+      console.log('=== SINGLE DISH MODE ===');
       console.log('Generating detailed recipe for single dish:', dishName);
       
       const detailedRecipe = await generateDetailedSingleRecipe({
@@ -64,10 +77,12 @@ serve(async (req) => {
     }
 
     // Query knowledge base for relevant dishes
+    console.log('=== QUERYING KNOWLEDGE BASE ===');
     console.log('Querying knowledge base for relevant dishes...');
     const knowledgeBaseInfo = await queryKnowledgeBase(ingredients, cuisineType, skillLevel);
     
     // Create enhanced prompt with knowledge base information
+    console.log('=== CREATING PROMPT ===');
     const prompt = createEnhancedPrompt({
       ingredients,
       skillLevel,
@@ -97,6 +112,7 @@ serve(async (req) => {
     let api302Error = null;
 
     try {
+      console.log('=== CALLING GEMINI API ===');
       console.log('Generating recipes with Gemini...');
       
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
