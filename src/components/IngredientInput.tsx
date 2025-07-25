@@ -15,7 +15,7 @@ const getIngredientIcon = (ingredient: string) => {
   // 中英文食材映射
   const ingredientIconMap: { [key: string]: any } = {
     // 肉类
-    '牛肉': Beef, '猪肉': Beef, '羊肉': Beef, '鸡肉': Beef, '肉': Beef,
+    '牛肉': Beef, '猪肉': Beef, '羊肉': Beef, '鸡肉': Beef, '肉': Beef, '肉类': Beef,
     'beef': Beef, 'pork': Beef, 'lamb': Beef, 'chicken': Beef, 'meat': Beef,
     
     // 海鲜
