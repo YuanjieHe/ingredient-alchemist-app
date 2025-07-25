@@ -42,7 +42,7 @@ serve(async (req) => {
       mealType, 
       occasionType, 
       cuisineType,
-      language = 'zh',
+      language = '中文',
       // New parameters for single dish mode
       singleDishMode = false,
       dishName,
@@ -214,7 +214,7 @@ serve(async (req) => {
       console.error('Response text:', generatedText);
       
       // Fallback: create a simple recipe structure
-      const isEnglish = language === 'en';
+      const isEnglish = language === 'English';
       recipes = [{
         id: "fallback-recipe",
         title: isEnglish ? `${cuisineType} ${mealType} with Available Ingredients` : `${cuisineType}风味${mealType}配现有食材`,
@@ -331,8 +331,8 @@ async function queryKnowledgeBase(ingredients: string[], cuisineType: string, sk
 }
 
 // Helper function to get cuisine-specific system prompt
-function getSystemPrompt(cuisineType: string, language: string = 'zh') {
-  const isEnglish = language === 'en';
+function getSystemPrompt(cuisineType: string, language: string = '中文') {
+  const isEnglish = language === 'English';
   
   const chefProfiles = {
     chinese: isEnglish 
@@ -390,12 +390,12 @@ function createEnhancedPrompt(params: any) {
     occasionType,
     cuisineType,
     knowledgeBaseInfo,
-    language = 'zh'
+    language = '中文'
   } = params;
 
   console.log('Current language in prompt creation:', language);
 
-  const isEnglish = language === 'en';
+  const isEnglish = language === 'English';
   // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
   const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
 
@@ -598,8 +598,8 @@ async function generateWith302AI(systemPrompt: string, prompt: string): Promise<
 
 // Helper function to generate detailed recipe for a single dish
 async function generateDetailedSingleRecipe(params: any): Promise<any> {
-  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = 'zh' } = params;
-  const isEnglish = language === 'en';
+  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = '中文' } = params;
+  const isEnglish = language === 'English';
   
   const systemPrompt = isEnglish 
     ? 'You are a master chef creating extremely detailed, step-by-step cooking instructions. Focus on precision, technique, and professional tips. Respond only with valid JSON.'
