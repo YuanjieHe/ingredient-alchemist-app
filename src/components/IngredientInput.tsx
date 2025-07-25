@@ -10,8 +10,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 // 食材图标映射
 const getIngredientIcon = (ingredient: string) => {
-  const lowerIngredient = ingredient.toLowerCase();
-  
   // 中英文食材映射
   const ingredientIconMap: { [key: string]: any } = {
     // 肉类
@@ -41,9 +39,13 @@ const getIngredientIcon = (ingredient: string) => {
     'egg': Egg, 'milk': Milk, 'yogurt': Milk, 'cheese': Milk
   };
 
-  // 寻找匹配的食材
+  // 寻找匹配的食材 - 对中文和英文分别处理
+  const lowerIngredient = ingredient.toLowerCase();
+  
   for (const [key, icon] of Object.entries(ingredientIconMap)) {
-    if (lowerIngredient.includes(key) || key.includes(lowerIngredient)) {
+    // 直接匹配（中文）或小写匹配（英文）
+    if (ingredient.includes(key) || key.includes(ingredient) || 
+        lowerIngredient.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerIngredient)) {
       return icon;
     }
   }
