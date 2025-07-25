@@ -21,7 +21,7 @@ interface IngredientWithQuantity {
 }
 
 const RecipeGenerator = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { subscription, canGenerate, remainingGenerations, incrementUsage, loading: subscriptionLoading } = useSubscription();
@@ -125,7 +125,7 @@ const RecipeGenerator = () => {
         occasionType,
         cuisineType,
         apiKey: API_KEY,
-        language // 传递当前语言设置
+        language: t('language') // 传递当前语言设置
       });
 
       setRecipes(generatedRecipes);

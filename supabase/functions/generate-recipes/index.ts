@@ -90,149 +90,81 @@ serve(async (req) => {
     let geminiError = null;
     let api302Error = null;
 
-    // For English, try GPT first; for Chinese, try Gemini first
-    const useGPTFirst = language === 'en';
-
-    if (useGPTFirst) {
-      // English: Try GPT first
-      try {
-        console.log('Generating recipes with GPT (primary for English)...');
-        generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
-        console.log('GPT primary response successful');
-      } catch (error) {
-        console.error('GPT failed, trying Gemini fallback:', error);
-        api302Error = error;
-        
-        // Try Gemini as fallback
-        try {
-          console.log('Trying Gemini fallback...');
-          const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: `${getSystemPrompt(cuisineType, language)}\n\n${prompt}`
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.8,
-                maxOutputTokens: 8000,
-              }
-            }),
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            geminiError = {
-              status: response.status,
-              statusText: response.statusText,
-              message: errorText
-            };
-            throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
+    try {
+      console.log('Generating recipes with Gemini...');
+      
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${getSystemPrompt(cuisineType, language)}\n\n${prompt}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 8000,
           }
+        }),
+      });
 
-          const data = await response.json();
-          generatedText = data.candidates[0].content.parts[0].text;
+      if (!response.ok) {
+        const errorText = await response.text();
+        geminiError = {
+          status: response.status,
+          statusText: response.statusText,
+          message: errorText
+        };
+        console.error('Gemini API error:', response.status, response.statusText, errorText);
+        
+        // If Gemini fails, try 302.ai
+        if (api302Key) {
+          console.log('Gemini failed, switching to 302.ai...');
           usingFallback = true;
-          console.log('Gemini fallback successful');
-        } catch (geminiErr) {
-          console.error('Both APIs failed:', error.message, geminiErr.message);
+          try {
+            generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
+          } catch (api302Err) {
+            api302Error = api302Err;
+            throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, 302.ai: ${api302Err.message}`);
+          }
+        } else {
+          throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+      } else {
+        const data = await response.json();
+        generatedText = data.candidates[0].content.parts[0].text;
+        console.log('Raw Gemini response received successfully');
+      }
+    } catch (error) {
+      // If Gemini fails completely and we have 302.ai API key, try 302.ai as fallback
+      if (api302Key && !usingFallback) {
+        console.log('Gemini failed completely, trying 302.ai as fallback...');
+        try {
+          generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
+          usingFallback = true;
+        } catch (api302Err) {
+          api302Error = api302Err;
+          console.error('Both APIs failed:', error.message, api302Err.message);
           
+          // Return detailed error information for debugging
           return new Response(JSON.stringify({ 
             error: 'Both APIs failed', 
             details: {
-              gpt: { message: error.message, status: error.status || 'unknown' },
-              gemini: geminiError || { message: geminiErr.message }
+              gemini: geminiError || { message: error.message },
+              api302: { message: api302Err.message, status: api302Err.status || 'unknown' }
             },
             message: 'Recipe generation failed. Please check API status and try again.',
-            debugInfo: `GPT: ${error.status || 'unknown error'}, Gemini: ${geminiError?.status || 'unknown error'}`
+            debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, 302.ai: ${api302Err.status || 'unknown error'}`
           }), {
             status: 503,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
-      }
-    } else {
-      // Chinese: Try Gemini first (original logic)
-      try {
-        console.log('Generating recipes with Gemini (primary for Chinese)...');
-        
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `${getSystemPrompt(cuisineType, language)}\n\n${prompt}`
-              }]
-            }],
-            generationConfig: {
-              temperature: 0.8,
-              maxOutputTokens: 8000,
-            }
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          geminiError = {
-            status: response.status,
-            statusText: response.statusText,
-            message: errorText
-          };
-          console.error('Gemini API error:', response.status, response.statusText, errorText);
-          
-          // If Gemini fails, try 302.ai
-          if (api302Key) {
-            console.log('Gemini failed, switching to 302.ai...');
-            usingFallback = true;
-            try {
-              generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
-            } catch (api302Err) {
-              api302Error = api302Err;
-              throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, 302.ai: ${api302Err.message}`);
-            }
-          } else {
-            throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
-          }
-        } else {
-          const data = await response.json();
-          generatedText = data.candidates[0].content.parts[0].text;
-          console.log('Gemini primary response successful');
-        }
-      } catch (error) {
-        // If Gemini fails completely and we have 302.ai API key, try 302.ai as fallback
-        if (api302Key && !usingFallback) {
-          console.log('Gemini failed completely, trying 302.ai as fallback...');
-          try {
-            generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
-            usingFallback = true;
-          } catch (api302Err) {
-            api302Error = api302Err;
-            console.error('Both APIs failed:', error.message, api302Err.message);
-            
-            // Return detailed error information for debugging
-            return new Response(JSON.stringify({ 
-              error: 'Both APIs failed', 
-              details: {
-                gemini: geminiError || { message: error.message },
-                api302: { message: api302Err.message, status: api302Err.status || 'unknown' }
-              },
-              message: 'Recipe generation failed. Please check API status and try again.',
-              debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, 302.ai: ${api302Err.status || 'unknown error'}`
-            }), {
-              status: 503,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-        } else {
-          throw error;
-        }
+      } else {
+        throw error;
       }
     }
 
