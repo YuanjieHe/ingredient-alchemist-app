@@ -77,8 +77,8 @@ export class RecipeService {
     });
 
     try {
-      // Use the edge function which now includes Deepseek fallback
-      console.log('Calling edge function with Deepseek fallback capability...');
+      // Use the edge function which now includes Gemini + 302.ai fallback
+      console.log('Calling edge function with Gemini + 302.ai fallback capability...');
       const response = await fetch(this.apiEndpoint, {
         method: 'POST',
         headers: {
