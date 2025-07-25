@@ -42,8 +42,6 @@ serve(async (req) => {
       dishDescription
     } = await req.json();
 
-    console.log('Received language parameter:', language);
-
     // Handle single dish detail generation
     if (singleDishMode) {
       console.log('Generating detailed recipe for single dish:', dishName);
@@ -371,211 +369,342 @@ function createEnhancedPrompt(params: any) {
   console.log('Current language in prompt creation:', language);
 
   const isEnglish = language === 'en';
+  // 根据人数计算菜品数量：每2-3人一道菜，至少4道菜
   const dishCount = Math.max(4, Math.ceil(peopleCount / 2));
 
-  // Create completely separate prompts for different languages
-  if (isEnglish) {
-    return createEnglishPrompt(ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType, dishCount, knowledgeBaseInfo);
-  } else {
-    return createChinesePrompt(ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType, dishCount, knowledgeBaseInfo);
-  }
-}
-
-// Completely separate English prompt generator
-function createEnglishPrompt(ingredients: string[], skillLevel: string, allowShopping: boolean, peopleCount: number, mealType: string, occasionType: string, cuisineType: string, dishCount: number, knowledgeBaseInfo: any) {
   let knowledgeSection = '';
   
   if (knowledgeBaseInfo.matchedDishes.length > 0) {
-    knowledgeSection += `\n\nKNOWLEDGE BASE REFERENCE DISHES (for inspiration):\n`;
+    knowledgeSection += `\n\n🔥 ${isEnglish ? 'KNOWLEDGE BASE REFERENCES (Use as inspiration but create new recipes)' : '知识库参考（作为灵感但创造新食谱）'}:\n`;
+    
     knowledgeBaseInfo.matchedDishes.forEach((dish: any, index: number) => {
-      knowledgeSection += `${index + 1}. "${dish.name}" - Traditional ${dish.cuisine_type} dish\n`;
+      knowledgeSection += `\n${index + 1}. "${dish.name}" (${dish.cuisine_type}):
+- ${isEnglish ? 'Cultural Background' : '文化背景'}: ${dish.cultural_background || (isEnglish ? 'Traditional dish' : '传统菜肴')}
+- ${isEnglish ? 'Cooking Time' : '烹饪时间'}: ${dish.cooking_time} ${isEnglish ? 'minutes' : '分钟'}
+- ${isEnglish ? 'Traditional Ingredients' : '传统食材'}: ${dish.dish_ingredients?.map((di: any) => di.ingredient_name).join(', ') || (isEnglish ? 'Various' : '各种')}
+- ${isEnglish ? 'Instructions Style' : '制作方法'}: ${typeof dish.instructions === 'string' ? dish.instructions.substring(0, 200) + '...' : (isEnglish ? 'Traditional preparation method' : '传统制作方法')}`;
     });
   }
 
   if (knowledgeBaseInfo.relevantTechniques.length > 0) {
-    knowledgeSection += `\nTRADITIONAL COOKING TECHNIQUES:\n`;
+    knowledgeSection += `\n\n🥢 ${isEnglish ? 'TRADITIONAL TECHNIQUES TO INCORPORATE' : '融入的传统技法'}:\n`;
+    
     knowledgeBaseInfo.relevantTechniques.forEach((technique: any, index: number) => {
-      knowledgeSection += `${index + 1}. ${technique.name} - ${technique.description || 'Traditional technique'}\n`;
+      knowledgeSection += `\n${index + 1}. ${technique.name} (${technique.difficulty_level}):
+- ${isEnglish ? 'Description' : '描述'}: ${technique.description || (isEnglish ? 'Traditional cooking method' : '传统烹饪方法')}
+- ${isEnglish ? 'Equipment' : '设备'}: ${technique.equipment_needed?.join(', ') || (isEnglish ? 'Basic kitchen tools' : '基本厨具')}
+- ${isEnglish ? 'Tips' : '技巧'}: ${technique.tips?.join('; ') || (isEnglish ? 'Master the basics first' : '先掌握基础')}`;
     });
   }
 
-  return `You are a professional ${cuisineType} chef. Create ${dishCount} complementary recipes for a complete ${mealType} meal serving ${peopleCount} people.
+  return `${isEnglish ? 'RESPOND ONLY IN ENGLISH' : '只用中文回复'}: ${isEnglish ? 'Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
-AVAILABLE INGREDIENTS: ${ingredients.join(', ')}
+${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 
-MEAL REQUIREMENTS:
-- Skill Level: ${skillLevel}
-- Occasion: ${occasionType}
-- Shopping: ${allowShopping ? 'Additional ingredients allowed' : 'Use only available ingredients'}
-- LANGUAGE: ALL content must be in ENGLISH ONLY
 
 ${knowledgeSection}
 
-Create ${dishCount} dishes that work together as a complete meal. Include main dishes, sides, and soup if appropriate.
+🔥 ${isEnglish ? 'MEAL COMPOSITION REQUIREMENTS (MANDATORY)' : '套餐组成要求（必须）'}:
+- ${isEnglish ? 'Total dishes' : '总菜品数'}: ${dishCount} ${isEnglish ? 'different dishes for one complete meal' : '道不同菜品组成一顿完整餐食'}
+- ${isEnglish ? 'MUST include' : '必须包含'}: 1-2 ${isEnglish ? 'main dishes' : '主菜'} (${isEnglish ? '荤菜/主菜' : '荤菜/主菜'}) + 2-3 ${isEnglish ? 'side dishes' : '配菜'} (${isEnglish ? '素菜/配菜' : '素菜/配菜'}) + 1 ${isEnglish ? 'soup/drink' : '汤品/饮品'} (${isEnglish ? '汤/饮品' : '汤/饮品'})
+- ${isEnglish ? 'Create a BALANCED TABLE that feeds' : '创建一个均衡的餐桌，满足'} ${peopleCount} ${isEnglish ? 'people for' : '人的'} ${mealType}
+- ${isEnglish ? 'Each dish uses different cooking methods and ingredients' : '每道菜使用不同的烹饪方法和食材'}
+- ${isEnglish ? 'All dishes should complement each other in flavor and nutrition' : '所有菜品在口味和营养上应该相互补充'}
 
-RESPONSE FORMAT (JSON only):
+${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
+- ${isEnglish ? 'Skill level' : '技能水平'}: ${skillLevel} (${isEnglish ? 'provide extremely detailed cooking techniques and precise instructions' : '提供极其详细的烹饪技法和精确说明'})
+- ${isEnglish ? 'Serves' : '服务人数'}: ${peopleCount} ${isEnglish ? 'people' : '人'}
+- ${isEnglish ? 'Focus' : '重点'}: ${isEnglish ? 'Authentic' : '正宗的'} ${cuisineType} ${isEnglish ? 'cooking methods and flavors' : '烹饪方法和口味'}
+- ${isEnglish ? 'Occasion' : '场合'}: ${occasionType}
+- ${allowShopping ? (isEnglish ? 'Can suggest essential ingredients to enhance the dish' : '可以建议必要食材来提升菜品') : (isEnglish ? '🚨 STRICT CONSTRAINT: Must use ONLY the provided ingredients. DO NOT add any ingredients not in the list. Be creative with ONLY these ingredients' : '🚨 严格约束：必须仅使用提供的食材。不要添加任何不在列表中的食材。仅用这些食材进行创意烹饪')}
+- ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes' : '使用知识库菜品作为灵感，但创造新的创新食谱'}
+- ${isEnglish ? 'INCORPORATE traditional techniques mentioned above when relevant' : '在相关时融入上述传统技法'}
+- ${isEnglish ? 'EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques' : '每个步骤都必须极其详细，包含精确的时间、温度和技法'}
+- ${isEnglish ? 'CRITICAL LANGUAGE REQUIREMENT: Generate ALL content strictly in English language - dish names, descriptions, ingredients, instructions, everything must be in English' : '关键语言要求：所有内容严格用中文生成 - 菜名、描述、食材、说明，一切都必须是中文'}
+
+${isEnglish ? 'REQUIRED DETAILS FOR EACH RECIPE' : '每个食谱的必需详情'}:
+1. ${isEnglish ? 'Authentic dish name with cultural context' : '正宗菜名及文化背景'}
+2. ${isEnglish ? 'Cultural significance and regional origin' : '文化意义和地域起源'}
+3. ${isEnglish ? 'Essential cooking techniques specific to the cuisine' : '该菜系特有的基本烹饪技法'}
+4. ${isEnglish ? 'Precise temperature and timing instructions' : '精确的温度和时间说明'}
+5. ${isEnglish ? 'Detailed ingredient preparation methods' : '详细的食材准备方法'}
+6. ${isEnglish ? 'Step-by-step cooking process with professional tips' : '逐步烹饪过程及专业提示'}
+7. ${isEnglish ? 'Traditional serving and presentation methods' : '传统上菜和摆盘方法'}
+8. ${isEnglish ? 'Texture, aroma, and visual indicators for each step' : '每个步骤的质地、香气和视觉指标'}
+
+${isEnglish ? 'Format the response as a JSON array with this exact structure' : '按照以下精确的JSON数组结构格式化回复'}:
 [
   {
     "id": "recipe1",
-    "title": "Authentic English Dish Name",
-    "description": "Detailed English description with cultural background",
+    "title": "${isEnglish ? 'Authentic Dish Name' : '正宗菜品名称'}",
+    "description": "${isEnglish ? `Detailed and engaging description with dish origin and cultural background, explaining the significance of this dish in ${cuisineType} cuisine` : `详细且引人入胜的描述，包含菜品起源和文化背景，解释此菜在${cuisineType}菜系中的意义`}",
     "prepTime": 20,
     "cookTime": 30,
     "servings": ${peopleCount},
     "difficulty": "${skillLevel}",
-    "ingredients": [
-      {"item": "ingredient name", "amount": "specific quantity", "usedIn": "dish purpose"}
-    ],
-    "dishInstructions": [
-      {
-        "dishName": "Main Dish Name",
-        "type": "main",
-        "steps": [
-          {
-            "stepNumber": 1,
-            "title": "Preparation Phase",
-            "description": "Extremely detailed English instructions with temperatures, timing, and techniques",
-            "duration": "10 minutes",
-            "tips": "Professional cooking tips in English"
-          }
-        ]
-      }
-    ],
-    "coordinationTips": ["English cooking coordination tips"],
-    "tags": ["authentic", "${cuisineType.toLowerCase()}"]
-  }
-]
+    "knowledgeBaseReferences": ${knowledgeBaseInfo.matchedDishes.length > 0 ? JSON.stringify(knowledgeBaseInfo.matchedDishes.map((d: any) => d.name)) : '[]'},
+     "ingredients": [
+       ${allowShopping ? 
+         `{"item": "${isEnglish ? 'Main ingredient' : '主要食材'}", "amount": "${isEnglish ? '300g, specific cut or preparation' : '300克，具体切法或处理方式'}", "usedIn": "${isEnglish ? 'main dish' : '主菜'}"},
+       {"item": "${isEnglish ? 'Seasoning ingredient' : '调味食材'}", "amount": "${isEnglish ? '3 cloves, minced' : '3瓣，切碎'}", "usedIn": "${isEnglish ? 'flavoring' : '调味'}"}` :
+         `${ingredients.slice(0, 3).map(ing => `{"item": "${ing}", "amount": "${isEnglish ? 'adequate amount' : '适量'}", "usedIn": "${isEnglish ? 'various dishes' : '各种菜品'}"}`).join(',\n       ')}`
+       }
+     ],
+     "dishInstructions": [
+       {
+         "dishName": "${isEnglish ? '【Main Dish】Braised Pork Ribs' : '【主菜】红烧排骨'}",
+         "type": "main",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Ingredient Selection & Preparation' : '选材处理'}",
+             "description": "${isEnglish ? `Select the highest quality pork ribs (specific specifications and weight), blanch in cold water to remove impurities, bring to boil and skim foam, rinse ribs and drain. Detailed description of selection criteria, processing methods, and cutting techniques for each ingredient.` : `选用最优质的排骨（具体规格和重量），冷水下锅焯水去腥，煮沸后撇浮沫，排骨冲洗控水。详细描述每种食材的选择标准、处理方法、切配技巧。`}",
+             "duration": "${isEnglish ? '15 minutes' : '15分钟'}",
+             "tips": "${isEnglish ? 'Special technique: High-quality ribs don\'t need excessive processing, maintaining original flavor is better.' : '特殊技巧：品质好的排骨无需过度处理，保持原味更佳。'}",
+             "imagePrompt": "Professional ${cuisineType} chef selecting and preparing ingredients"
+           }
+         ]
+       },
+       {
+         "dishName": "${isEnglish ? '【Side Dish】Stir-fried Seasonal Vegetables' : '【配菜】清炒时蔬'}",
+         "type": "side",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Vegetable Washing and Cutting' : '蔬菜清洗与切配'}",
+             "description": "${isEnglish ? 'Detailed vegetable processing steps, including washing, cutting, and seasoning preparation.' : '详细的蔬菜处理步骤，包括清洗、切配、调味准备。'}",
+             "duration": "${isEnglish ? '10 minutes' : '10分钟'}",
+             "tips": "${isEnglish ? 'Vegetable cutting techniques and key points.' : '蔬菜切配的技巧和要点。'}"
+           }
+         ]
+       },
+       {
+         "dishName": "${isEnglish ? '【Soup】Seaweed and Egg Drop Soup' : '【汤品】紫菜蛋花汤'}",
+         "type": "soup",
+         "steps": [
+           {
+             "stepNumber": 1,
+             "title": "${isEnglish ? 'Soup Preparation' : '汤品制作'}",
+             "description": "${isEnglish ? 'Detailed soup making steps, including water amount, seasoning, and heat control.' : '详细的汤品制作步骤，包括水量、调味、火候控制。'}",
+             "duration": "${isEnglish ? '12 minutes' : '12分钟'}",
+             "tips": "${isEnglish ? 'Key points for soup making.' : '汤品制作的关键要点。'}"
+           }
+         ]
+       }
+     ],
+     "dishes": [
+       {"name": "${isEnglish ? 'Braised Pork Ribs' : '红烧排骨'}", "type": "main", "description": "${isEnglish ? 'Sweet and tender main dish' : '香甜软糯的主菜'}"},
+       {"name": "${isEnglish ? 'Stir-fried Seasonal Vegetables' : '清炒时蔬'}", "type": "side", "description": "${isEnglish ? 'Fresh and light side dish' : '清爽解腻的配菜'}"},
+       {"name": "${isEnglish ? 'Seaweed and Egg Drop Soup' : '紫菜蛋花汤'}", "type": "soup", "description": "${isEnglish ? 'Nutritious soup' : '营养丰富的汤品'}"} 
+     ],
+     "coordinationTips": [
+       "${isEnglish ? `Prepare ingredients in advance, process all ingredients according to traditional ${cuisineType} techniques to ensure smooth cooking process` : `提前备料，按传统${cuisineType}技法处理所有食材确保烹饪流程顺畅`}",
+       "${isEnglish ? `Master the core cooking techniques of ${cuisineType} cuisine, strictly follow traditional processes` : `掌握${cuisineType}菜系核心烹饪技法，严格按传统工艺操作`}",
+       "${isEnglish ? 'Follow traditional heat and timing control principles to ensure authentic flavor' : '遵循传统火候和时间控制准则，确保正宗口味'}",
+       "${isEnglish ? `Pay attention to the fundamental flavor balance principles and cultural connotations of ${cuisineType} cuisine` : `注重${cuisineType}菜系的根本味型平衡原则和文化内涵`}"
+     ],
+     "tags": ["authentic", "traditional", "${cuisineType.toLowerCase()}", "detailed instructions", "professional technique"]
+   }
+ ]
 
-CRITICAL REQUIREMENTS:
-- ALL text must be in English
-- Provide authentic ${cuisineType} flavors
-- Include extremely detailed cooking steps
-- Coordinate timing between all dishes
-- Use traditional ${cuisineType} techniques`;
+${isEnglish ? 'EXAMPLE OF EXTREME DETAIL REQUIRED' : '极度详细要求示例'} (${isEnglish ? 'like' : '如'} ${isEnglish ? 'Braised Pork' : '红烧肉'}):
+${isEnglish ? 'Every step must include' : '每个步骤必须包含'}:
+1. ${isEnglish ? 'Specific ingredient specifications' : '具体的用料规格'}（${isEnglish ? 'such as "Select pork belly with skin about 750g"' : '如"选用带皮三层五花肉约750克"'}）
+2. ${isEnglish ? 'Precise timing control' : '精确的时间控制'}（${isEnglish ? 'such as "control within 30 seconds to prevent bitterness"' : '如"控制在30秒内以防发苦"'}）
+3. ${isEnglish ? 'Detailed technical points' : '详细的技术要点'}（${isEnglish ? 'such as "cold pan with little oil, add about 40g rock sugar and simmer over low heat until caramel color bubbles"' : '如"冷锅放少量油，加冰糖约40克小火熬至焦糖色冒密泡"'}）
+4. ${isEnglish ? 'Alternative methods' : '替代方案'}（${isEnglish ? 'such as "using 200ml cola instead of caramel can enhance flavor"' : '如"用可乐200ml替代糖色可增加风味"'}）
+5. ${isEnglish ? 'Critical control points' : '关键控制点'}（${isEnglish ? 'such as "do not lift lid during process", "completely cover meat pieces"' : '如"期间不揭盖"、"完全没过肉块"'}）
+6. ${isEnglish ? 'Professional judgment standards' : '专业判断标准'}（${isEnglish ? 'such as "turn to medium heat to reduce sauce until thick"' : '如"转中火收汁至浓稠"'}）
+
+${isEnglish ? 'CRITICAL: Every step must be as detailed as the Braised Pork example provided, with precise measurements, timing, temperatures, and professional techniques. Include exact quantities, specific time windows, alternative methods, and critical control points. Respond ONLY with valid JSON. No other text.' : 'CRITICAL: 每个步骤都必须像提供的红烧肉示例一样详细，包含精确的用量、时间、温度和专业技法。包括确切的数量、具体的时间窗口、替代方法和关键控制点。仅用有效的JSON格式回复，不要其他文本。'}`;
 }
 
-// Completely separate Chinese prompt generator  
-function createChinesePrompt(ingredients: string[], skillLevel: string, allowShopping: boolean, peopleCount: number, mealType: string, occasionType: string, cuisineType: string, dishCount: number, knowledgeBaseInfo: any) {
-  let knowledgeSection = '';
+// Helper function to generate recipes using 302.ai API as fallback
+async function generateWith302AI(systemPrompt: string, prompt: string): Promise<string> {
+  if (!api302Key) {
+    throw new Error('302.ai API key not available');
+  }
+
+  console.log('Using 302.ai API for recipe generation...');
   
-  if (knowledgeBaseInfo.matchedDishes.length > 0) {
-    knowledgeSection += `\n\n知识库参考菜品（作为灵感）:\n`;
-    knowledgeBaseInfo.matchedDishes.forEach((dish: any, index: number) => {
-      knowledgeSection += `${index + 1}. "${dish.name}" - 传统${dish.cuisine_type}菜品\n`;
-    });
-  }
-
-  if (knowledgeBaseInfo.relevantTechniques.length > 0) {
-    knowledgeSection += `\n传统烹饪技法:\n`;
-    knowledgeBaseInfo.relevantTechniques.forEach((technique: any, index: number) => {
-      knowledgeSection += `${index + 1}. ${technique.name} - ${technique.description || '传统技法'}\n`;
-    });
-  }
-
-  return `您是专业的${cuisineType}料理大师。为${peopleCount}人的${mealType}创建${dishCount}道相互搭配的完整菜谱。
-
-现有食材：${ingredients.join('、')}
-
-餐食要求：
-- 技能水平：${skillLevel}
-- 场合：${occasionType}
-- 购买食材：${allowShopping ? '允许添加必要食材' : '仅使用现有食材'}
-- 语言：所有内容必须用中文
-
-${knowledgeSection}
-
-创建${dishCount}道菜品组合成完整餐食。包含主菜、配菜，如合适可加汤品。
-
-回复格式（仅JSON）：
-[
-  {
-    "id": "recipe1",
-    "title": "正宗中文菜名",
-    "description": "详细的中文描述，包含文化背景",
-    "prepTime": 20,
-    "cookTime": 30,
-    "servings": ${peopleCount},
-    "difficulty": "${skillLevel}",
-    "ingredients": [
-      {"item": "食材名称", "amount": "具体用量", "usedIn": "菜品用途"}
-    ],
-    "dishInstructions": [
-      {
-        "dishName": "主菜名称",
-        "type": "main",
-        "steps": [
-          {
-            "stepNumber": 1,
-            "title": "准备阶段",
-            "description": "极其详细的中文制作说明，包含温度、时间和技法",
-            "duration": "10分钟",
-            "tips": "专业烹饪提示（中文）"
-          }
-        ]
-      }
-    ],
-    "coordinationTips": ["中文烹饪协调提示"],
-    "tags": ["正宗", "${cuisineType.toLowerCase()}"]
-  }
-]
-
-关键要求：
-- 所有文字必须是中文
-- 提供正宗${cuisineType}风味
-- 包含极其详细的烹饪步骤
-- 协调各菜品制作时间
-- 使用传统${cuisineType}技法`;
-}
-
-// 302.ai API helper function
-async function generateWith302AI(systemPrompt: string, userPrompt: string) {
-  console.log('Calling 302.ai API...');
   const response = await fetch('https://api.302.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${api302Key}`,
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${api302Key}`,
+      'User-Agent': 'https://api.302.ai/v1/chat/completions',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: '302-agent-what2cookgpt4o',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+        { role: 'user', content: prompt }
       ],
       temperature: 0.8,
-      max_tokens: 8000
+      max_tokens: 8000,
+      stream: false
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
     console.error('302.ai API error:', response.status, response.statusText, errorText);
-    throw new Error(`302.ai API error: ${response.status} ${response.statusText} - ${errorText}`);
+    
+    // Create detailed error object for better debugging
+    const error = new Error(`302.ai API error: ${response.status} ${response.statusText} - ${errorText}`);
+    (error as any).status = response.status;
+    (error as any).statusText = response.statusText;
+    (error as any).details = errorText;
+    
+    throw error;
   }
 
   const data = await response.json();
-  console.log('302.ai API response received successfully');
-  return data.choices[0].message.content;
+  const generatedText = data.choices[0].message.content;
+  console.log('Raw 302.ai response:', generatedText);
+  
+  return generatedText;
 }
 
-// Helper function for single dish detail generation
-async function generateDetailedSingleRecipe(params: any) {
-  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language } = params;
+// Helper function to generate detailed recipe for a single dish
+async function generateDetailedSingleRecipe(params: any): Promise<any> {
+  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = 'zh' } = params;
   const isEnglish = language === 'en';
   
   const systemPrompt = isEnglish 
-    ? 'You are a professional chef. Generate an extremely detailed recipe with step-by-step instructions. All content must be in English.'
-    : '您是专业厨师。生成极其详细的食谱和逐步说明。所有内容必须用中文。';
-    
-  const userPrompt = isEnglish
-    ? `Create a detailed recipe for "${dishName}". Description: ${dishDescription}. Use ingredients: ${ingredients.join(', ')}. Skill level: ${skillLevel}. Serves: ${peopleCount}. Provide extremely detailed cooking steps with precise timing and techniques.`
-    : `为"${dishName}"创建详细食谱。描述：${dishDescription}。使用食材：${ingredients.join('、')}。技能水平：${skillLevel}。服务人数：${peopleCount}。提供极其详细的烹饪步骤，包含精确时间和技法。`;
-    
+    ? 'You are a master chef creating extremely detailed, step-by-step cooking instructions. Focus on precision, technique, and professional tips. Respond only with valid JSON.'
+    : '您是一位烹饪大师，创建极其详细的逐步烹饪说明。专注于精确性、技法和专业提示。仅用有效的JSON格式回复。';
+
+  const prompt = `为菜品"${dishName}"生成极其详细的烹饪步骤。
+
+菜品信息：
+- 菜名：${dishName}
+- 描述：${dishDescription}
+- 可用食材：${ingredients.join(', ')}
+- 技能水平：${skillLevel}
+- 服务人数：${peopleCount}人
+
+要求生成包含以下内容的详细食谱：
+1. 每个步骤都必须极其详细，包含精确的时间、温度、技法
+2. 提供专业的烹饪提示和关键控制点
+3. 包含营养信息和完整的食材清单
+
+请按以下JSON格式回复：
+{
+  "detailedSteps": [
+    {
+      "stepNumber": 1,
+      "title": "详细步骤标题",
+      "description": "非常详细的步骤描述，包含具体的操作方法、时间、温度、技巧等",
+      "duration": "X分钟",
+      "tips": "专业提示和关键控制点"
+    }
+  ],
+  "ingredients": [
+    {"item": "食材名称", "amount": "用量", "needed": false}
+  ],
+  "tips": ["烹饪提示1", "烹饪提示2"],
+  "nutritionInfo": {
+    "calories": 350,
+    "protein": "25g",
+    "carbs": "30g", 
+    "fat": "12g"
+  }
+}`;
+
   try {
-    const generatedText = await generateWith302AI(systemPrompt, userPrompt);
-    return JSON.parse(generatedText);
+    console.log('Generating detailed recipe with Gemini...');
+    
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4000,
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error in single recipe generation:', response.status, response.statusText, errorText);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    let generatedText = data.candidates[0].content.parts[0].text;
+    
+    // Clean and parse the JSON response
+    let cleanedText = generatedText.trim();
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    const result = JSON.parse(cleanedText);
+    console.log('Successfully generated detailed single recipe');
+    
+    return result;
   } catch (error) {
-    console.error('Single recipe generation failed:', error);
-    throw error;
+    console.error('Error generating detailed recipe:', error);
+    
+    // Fallback detailed recipe
+    return {
+      detailedSteps: [
+        {
+          stepNumber: 1,
+          title: "食材准备",
+          description: `准备制作${dishName}所需的所有食材。将${ingredients.slice(0, 3).join('、')}等主要食材清洗干净，按照传统烹饪方法进行切配处理。`,
+          duration: "10分钟",
+          tips: "食材的新鲜度直接影响菜品的最终口感，选择优质食材是成功的关键。"
+        },
+        {
+          stepNumber: 2,
+          title: "预处理阶段", 
+          description: "根据传统工艺对主要食材进行预处理，包括腌制、焯水或其他必要的预备工序。",
+          duration: "15分钟",
+          tips: "预处理步骤不可省略，这是确保菜品口感和味道的重要环节。"
+        },
+        {
+          stepNumber: 3,
+          title: "主要烹饪",
+          description: `开始正式烹饪${dishName}。控制好火候和时间，按照传统方法进行烹制。`,
+          duration: "20分钟", 
+          tips: "烹饪过程中要注意火候控制，不同阶段使用不同的火力。"
+        },
+        {
+          stepNumber: 4,
+          title: "调味收尾",
+          description: "在烹饪的最后阶段进行调味，确保口感平衡。最后进行装盘摆设。",
+          duration: "5分钟",
+          tips: "调味要循序渐进，可以先尝味再调整，避免过咸或过淡。"
+        }
+      ],
+      ingredients: ingredients.map((ing: string) => ({
+        item: ing,
+        amount: "适量",
+        needed: false
+      })),
+      tips: [
+        "选用新鲜优质的食材是制作美味菜品的基础",
+        "严格控制烹饪时间和火候，避免过度烹饪",
+        "调味要适中，可以根据个人口味进行微调"
+      ],
+      nutritionInfo: {
+        calories: 280,
+        protein: "18g",
+        carbs: "25g",
+        fat: "10g"
+      }
+    };
   }
 }
