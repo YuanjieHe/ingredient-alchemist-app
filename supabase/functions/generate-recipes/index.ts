@@ -82,6 +82,14 @@ serve(async (req) => {
     });
 
     console.log('Enhanced prompt created with knowledge base references');
+    
+    // Log the complete prompt for debugging
+    const systemPrompt = getSystemPrompt(cuisineType, language);
+    console.log('=== COMPLETE SYSTEM PROMPT ===');
+    console.log(systemPrompt);
+    console.log('=== COMPLETE USER PROMPT ===');
+    console.log(prompt);
+    console.log('=== END PROMPTS ===');
 
     let generatedText;
     let usingFallback = false;
@@ -135,6 +143,9 @@ serve(async (req) => {
         const data = await response.json();
         generatedText = data.candidates[0].content.parts[0].text;
         console.log('Raw Gemini response received successfully');
+        console.log('=== COMPLETE GEMINI RESPONSE ===');
+        console.log(generatedText);
+        console.log('=== END GEMINI RESPONSE ===');
       }
     } catch (error) {
       // If Gemini fails completely and we have 302.ai API key, try 302.ai as fallback
@@ -345,7 +356,7 @@ function getSystemPrompt(cuisineType: string, language: string = 'zh') {
 
   const profile = chefProfiles[cuisineType.toLowerCase()] || chefProfiles.other;
   const instruction = isEnglish 
-    ? 'IMPORTANT: You must respond ONLY in English. All recipe names, ingredients, instructions, descriptions must be in English language. Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only.'
+    ? '🚨 CRITICAL LANGUAGE REQUIREMENT: You MUST respond EXCLUSIVELY in English language. Every single word must be in English - recipe names, ingredient names, cooking instructions, descriptions, tips, everything. Do not include any Chinese characters or other languages. Create exciting, authentic recipes with extremely detailed step-by-step instructions. Every step should be thoroughly explained with precise timing, temperature, and technique details. Always respond with valid JSON only.'
     : '重要：你必须只用中文回复。所有食谱名称、食材、制作步骤、描述都必须是中文。创造令人兴奋的正宗食谱，提供极其详细的步骤说明。每个步骤都应该详细解释，包含精确的时间、温度和技法细节。始终只用有效的JSON格式回复。';
   
   return `${profile} ${instruction}`;
@@ -397,7 +408,7 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
-  return `${isEnglish ? 'RESPOND ONLY IN ENGLISH' : '只用中文回复'}: ${isEnglish ? 'Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
+  return `${isEnglish ? '🚨 CRITICAL: RESPOND EXCLUSIVELY IN ENGLISH LANGUAGE - NO OTHER LANGUAGES ALLOWED' : '只用中文回复'}: ${isEnglish ? 'Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 
@@ -420,7 +431,7 @@ ${isEnglish ? 'KEY REQUIREMENTS' : '关键要求'}:
 - ${isEnglish ? 'USE knowledge base dishes as INSPIRATION but create NEW, innovative recipes' : '使用知识库菜品作为灵感，但创造新的创新食谱'}
 - ${isEnglish ? 'INCORPORATE traditional techniques mentioned above when relevant' : '在相关时融入上述传统技法'}
 - ${isEnglish ? 'EVERY STEP must be extremely detailed with precise timing, temperatures, and techniques' : '每个步骤都必须极其详细，包含精确的时间、温度和技法'}
-- ${isEnglish ? 'CRITICAL LANGUAGE REQUIREMENT: Generate ALL content strictly in English language - dish names, descriptions, ingredients, instructions, everything must be in English' : '关键语言要求：所有内容严格用中文生成 - 菜名、描述、食材、说明，一切都必须是中文'}
+- ${isEnglish ? '🚨 CRITICAL LANGUAGE REQUIREMENT: Generate ALL content EXCLUSIVELY in English language - dish names, descriptions, ingredients, instructions, tips, everything must be ONLY in English. Do not use any Chinese characters or other languages.' : '关键语言要求：所有内容严格用中文生成 - 菜名、描述、食材、说明，一切都必须是中文'}
 
 ${isEnglish ? 'REQUIRED DETAILS FOR EACH RECIPE' : '每个食谱的必需详情'}:
 1. ${isEnglish ? 'Authentic dish name with cultural context' : '正宗菜名及文化背景'}
@@ -561,7 +572,10 @@ async function generateWith302AI(systemPrompt: string, prompt: string): Promise<
 
   const data = await response.json();
   const generatedText = data.choices[0].message.content;
-  console.log('Raw 302.ai response:', generatedText);
+  console.log('Raw 302.ai response received successfully');
+  console.log('=== COMPLETE 302.AI RESPONSE ===');
+  console.log(generatedText);
+  console.log('=== END 302.AI RESPONSE ===');
   
   return generatedText;
 }
