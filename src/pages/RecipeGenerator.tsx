@@ -402,10 +402,10 @@ const RecipeGenerator = () => {
             <div className="flex items-center justify-between">
               <Button 
                 variant="outline" 
-                onClick={() => setStep('preview')}
+                onClick={() => setStep('preferences')}
                 className="px-6 py-3 text-base font-medium"
               >
-                {t('backToPreview')}
+                {language === 'en' ? 'Back to Filters' : '返回生成筛选'}
               </Button>
               <LanguageToggle />
             </div>
