@@ -79,6 +79,20 @@ export class RecipeService {
     try {
       // Use the edge function which now includes Gemini + 302.ai fallback
       console.log('Calling edge function with Gemini + 302.ai fallback capability...');
+      console.log('=== FRONTEND REQUEST DETAILS ===');
+      console.log('API Endpoint:', this.apiEndpoint);
+      console.log('Request Body:', JSON.stringify({
+        ingredients: request.ingredients,
+        skillLevel: request.skillLevel,
+        mealDays: request.mealDays,
+        allowShopping: request.allowShopping,
+        peopleCount: request.peopleCount,
+        mealType: request.mealType,
+        occasionType: request.occasionType,
+        cuisineType: request.cuisineType,
+        language: request.language || 'zh'
+      }, null, 2));
+      
       const response = await fetch(this.apiEndpoint, {
         method: 'POST',
         headers: {
@@ -97,8 +111,15 @@ export class RecipeService {
         })
       });
       
+      console.log('=== FRONTEND RESPONSE DETAILS ===');
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('=== FRONTEND RECEIVED DATA ===');
+        console.log('Data:', JSON.stringify(data, null, 2));
         console.log('Recipe generation successful via edge function');
         
         // Convert edge function format to our expected format
@@ -123,6 +144,8 @@ export class RecipeService {
         return convertedRecipes;
       } else {
         const errorData = await response.json();
+        console.error('=== FRONTEND ERROR RESPONSE ===');
+        console.error('Error Data:', JSON.stringify(errorData, null, 2));
         console.error('Edge function failed with detailed error:', errorData);
         
         // Show detailed API error information for debugging
@@ -133,6 +156,10 @@ export class RecipeService {
         }
       }
     } catch (edgeFunctionError) {
+      console.error('=== FRONTEND FETCH ERROR ===');
+      console.error('Error details:', edgeFunctionError);
+      console.error('Error message:', edgeFunctionError.message);
+      console.error('Error stack:', edgeFunctionError.stack);
       console.error('Edge function error, falling back to mock recipes:', edgeFunctionError);
       
       // If edge function fails, fall back to mock recipes instead of trying Gemini again
