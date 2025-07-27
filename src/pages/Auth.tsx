@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { ChefHat, ArrowRight, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { BulkAccountCreator } from '@/components/BulkAccountCreator';
 
 const Auth = () => {
   const { t } = useLanguage();
@@ -104,7 +105,10 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-6xl space-y-6">
+        <BulkAccountCreator />
+        
+      <div className="w-full max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
             <ChefHat className="w-8 h-8 text-primary" />
@@ -213,6 +217,7 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
