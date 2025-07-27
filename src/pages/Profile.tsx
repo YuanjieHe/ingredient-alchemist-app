@@ -343,12 +343,12 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="w-6 h-6 text-yellow-500" />
-            会员状态
+            {t('membershipStatus')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {subscriptionLoading ? (
-            <p className="text-muted-foreground">加载中...</p>
+            <p className="text-muted-foreground">{t('loadingSubscription')}</p>
           ) : subscription ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -359,15 +359,15 @@ export default function Profile() {
                   {subscription.subscription_type === 'premium' ? (
                     <>
                       <Star className="w-3 h-3 mr-1" />
-                      高级会员
+                      {t('premiumMember')}
                     </>
                   ) : (
-                    '免费用户'
+                    t('freeUser')
                   )}
                 </Badge>
                 {subscription.subscription_type === 'premium' && (
                   <span className="text-sm text-muted-foreground">
-                    状态: {subscription.subscription_status === 'active' ? '有效' : '已过期'}
+                    {t('status')}: {subscription.subscription_status === 'active' ? t('active') : t('expired')}
                   </span>
                 )}
               </div>
@@ -377,22 +377,22 @@ export default function Profile() {
                   <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium text-sm">免费试用进度</h4>
+                        <h4 className="font-medium text-sm">{t('freeTrialProgress')}</h4>
                         <p className="text-xs text-muted-foreground mt-1">
-                          剩余 {remainingGenerations} 次免费生成机会
+                          {t('remainingGenerations')}: {remainingGenerations}
                         </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
                           {remainingGenerations}
                         </div>
-                        <div className="text-xs text-muted-foreground">次剩余</div>
+                        <div className="text-xs text-muted-foreground">{t('generationsRemaining')}</div>
                       </div>
                     </div>
                     <div className="mt-3">
                       <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>已使用 {subscription.free_generations_used}</span>
-                        <span>总共 {subscription.free_generations_limit}</span>
+                        <span>{t('usedGenerations')} {subscription.free_generations_used}</span>
+                        <span>{t('totalGenerations')} {subscription.free_generations_limit}</span>
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div 
@@ -406,7 +406,7 @@ export default function Profile() {
                     {remainingGenerations === 0 && (
                       <div className="mt-3 p-2 bg-orange-100 dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
                         <p className="text-xs text-orange-800 dark:text-orange-200 text-center">
-                          免费次数已用完，升级到高级会员享受无限生成
+                          {t('freeTrialExhausted')}
                         </p>
                       </div>
                     )}
@@ -416,22 +416,22 @@ export default function Profile() {
                   <div className="mt-6">
                     <h4 className="font-medium mb-4 flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500" />
-                      升级到高级会员
+                      {t('upgradeToPremium')}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {/* Monthly */}
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">¥14</div>
-                          <div className="text-sm text-muted-foreground">月付</div>
-                          <div className="text-xs text-muted-foreground mt-1">每月</div>
+                          <div className="text-sm text-muted-foreground">{t('monthly')}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{t('perMonth')}</div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
                             onClick={() => handlePurchase('monthly', 14)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'monthly' ? '处理中...' : '选择'}
+                            {paymentLoading && selectedPlan === 'monthly' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -440,16 +440,16 @@ export default function Profile() {
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">¥30</div>
-                          <div className="text-sm text-muted-foreground">季付</div>
-                          <div className="text-xs text-muted-foreground mt-1">3个月</div>
-                          <div className="text-xs text-green-600">节省 ¥12</div>
+                          <div className="text-sm text-muted-foreground">{t('quarterly')}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{t('months3')}</div>
+                          <div className="text-xs text-green-600">{t('saveAmount')} ¥12</div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
                             onClick={() => handlePurchase('quarterly', 30)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'quarterly' ? '处理中...' : '选择'}
+                            {paymentLoading && selectedPlan === 'quarterly' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -457,20 +457,20 @@ export default function Profile() {
                       {/* Annual */}
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
                         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-orange-500 text-white">推荐</Badge>
+                          <Badge className="bg-orange-500 text-white">{t('recommended')}</Badge>
                         </div>
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">¥98</div>
-                          <div className="text-sm text-muted-foreground">年付</div>
-                          <div className="text-xs text-muted-foreground mt-1">12个月</div>
-                          <div className="text-xs text-green-600">节省 ¥70</div>
+                          <div className="text-sm text-muted-foreground">{t('annual')}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{t('months12')}</div>
+                          <div className="text-xs text-green-600">{t('saveAmount')} ¥70</div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
                             onClick={() => handlePurchase('annual', 98)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'annual' ? '处理中...' : '选择'}
+                            {paymentLoading && selectedPlan === 'annual' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -478,20 +478,20 @@ export default function Profile() {
                       {/* Lifetime */}
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
                         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-purple-500 text-white">终生</Badge>
+                          <Badge className="bg-purple-500 text-white">{t('lifetime')}</Badge>
                         </div>
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">¥168</div>
-                          <div className="text-sm text-muted-foreground">终生会员</div>
-                          <div className="text-xs text-muted-foreground mt-1">永久使用</div>
-                          <div className="text-xs text-green-600">最超值</div>
+                          <div className="text-sm text-muted-foreground">{t('lifetime')}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{t('permanentUse')}</div>
+                          <div className="text-xs text-green-600">{t('mostValue')}</div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
                             onClick={() => handlePurchase('lifetime', 168)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'lifetime' ? '处理中...' : '选择'}
+                            {paymentLoading && selectedPlan === 'lifetime' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -506,7 +506,7 @@ export default function Profile() {
                         className="flex items-center gap-2"
                       >
                         <Smartphone className="w-4 h-4" />
-                        恢复购买 (iOS)
+                        {t('restorePurchases')}
                       </Button>
                     </div>
                     
