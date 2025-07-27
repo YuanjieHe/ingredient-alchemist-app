@@ -27,10 +27,17 @@ serve(async (req) => {
     const accounts = [];
     const createdAccounts = [];
 
-    // 生成20个账号信息
-    for (let i = 1; i <= 20; i++) {
-      const email = `tuiguang${String(i).padStart(2, '0')}@recipe-ai.com`;
-      const password = `Tuiguang${i}2024!`;
+    // 生成20个随机数字账号
+    const randomNumbers = [
+      "847532", "293681", "756924", "418375", "639287",
+      "175493", "824156", "367829", "591746", "482913",
+      "735684", "216857", "968374", "543192", "791465",
+      "325789", "687241", "154836", "429573", "816492"
+    ];
+    
+    for (let i = 0; i < 20; i++) {
+      const email = `user${randomNumbers[i]}@recipe-ai.com`;
+      const password = `What2cook@2025`;
       accounts.push({ email, password });
     }
 
