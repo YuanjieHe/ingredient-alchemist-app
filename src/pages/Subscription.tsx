@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const Subscription = () => {
   const { subscription, remainingGenerations, canGenerate, refreshSubscription } = useSubscription();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -123,8 +123,8 @@ const Subscription = () => {
                 <div>
                   <Badge variant={subscription.subscription_type === 'premium' ? 'default' : 'secondary'}>
                     {subscription.subscription_type === 'premium' 
-                      ? (isEN ? 'Premium' : '高级版') 
-                      : (isEN ? 'Free' : '免费版')
+                      ? t('premium') 
+                      : t('free')
                     }
                   </Badge>
                   <p className="text-sm text-muted-foreground mt-1">

@@ -176,22 +176,19 @@ const RecipeGenerator = () => {
                         )}
                         <Badge variant={subscription.subscription_type === 'premium' ? 'default' : 'secondary'}>
                           {subscription.subscription_type === 'premium' 
-                            ? (t('language') === 'en' ? 'Premium' : '高级版') 
-                            : (t('language') === 'en' ? 'Free' : '免费版')
+                            ? t('premium') 
+                            : t('free')
                           }
                         </Badge>
                       </div>
                       <div className="text-right">
                         {subscription.subscription_type === 'free' ? (
                           <p className="text-sm text-muted-foreground">
-                            {t('language') === 'en' 
-                              ? `${remainingGenerations} generations left`
-                              : `剩余 ${remainingGenerations} 次生成`
-                            }
+                            {remainingGenerations} {t('generationsLeft')}
                           </p>
                         ) : (
                           <p className="text-sm text-primary font-medium">
-                            {t('language') === 'en' ? 'Unlimited' : '无限制'}
+                            {t('unlimited')}
                           </p>
                         )}
                       </div>
@@ -205,12 +202,12 @@ const RecipeGenerator = () => {
                             className="w-full"
                           >
                             <Crown className="w-4 h-4 mr-2" />
-                            {t('language') === 'en' ? 'Upgrade to Premium' : '升级到高级版'}
+                            {t('upgradeToPremium')}
                           </Button>
                         ) : (
                           <div className="space-y-3">
                             <p className="text-xs text-center text-muted-foreground">
-                              {t('language') === 'en' ? 'Upgrade to unlock unlimited generations' : '升级解锁无限生成'}
+                              {t('upgradeToUnlockUnlimited')}
                             </p>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
