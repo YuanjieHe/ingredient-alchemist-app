@@ -511,12 +511,12 @@ export default function Profile() {
                     </div>
                     
                     <div className="mt-4 p-3 bg-muted rounded-lg">
-                      <h4 className="font-medium mb-2 text-sm">高级会员特权:</h4>
+                      <h4 className="font-medium mb-2 text-sm">{t('premiumBenefits')}</h4>
                       <ul className="text-sm text-muted-foreground space-y-1">
-                        <li>• 无限次菜谱生成</li>
-                        <li>• 根据人数智能搭配菜品</li>
-                        <li>• 主菜 + 配菜完整搭配</li>
-                        <li>• 优先客服支持</li>
+                        <li>{t('unlimitedRecipes')}</li>
+                        <li>{t('smartPortioning')}</li>
+                        <li>{t('completeMealPlans')}</li>
+                        <li>{t('prioritySupport')}</li>
                       </ul>
                     </div>
                   </div>
@@ -526,25 +526,25 @@ export default function Profile() {
                 <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <div className="flex items-center gap-2 mb-2">
                     <Crown className="w-5 h-5 text-yellow-500" />
-                    <span className="font-medium">高级会员特权</span>
+                    <span className="font-medium">{t('premiumBenefits')}</span>
                   </div>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>✅ 无限次菜谱生成</li>
-                    <li>✅ 智能菜品搭配</li>
-                    <li>✅ 完整餐桌方案</li>
-                    <li>✅ 优先客服支持</li>
+                    <li>✅ {t('unlimitedRecipes')}</li>
+                    <li>✅ {t('smartPortioning')}</li>
+                    <li>✅ {t('completeMealPlans')}</li>
+                    <li>✅ {t('prioritySupport')}</li>
                   </ul>
                 </div>
               )}
 
               {subscription.subscription_end_date && (
                 <p className="text-sm text-muted-foreground">
-                  到期时间: {new Date(subscription.subscription_end_date).toLocaleDateString()}
+                  {t('activeUntil')}: {new Date(subscription.subscription_end_date).toLocaleDateString()}
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-muted-foreground">加载订阅信息失败</p>
+            <p className="text-muted-foreground">{t('loadSubscriptionFailed')}</p>
           )}
         </CardContent>
       </Card>
