@@ -148,151 +148,31 @@ const Subscription = () => {
           </Card>
         )}
 
-        {/* Upgrade Plans */}
+        {/* Coming Tomorrow Message */}
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-            <Crown className="w-6 h-6 text-yellow-500" />
-            {isEN ? 'Upgrade to Premium' : '升级到高级会员'}
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Monthly Plan */}
-          <Card className="relative">
-            <CardHeader className="text-center pb-2">
-              <div className="text-3xl font-bold text-primary">¥14</div>
-              <CardTitle className="text-base">{isEN ? 'Monthly' : '月付'}</CardTitle>
-              <CardDescription className="text-sm">
-                {isEN ? 'Billed monthly' : '每月'}
+          <Card className="border-2 border-primary bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
+                <Zap className="w-6 h-6 text-primary" />
+                {isEN ? 'Coming Tomorrow' : '明日即将推出'}
+              </CardTitle>
+              <CardDescription className="text-lg">
+                {isEN 
+                  ? 'Premium features and payment options will be available tomorrow!' 
+                  : '高级功能和付款选项将于明日推出！'
+                }
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('monthly')} className="w-full" disabled={isLoading}>
-                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
-              </Button>
+            <CardContent className="text-center">
+              <div className="text-6xl mb-4">🚀</div>
+              <p className="text-muted-foreground">
+                {isEN 
+                  ? 'Stay tuned for unlimited recipe generations and advanced features.'
+                  : '敬请期待无限食谱生成和高级功能。'
+                }
+              </p>
             </CardContent>
           </Card>
-
-          {/* Quarterly Plan */}
-          <Card className="relative">
-            <CardHeader className="text-center pb-2">
-              <div className="text-3xl font-bold text-primary">¥30</div>
-              <CardTitle className="text-base">{isEN ? 'Quarterly' : '季付'}</CardTitle>
-              <CardDescription className="text-sm">
-                {isEN ? '3 months' : '3个月'}
-              </CardDescription>
-              <div className="text-xs text-green-600 font-medium">
-                {isEN ? 'Save ¥12' : '节省 ¥12'}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('quarterly')} className="w-full" disabled={isLoading}>
-                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Annual Plan */}
-          <Card className="relative border-2 border-primary">
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-orange-500 text-white">
-                {isEN ? 'Recommended' : '推荐'}
-              </Badge>
-            </div>
-            <CardHeader className="text-center pb-2">
-              <div className="text-3xl font-bold text-primary">¥98</div>
-              <CardTitle className="text-base">{isEN ? 'Annual' : '年付'}</CardTitle>
-              <CardDescription className="text-sm">
-                {isEN ? '12 months' : '12个月'}
-              </CardDescription>
-              <div className="text-xs text-green-600 font-medium">
-                {isEN ? 'Save ¥70' : '节省 ¥70'}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('annual')} className="w-full" disabled={isLoading}>
-                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Lifetime Plan */}
-          <Card className="relative border-2 border-purple-500">
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-purple-500 text-white">
-                {isEN ? 'Lifetime' : '终生'}
-              </Badge>
-            </div>
-            <CardHeader className="text-center pb-2">
-              <div className="text-3xl font-bold text-purple-600">¥168</div>
-              <CardTitle className="text-base">{isEN ? 'Lifetime' : '终生会员'}</CardTitle>
-              <CardDescription className="text-sm">
-                {isEN ? 'Forever access' : '永久使用'}
-              </CardDescription>
-              <div className="text-xs text-purple-600 font-medium">
-                {isEN ? 'Best value' : '最超值'}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <Button onClick={() => handleUpgrade('lifetime')} className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
-                {isLoading ? (isEN ? 'Processing...' : '处理中...') : (isEN ? 'Select' : '选择')}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Features List */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-center">
-              {isEN ? 'Premium Features' : '高级功能'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'Unlimited recipe generations' : '无限食谱生成'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'Advanced recipe features' : '高级食谱功能'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'Save favorite recipes' : '收藏喜爱食谱'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'Recipe history' : '食谱历史记录'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'Priority support' : '优先客服支持'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm">{isEN ? 'No ads' : '无广告'}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Restore Purchase Button */}
-        <div className="flex justify-center mt-6">
-          <Button variant="outline" onClick={() => handleUpgrade('restore')} disabled={isLoading}>
-            📱 {isLoading ? (isEN ? 'Restoring...' : '恢复中...') : (isEN ? 'Restore Purchase (iOS)' : '恢复购买 (iOS)')}
-          </Button>
-        </div>
-
-        {/* Additional Info */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>
-            {isEN 
-              ? 'Subscriptions will be charged to your Apple ID account. Auto-renewal can be turned off in Account Settings.'
-              : '订阅费用将从您的Apple ID账户扣除。可在账户设置中关闭自动续费。'
-            }
-          </p>
         </div>
       </div>
     </div>
