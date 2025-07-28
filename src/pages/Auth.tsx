@@ -71,10 +71,10 @@ const Auth = () => {
         toast.error(error.message);
       } else {
         setShowOtpInput(true);
-        toast.success('验证码已发送到您的手机');
+        toast.success(t('otpSent'));
       }
     } catch (error) {
-      toast.error('发送验证码失败');
+      toast.error(t('otpSendFailed'));
     } finally {
       setLoading(false);
     }
@@ -89,11 +89,11 @@ const Auth = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success('登录成功');
+        toast.success(t('signInSuccess'));
         navigate('/');
       }
     } catch (error) {
-      toast.error('验证失败');
+      toast.error(t('otpVerifyFailed'));
     } finally {
       setLoading(false);
     }
@@ -122,9 +122,13 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
                 <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
+                <TabsTrigger value="phone">
+                  <Phone className="w-4 h-4 mr-1" />
+                  {t('phoneLogin')}
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4 mt-6">
@@ -199,6 +203,60 @@ const Auth = () => {
                     {loading ? t('signingUp') : t('signUp')}
                   </Button>
                 </form>
+              </TabsContent>
+
+              <TabsContent value="phone" className="space-y-4 mt-6">
+                <CardHeader className="px-0 pb-4">
+                  <CardTitle className="text-xl">{t('phoneLogin')}</CardTitle>
+                  <CardDescription>
+                    {t('phoneLoginDescription')}
+                  </CardDescription>
+                </CardHeader>
+                
+                {!showOtpInput ? (
+                  <form onSubmit={handlePhoneSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">{t('phoneNumber')}</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder={t('phonePlaceholder')}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t('sendingOtp') : t('sendOtp')}
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleOtpVerify} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">{t('verificationCode')}</Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder={t('otpPlaceholder')}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                        maxLength={6}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t('verifying') : t('verify')}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => setShowOtpInput(false)}
+                    >
+                      {t('backToPhone')}
+                    </Button>
+                  </form>
+                )}
               </TabsContent>
             </Tabs>
             
