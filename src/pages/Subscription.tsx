@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ApplePaymentService } from '@/services/applePaymentService';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Subscription = () => {
   const { subscription, remainingGenerations, canGenerate, refreshSubscription } = useSubscription();
@@ -77,6 +78,34 @@ const Subscription = () => {
     }
   };
 
+  const handleVerifyPayment = async () => {
+    setIsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+
+      const { data, error } = await supabase.functions.invoke('verify-stripe-payment', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.hasActivePremium) {
+        await refreshSubscription();
+        toast.success(isEN ? 'Premium subscription activated!' : '高级订阅已激活！');
+      } else {
+        toast.info(isEN ? 'No premium subscription found. Please complete payment first.' : '未找到高级订阅，请先完成付款。');
+      }
+    } catch (error: any) {
+      console.error('Verify payment error:', error);
+      toast.error(error.message || (isEN ? 'Failed to verify payment' : '验证付款失败'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
@@ -119,7 +148,7 @@ const Subscription = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <Badge variant={subscription.subscription_type === 'premium' ? 'default' : 'secondary'}>
                     {subscription.subscription_type === 'premium' 
@@ -144,6 +173,27 @@ const Subscription = () => {
                   </p>
                 </div>
               </div>
+              {subscription.subscription_type === 'free' && (
+                <div className="text-center">
+                  <Button 
+                    onClick={handleVerifyPayment} 
+                    disabled={isLoading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isLoading 
+                      ? (isEN ? 'Verifying...' : '验证中...') 
+                      : (isEN ? 'I just paid - Activate Premium' : '我刚付款了 - 激活高级版')
+                    }
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {isEN 
+                      ? 'Complete payment first, then click to activate premium features'
+                      : '请先完成付款，然后点击激活高级功能'
+                    }
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
