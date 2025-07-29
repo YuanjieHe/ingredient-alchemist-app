@@ -226,7 +226,6 @@ const Subscription = () => {
                 id="monthly-plan-button"
                 dangerouslySetInnerHTML={{
                   __html: `
-                    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
                     <stripe-buy-button
                       buy-button-id="buy_btn_1RqKHV1kjuY3nILVQlEq0nL8"
                       publishable-key="pk_test_51RqK6v1kjuY3nILVNoL90lVy91lHym7LwwJjAqek4AjuNOV986vwkdOeJQJQH5xU7EnTL2NunHXqBojPesQrX2NX00qaBBmqnK"
