@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createHash } from "https://deno.land/std@0.190.0/node/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,12 +8,8 @@ const corsHeaders = {
 };
 
 // 生成MD5哈希
-async function md5(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest('MD5', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+function md5(text: string): string {
+  return createHash('md5').update(text).digest('hex');
 }
 
 // 生成随机订单号
@@ -78,9 +75,9 @@ serve(async (req) => {
     const signStr = `money=${params.money}&name=${params.name}&notify_url=${params.notify_url}&out_trade_no=${params.out_trade_no}&pid=${params.pid}&return_url=${params.return_url}&sitename=${params.sitename}&type=${params.type}${key}`;
     
     // 生成签名
-    const sign = await md5(signStr);
+    const sign = md5(signStr);
     
-    // 构建支付URL
+    console.log("Z-Pay payment params:", { orderId, signStr: signStr.substring(0, 100) + "...", sign });
     const paymentParams = new URLSearchParams({
       ...params,
       sign: sign

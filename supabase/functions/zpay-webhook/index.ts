@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createHash } from "https://deno.land/std@0.190.0/node/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,12 +8,8 @@ const corsHeaders = {
 };
 
 // 生成MD5哈希
-async function md5(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest('MD5', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+function md5(text: string): string {
+  return createHash('md5').update(text).digest('hex');
 }
 
 serve(async (req) => {
@@ -57,7 +54,7 @@ serve(async (req) => {
 
     // 验证签名
     const signStr = `money=${money}&name=${name}&out_trade_no=${out_trade_no}&pid=${pid}&trade_no=${trade_no}&trade_status=${trade_status}&type=${type}${key}`;
-    const expectedSign = await md5(signStr);
+    const expectedSign = md5(signStr);
     
     if (sign !== expectedSign) {
       console.error("Invalid signature:", { expected: expectedSign, received: sign });
