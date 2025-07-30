@@ -42,6 +42,12 @@ const Subscription = () => {
   }, [user, isInitialized, paymentService]);
 
   const handleUpgrade = async (planType?: string) => {
+    if (!user) {
+      toast.error(isEN ? 'Please log in first' : '请先登录');
+      navigate('/auth');
+      return;
+    }
+
     if (planType === 'restore') {
       setIsLoading(true);
       try {
@@ -62,13 +68,39 @@ const Subscription = () => {
 
     setIsLoading(true);
     try {
-      const result = await paymentService.purchaseProduct(planType);
-      
-      if (result.success) {
-        await refreshSubscription();
-        toast.success(isEN ? 'Purchase successful!' : '购买成功！');
+      // Use different payment systems based on language
+      if (language === 'zh') {
+        // Use Z-Pay for Chinese users
+        const { data, error } = await supabase.functions.invoke('create-zpay-checkout', {
+          body: { planType }
+        });
+
+        if (error) throw error;
+        
+        window.open(data.url, '_blank');
+        toast.info('请在新窗口中完成支付');
       } else {
-        toast.error(result.error || (isEN ? 'Purchase failed' : '购买失败'));
+        // Use Apple Pay or fallback to Stripe for English users
+        if (paymentService.isApplePayAvailable()) {
+          const result = await paymentService.purchaseProduct(planType);
+          
+          if (result.success) {
+            await refreshSubscription();
+            toast.success('Purchase successful!');
+          } else {
+            toast.error(result.error || 'Purchase failed');
+          }
+        } else {
+          // Fallback to Stripe checkout for web users
+          const { data, error } = await supabase.functions.invoke('create-checkout', {
+            body: { planType }
+          });
+
+          if (error) throw error;
+          
+          window.open(data.url, '_blank');
+          toast.info('Please complete payment in the new tab');
+        }
       }
     } catch (error: any) {
       console.error('Purchase error:', error);
@@ -245,18 +277,21 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-blue-500" />
-                Basic Monthly
+                {language === 'zh' ? '月付计划' : 'Basic Monthly'}
                 {subscription?.subscription_type === 'premium' && (
-                  <Badge variant="outline">Current</Badge>
+                  <Badge variant="outline">{language === 'zh' ? '当前' : 'Current'}</Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                Great for light users
+                {language === 'zh' ? '轻度用户的理想选择' : 'Great for light users'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $8<span className="text-lg font-normal">/month</span>
+                {language === 'zh' ? '¥14' : '$8'}
+                <span className="text-lg font-normal">
+                  {language === 'zh' ? '/月' : '/month'}
+                </span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -270,9 +305,11 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => window.open('https://buy.stripe.com/cNi4grawf5b84izdUP2Ji02', '_blank')}
+                onClick={() => handleUpgrade('monthly')}
+                disabled={isLoading}
               >
-                Choose Basic
+                {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
+                 (language === 'zh' ? '选择月付' : 'Choose Basic')}
               </Button>
             </CardContent>
           </Card>
@@ -282,16 +319,19 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-yellow-500" />
-                Quarterly
-                <Badge variant="secondary">Popular</Badge>
+                {language === 'zh' ? '季付计划' : 'Quarterly'}
+                <Badge variant="secondary">{language === 'zh' ? '热门' : 'Popular'}</Badge>
               </CardTitle>
               <CardDescription>
-                Most popular choice for regular users
+                {language === 'zh' ? '普通用户最受欢迎的选择' : 'Most popular choice for regular users'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $20<span className="text-lg font-normal">/3 months</span>
+                {language === 'zh' ? '¥30' : '$20'}
+                <span className="text-lg font-normal">
+                  {language === 'zh' ? '/3个月' : '/3 months'}
+                </span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -313,9 +353,11 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => window.open('https://buy.stripe.com/bJe8wH6fZ1YWbL12c72Ji01', '_blank')}
+                onClick={() => handleUpgrade('quarterly')}
+                disabled={isLoading}
               >
-                Choose Quarterly
+                {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
+                 (language === 'zh' ? '选择季付' : 'Choose Quarterly')}
               </Button>
             </CardContent>
           </Card>
@@ -325,16 +367,19 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-orange-500" />
-                Annual
-                <Badge variant="secondary">Recommended</Badge>
+                {language === 'zh' ? '年付计划' : 'Annual'}
+                <Badge variant="secondary">{language === 'zh' ? '推荐' : 'Recommended'}</Badge>
               </CardTitle>
               <CardDescription>
-                Best value for regular users
+                {language === 'zh' ? '普通用户的最佳性价比' : 'Best value for regular users'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $98<span className="text-lg font-normal">/year</span>
+                {language === 'zh' ? '¥98' : '$98'}
+                <span className="text-lg font-normal">
+                  {language === 'zh' ? '/年' : '/year'}
+                </span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -360,9 +405,11 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => window.open('https://buy.stripe.com/annual-link-here', '_blank')}
+                onClick={() => handleUpgrade('yearly')}
+                disabled={isLoading}
               >
-                Choose Annual
+                {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
+                 (language === 'zh' ? '选择年付' : 'Choose Annual')}
               </Button>
             </CardContent>
           </Card>
@@ -372,16 +419,19 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-purple-500" />
-                Lifetime
-                <Badge variant="secondary">Best Value</Badge>
+                {language === 'zh' ? '终身计划' : 'Lifetime'}
+                <Badge variant="secondary">{language === 'zh' ? '最佳价值' : 'Best Value'}</Badge>
               </CardTitle>
               <CardDescription>
-                One-time payment, forever access
+                {language === 'zh' ? '一次付款，永久使用' : 'One-time payment, forever access'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $168<span className="text-lg font-normal"> once</span>
+                {language === 'zh' ? '¥168' : '$168'}
+                <span className="text-lg font-normal">
+                  {language === 'zh' ? ' 一次性' : ' once'}
+                </span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -407,9 +457,11 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => window.open('https://buy.stripe.com/lifetime-link-here', '_blank')}
+                onClick={() => handleUpgrade('lifetime')}
+                disabled={isLoading}
               >
-                Choose Lifetime
+                {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
+                 (language === 'zh' ? '选择终身' : 'Choose Lifetime')}
               </Button>
             </CardContent>
           </Card>
