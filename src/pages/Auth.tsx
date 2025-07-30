@@ -122,13 +122,9 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
                 <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
-                <TabsTrigger value="phone">
-                  <Phone className="w-4 h-4 mr-1" />
-                  {t('phoneLogin')}
-                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4 mt-6">

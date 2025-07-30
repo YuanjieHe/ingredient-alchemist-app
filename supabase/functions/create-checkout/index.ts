@@ -44,8 +44,8 @@ serve(async (req) => {
     // 定义价格配置
     const priceConfig = {
       monthly: { amount: 800, interval: "month" }, // $8
-      quarterly: { amount: 2100, interval: "month", interval_count: 3 }, // $21/3个月
-      annual: { amount: 6400, interval: "year" }, // $64/年
+      quarterly: { amount: 2000, interval: "month", interval_count: 3 }, // $20/3个月
+      fiveyear: { amount: 12500, interval: "year", interval_count: 5 }, // $125/5年
       lifetime: { amount: 16800, interval: null } // $168 一次性
     };
 
@@ -60,9 +60,9 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: { 
-              name: `高级会员 - ${planType === 'monthly' ? '月付' : 
-                              planType === 'quarterly' ? '季付' : 
-                              planType === 'annual' ? '年付' : '终生'}` 
+               name: `高级会员 - ${planType === 'monthly' ? '月付' : 
+                               planType === 'quarterly' ? '季付' : 
+                               planType === 'fiveyear' ? '五年付' : '终生'}` 
             },
             unit_amount: config.amount,
             ...(config.interval ? {

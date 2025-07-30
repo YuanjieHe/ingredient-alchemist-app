@@ -277,12 +277,12 @@ const Subscription = () => {
             </CardContent>
           </Card>
 
-          {/* Premium Monthly Plan */}
+          {/* Quarterly Plan */}
           <Card className="ring-2 ring-yellow-500">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-yellow-500" />
-                {isEN ? 'Premium Monthly' : '高级月付'}
+                {isEN ? 'Quarterly' : '季付'}
                 <Badge variant="secondary">{isEN ? 'Popular' : '热门'}</Badge>
               </CardTitle>
               <CardDescription>
@@ -291,7 +291,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $20<span className="text-lg font-normal">{isEN ? '/month' : '/月'}</span>
+                $20<span className="text-lg font-normal">{isEN ? '/3 months' : '/3个月'}</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -315,25 +315,25 @@ const Subscription = () => {
                 className="w-full"
                 onClick={() => window.open('https://buy.stripe.com/bJe8wH6fZ1YWbL12c72Ji01', '_blank')}
               >
-                {isEN ? 'Choose Premium' : '选择高级版'}
+                {isEN ? 'Choose Quarterly' : '选择季付'}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Annual Plan */}
+          {/* 5-Year Plan */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-purple-500" />
-                {isEN ? 'Annual Premium' : '年度高级版'}
+                {isEN ? '5-Year Premium' : '五年高级版'}
               </CardTitle>
               <CardDescription>
-                {isEN ? 'Best value - save money annually' : '最超值 - 年付省钱'}
+                {isEN ? 'Best value - long-term savings' : '最超值 - 长期节省'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $125<span className="text-lg font-normal">{isEN ? '/year' : '/年'}</span>
+                $125<span className="text-lg font-normal">{isEN ? '/5 years' : '/5年'}</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -354,14 +354,14 @@ const Subscription = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Save vs monthly plans' : '比月付方案省钱'}
+                  {isEN ? 'Huge savings vs short-term plans' : '比短期方案大幅节省'}
                 </li>
               </ul>
               <Button 
                 className="w-full"
                 onClick={() => window.open('https://buy.stripe.com/4gMcMX7k3avs9CT8Av2Ji00', '_blank')}
               >
-                {isEN ? 'Choose Annual' : '选择年付'}
+                {isEN ? 'Choose 5-Year' : '选择五年'}
               </Button>
             </CardContent>
           </Card>
