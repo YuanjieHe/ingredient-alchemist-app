@@ -211,24 +211,24 @@ const RecipeGenerator = () => {
                             </p>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">月付</div>
-                                <div className="text-sm font-bold text-primary">¥14</div>
+                                <div className="text-xs font-medium text-foreground">Monthly</div>
+                                <div className="text-sm font-bold text-primary">$8</div>
                               </div>
                               <div className="text-center p-2 border rounded-lg bg-primary/5 border-primary/20 hover:bg-primary/10 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-primary">季付</div>
-                                <div className="text-sm font-bold text-primary">¥30</div>
-                                <Badge className="text-xs mt-1 bg-primary/10 text-primary hover:bg-primary/20">省钱</Badge>
+                                <div className="text-xs font-medium text-primary">Quarterly</div>
+                                <div className="text-sm font-bold text-primary">$20</div>
+                                <Badge className="text-xs mt-1 bg-primary/10 text-primary hover:bg-primary/20">Save</Badge>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">年付</div>
-                                <div className="text-sm font-bold text-primary">¥98</div>
+                                <div className="text-xs font-medium text-foreground">Annual</div>
+                                <div className="text-sm font-bold text-primary">$98</div>
                               </div>
                               <div className="text-center p-2 border rounded-lg bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:from-yellow-100 hover:to-orange-100 transition-all cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-yellow-800">终身</div>
-                                <div className="text-sm font-bold text-yellow-800">¥168</div>
-                                <Badge className="text-xs mt-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">推荐</Badge>
+                                <div className="text-xs font-medium text-yellow-800">Lifetime</div>
+                                <div className="text-sm font-bold text-yellow-800">$168</div>
+                                <Badge className="text-xs mt-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Recommended</Badge>
                               </div>
                             </div>
                           </div>
