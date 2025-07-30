@@ -204,27 +204,27 @@ const Subscription = () => {
           <Card className={subscription?.subscription_type === 'free' ? 'ring-2 ring-primary' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {isEN ? 'Free Plan' : '免费版'}
+                Free Plan
                 {subscription?.subscription_type === 'free' && (
-                  <Badge variant="outline">{isEN ? 'Current' : '当前'}</Badge>
+                  <Badge variant="outline">Current</Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                {isEN ? 'Perfect for trying out our service' : '非常适合试用我们的服务'}
+                Perfect for trying out our service
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {isEN ? 'Free' : '免费'}
+                Free
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? '3 recipe generations' : '3次食谱生成'}
+                  3 recipe generations
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Basic features' : '基础功能'}
+                  Basic features
                 </li>
               </ul>
               <Button 
@@ -233,8 +233,8 @@ const Subscription = () => {
                 disabled={subscription?.subscription_type === 'free'}
               >
                 {subscription?.subscription_type === 'free' 
-                  ? (isEN ? 'Current Plan' : '当前方案')
-                  : (isEN ? 'Get Started' : '开始使用')
+                  ? 'Current Plan'
+                  : 'Get Started'
                 }
               </Button>
             </CardContent>
@@ -245,34 +245,34 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-blue-500" />
-                {isEN ? 'Basic Monthly' : '基础月付'}
+                Basic Monthly
                 {subscription?.subscription_type === 'premium' && (
-                  <Badge variant="outline">{isEN ? 'Current' : '当前'}</Badge>
+                  <Badge variant="outline">Current</Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                {isEN ? 'Great for light users' : '适合轻度用户'}
+                Great for light users
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {isEN ? '$8' : '¥14'}<span className="text-lg font-normal">{isEN ? '/month' : '/月'}</span>
+                $8<span className="text-lg font-normal">/month</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Unlimited recipe generations' : '无限食谱生成'}
+                  Unlimited recipe generations
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Basic features' : '基础功能'}
+                  Basic features
                 </li>
               </ul>
               <Button 
                 className="w-full"
                 onClick={() => window.open('https://buy.stripe.com/cNi4grawf5b84izdUP2Ji02', '_blank')}
               >
-                {isEN ? 'Choose Basic' : '选择基础版'}
+                Choose Basic
               </Button>
             </CardContent>
           </Card>
@@ -282,89 +282,138 @@ const Subscription = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-yellow-500" />
-                {isEN ? 'Quarterly' : '季付'}
-                <Badge variant="secondary">{isEN ? 'Popular' : '热门'}</Badge>
+                Quarterly
+                <Badge variant="secondary">Popular</Badge>
               </CardTitle>
               <CardDescription>
-                {isEN ? 'Most popular choice for regular users' : '常规用户的最受欢迎选择'}
+                Most popular choice for regular users
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {isEN ? '$20' : '¥30'}<span className="text-lg font-normal">{isEN ? '/3 months' : '/3个月'}</span>
+                $20<span className="text-lg font-normal">/3 months</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Unlimited recipe generations' : '无限食谱生成'}
+                  Unlimited recipe generations
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Advanced features' : '高级功能'}
+                  Advanced features
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Priority support' : '优先支持'}
+                  Priority support
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Premium ingredients database' : '高级食材数据库'}
+                  Premium ingredients database
                 </li>
               </ul>
               <Button 
                 className="w-full"
                 onClick={() => window.open('https://buy.stripe.com/bJe8wH6fZ1YWbL12c72Ji01', '_blank')}
               >
-                {isEN ? 'Choose Quarterly' : '选择季付'}
+                Choose Quarterly
               </Button>
             </CardContent>
           </Card>
 
-          {/* 5-Year Plan */}
-          <Card>
+          {/* Annual Plan */}
+          <Card className="ring-2 ring-orange-500">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-purple-500" />
-                {isEN ? '5-Year Premium' : '五年高级版'}
+                <Crown className="w-5 h-5 text-orange-500" />
+                Annual
+                <Badge variant="secondary">Recommended</Badge>
               </CardTitle>
               <CardDescription>
-                {isEN ? 'Best value - long-term savings' : '最超值 - 长期节省'}
+                Best value for regular users
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {isEN ? '$125' : '¥188'}<span className="text-lg font-normal">{isEN ? '/5 years' : '/5年'}</span>
+                $98<span className="text-lg font-normal">/year</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Unlimited recipe generations' : '无限食谱生成'}
+                  Unlimited recipe generations
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Advanced features' : '高级功能'}
+                  Advanced features
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Priority support' : '优先支持'}
+                  Priority support
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Premium ingredients database' : '高级食材数据库'}
+                  Premium ingredients database
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  {isEN ? 'Huge savings vs short-term plans' : '比短期方案大幅节省'}
+                  Save $70 compared to monthly
                 </li>
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => window.open('https://buy.stripe.com/4gMcMX7k3avs9CT8Av2Ji00', '_blank')}
+                onClick={() => window.open('https://buy.stripe.com/annual-link-here', '_blank')}
               >
-                {isEN ? 'Choose 5-Year' : '选择五年'}
+                Choose Annual
               </Button>
             </CardContent>
           </Card>
+
+          {/* Lifetime Plan */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-purple-500" />
+                Lifetime
+                <Badge variant="secondary">Best Value</Badge>
+              </CardTitle>
+              <CardDescription>
+                One-time payment, forever access
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-4">
+                $168<span className="text-lg font-normal"> once</span>
+              </div>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Unlimited recipe generations
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  All premium features
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Priority support
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Premium ingredients database
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Lifetime access - no recurring payments
+                </li>
+              </ul>
+              <Button 
+                className="w-full"
+                onClick={() => window.open('https://buy.stripe.com/lifetime-link-here', '_blank')}
+              >
+                Choose Lifetime
+              </Button>
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>
