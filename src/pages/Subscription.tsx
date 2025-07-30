@@ -256,7 +256,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $8<span className="text-lg font-normal">{isEN ? '/month' : '/月'}</span>
+                {isEN ? '$8' : '¥14'}<span className="text-lg font-normal">{isEN ? '/month' : '/月'}</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -291,7 +291,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $20<span className="text-lg font-normal">{isEN ? '/3 months' : '/3个月'}</span>
+                {isEN ? '$20' : '¥30'}<span className="text-lg font-normal">{isEN ? '/3 months' : '/3个月'}</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
@@ -333,7 +333,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                $125<span className="text-lg font-normal">{isEN ? '/5 years' : '/5年'}</span>
+                {isEN ? '$125' : '¥188'}<span className="text-lg font-normal">{isEN ? '/5 years' : '/5年'}</span>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
