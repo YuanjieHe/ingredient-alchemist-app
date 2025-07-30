@@ -211,24 +211,44 @@ const RecipeGenerator = () => {
                             </p>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">Monthly</div>
-                                <div className="text-sm font-bold text-primary">$8</div>
+                                <div className="text-xs font-medium text-foreground">
+                                  {language === 'zh' ? '月付' : 'Monthly'}
+                                </div>
+                                <div className="text-sm font-bold text-primary">
+                                  {language === 'zh' ? '¥14' : '$8'}
+                                </div>
                               </div>
                               <div className="text-center p-2 border rounded-lg bg-primary/5 border-primary/20 hover:bg-primary/10 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-primary">Quarterly</div>
-                                <div className="text-sm font-bold text-primary">$20</div>
-                                <Badge className="text-xs mt-1 bg-primary/10 text-primary hover:bg-primary/20">Save</Badge>
+                                <div className="text-xs font-medium text-primary">
+                                  {language === 'zh' ? '季付' : 'Quarterly'}
+                                </div>
+                                <div className="text-sm font-bold text-primary">
+                                  {language === 'zh' ? '¥30' : '$20'}
+                                </div>
+                                <Badge className="text-xs mt-1 bg-primary/10 text-primary hover:bg-primary/20">
+                                  {language === 'zh' ? '省钱' : 'Save'}
+                                </Badge>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="text-center p-2 border rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-foreground">Annual</div>
-                                <div className="text-sm font-bold text-primary">$98</div>
+                                <div className="text-xs font-medium text-foreground">
+                                  {language === 'zh' ? '年付' : 'Annual'}
+                                </div>
+                                <div className="text-sm font-bold text-primary">
+                                  {language === 'zh' ? '¥98' : '$98'}
+                                </div>
                               </div>
                               <div className="text-center p-2 border rounded-lg bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:from-yellow-100 hover:to-orange-100 transition-all cursor-pointer" onClick={() => navigate('/subscription')}>
-                                <div className="text-xs font-medium text-yellow-800">Lifetime</div>
-                                <div className="text-sm font-bold text-yellow-800">$168</div>
-                                <Badge className="text-xs mt-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Recommended</Badge>
+                                <div className="text-xs font-medium text-yellow-800">
+                                  {language === 'zh' ? '终身' : 'Lifetime'}
+                                </div>
+                                <div className="text-sm font-bold text-yellow-800">
+                                  {language === 'zh' ? '¥168' : '$168'}
+                                </div>
+                                <Badge className="text-xs mt-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                                  {language === 'zh' ? '推荐' : 'Recommended'}
+                                </Badge>
                               </div>
                             </div>
                           </div>
