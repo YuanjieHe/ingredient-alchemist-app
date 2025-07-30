@@ -1,35 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import CryptoJS from "https://esm.sh/crypto-js@4.1.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// 使用外部MD5库
+// 使用 crypto-js 生成真正的 MD5 哈希
 function md5(text: string): string {
-  // 简单但有效的MD5实现
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  
-  // 为了测试，我们先使用SHA-256然后截取前32位
-  // 这不是真正的MD5，但对于测试应该可以工作
-  return crypto.subtle.digest("SHA-256", data).then(hashBuffer => {
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex.substring(0, 32); // 截取前32位模拟MD5
-  });
-}
-
-// 等等，我需要重新考虑这个方法，因为我需要同步函数
-// 让我使用一个不同的方法
-async function generateMD5Hash(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex.substring(0, 32); // 使用SHA-256的前32位作为MD5替代
+  return CryptoJS.MD5(text).toString();
 }
 
 // 生成随机订单号
@@ -95,7 +75,7 @@ serve(async (req) => {
     const signStr = `money=${params.money}&name=${params.name}&notify_url=${params.notify_url}&out_trade_no=${params.out_trade_no}&pid=${params.pid}&return_url=${params.return_url}&sitename=${params.sitename}&type=${params.type}${key}`;
     
     // 生成签名
-    const sign = await generateMD5Hash(signStr);
+    const sign = md5(signStr);
     
     console.log("Z-Pay payment params:", { orderId, signStr: signStr.substring(0, 100) + "...", sign });
     const paymentParams = new URLSearchParams({
