@@ -6,6 +6,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// 生成MD5哈希
+async function md5(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('MD5', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 生成随机订单号
+function generateOrderId(): string {
+  return `ZP${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,32 +39,56 @@ serve(async (req) => {
 
     const { planType } = await req.json();
     
-    // Z-Pay price configuration (in RMB cents)
+    // 获取Z-Pay配置
+    const pid = Deno.env.get("ZPAY_PID");
+    const key = Deno.env.get("ZPAY_PKEY");
+    
+    if (!pid || !key) {
+      throw new Error("Z-Pay配置未完成");
+    }
+    
+    // Z-Pay价格配置 (以分为单位)
     const priceConfig = {
-      monthly: { amount: 1400, name: "高级会员 - 月付" }, // ¥14
-      quarterly: { amount: 3000, name: "高级会员 - 季付" }, // ¥30
-      yearly: { amount: 9800, name: "高级会员 - 年付" }, // ¥98
-      lifetime: { amount: 16800, name: "高级会员 - 终身" } // ¥168
+      monthly: { amount: "14.00", name: "高级会员 - 月付" },
+      quarterly: { amount: "30.00", name: "高级会员 - 季付" },
+      yearly: { amount: "98.00", name: "高级会员 - 年付" },
+      lifetime: { amount: "168.00", name: "高级会员 - 终身" }
     };
 
     const config = priceConfig[planType as keyof typeof priceConfig];
     if (!config) throw new Error("Invalid plan type");
 
-    // This would be the actual Z-Pay integration
-    // For now, returning a placeholder response
-    const zPayData = {
-      order_id: `order_${Date.now()}_${user.id}`,
-      amount: config.amount,
-      product_name: config.name,
-      user_id: user.id,
-      plan_type: planType,
-      // In real implementation, you would call Z-Pay API here
-      payment_url: `https://z-pay.cn/pay?order_id=order_${Date.now()}_${user.id}&amount=${config.amount}&product=${encodeURIComponent(config.name)}`,
-      success_url: `${req.headers.get("origin")}/profile?success=true`,
-      cancel_url: `${req.headers.get("origin")}/profile?cancelled=true`
+    const orderId = generateOrderId();
+    const returnUrl = `${req.headers.get("origin")}/profile?success=true`;
+    const notifyUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/zpay-webhook`;
+    
+    // 构建支付参数
+    const params = {
+      pid: pid,
+      type: "alipay", // 默认使用支付宝
+      out_trade_no: orderId,
+      notify_url: notifyUrl,
+      return_url: returnUrl,
+      name: config.name,
+      money: config.amount,
+      sitename: "智能厨房助手"
     };
+    
+    // 构建签名字符串 (按照易支付接口规范)
+    const signStr = `money=${params.money}&name=${params.name}&notify_url=${params.notify_url}&out_trade_no=${params.out_trade_no}&pid=${params.pid}&return_url=${params.return_url}&sitename=${params.sitename}&type=${params.type}${key}`;
+    
+    // 生成签名
+    const sign = await md5(signStr);
+    
+    // 构建支付URL
+    const paymentParams = new URLSearchParams({
+      ...params,
+      sign: sign
+    });
+    
+    const paymentUrl = `https://z-pay.cn/submit.php?${paymentParams.toString()}`;
 
-    // Store order in database for verification later
+    // 将订单信息存储到数据库
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -58,19 +96,25 @@ serve(async (req) => {
     );
 
     await supabaseService.from("zpay_orders").insert({
-      order_id: zPayData.order_id,
+      order_id: orderId,
       user_id: user.id,
-      amount: config.amount,
+      amount: parseFloat(config.amount) * 100, // 转换为分
       plan_type: planType,
       status: "pending",
       created_at: new Date().toISOString()
     });
 
-    return new Response(JSON.stringify({ url: zPayData.payment_url }), {
+    console.log(`Created Z-Pay order: ${orderId} for user: ${user.id}, amount: ${config.amount}, plan: ${planType}`);
+
+    return new Response(JSON.stringify({ 
+      url: paymentUrl,
+      order_id: orderId 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
+    console.error("Z-Pay checkout error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
