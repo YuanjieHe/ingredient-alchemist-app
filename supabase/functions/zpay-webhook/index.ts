@@ -52,9 +52,16 @@ serve(async (req) => {
       sign 
     } = params;
 
-    // 验证签名
+    // 验证签名 - 按照Z-Pay webhook的参数顺序 
     const signStr = `money=${money}&name=${name}&out_trade_no=${out_trade_no}&pid=${pid}&trade_no=${trade_no}&trade_status=${trade_status}&type=${type}${key}`;
     const expectedSign = md5(signStr);
+    
+    console.log("Signature verification:", {
+      signStr: signStr,
+      expectedSign: expectedSign,
+      receivedSign: sign,
+      match: sign === expectedSign
+    });
     
     if (sign !== expectedSign) {
       console.error("Invalid signature:", { expected: expectedSign, received: sign });
