@@ -202,9 +202,15 @@ export default function Profile() {
         }
 
         if (checkoutData?.url) {
-          // 在新标签页打开支付页面
-          window.open(checkoutData.url, '_blank');
-          toast.info(language === 'zh' ? '已在新标签页打开支付页面' : 'Payment page opened in new tab');
+          // iOS兼容的链接跳转方式
+          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            // 在iOS设备上直接跳转
+            window.location.href = checkoutData.url;
+          } else {
+            // 其他设备在新标签页打开
+            window.open(checkoutData.url, '_blank');
+          }
+          toast.info(language === 'zh' ? '正在跳转到支付页面...' : 'Redirecting to payment page...');
         } else {
           throw new Error('未能创建支付链接');
         }
