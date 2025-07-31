@@ -71,10 +71,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   
   if (session.amount_total) {
     const amount = session.amount_total;
-    if (amount === 12500) { // $125 for 5 years
-      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 5);
-    } else if (amount === 16800) { // $168 lifetime
-      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 50); // 50 years for lifetime
+    if (amount === 12500) { // $125 for both 5 years and lifetime
+      // Check metadata to distinguish between fiveyear and lifetime plans
+      const planType = session.metadata?.plan_type;
+      if (planType === 'lifetime') {
+        subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 50); // 50 years for lifetime
+      } else {
+        // Default to 5 years for $125 amount if planType is not specified or is 'fiveyear'
+        subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 5);
+      }
     } else if (amount === 2000) { // $20 quarterly (3 months)
       subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 3);
     } else if (amount === 800) { // $8 monthly

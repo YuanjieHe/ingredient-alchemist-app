@@ -46,7 +46,7 @@ serve(async (req) => {
       monthly: { amount: 800, interval: "month" }, // $8
       quarterly: { amount: 2000, interval: "month", interval_count: 3 }, // $20/3个月
       fiveyear: { amount: 12500, interval: "year", interval_count: 5 }, // $125/5年
-      lifetime: { amount: 16800, interval: null } // $168 一次性
+      lifetime: { amount: 12500, interval: null } // $125 一次性
     };
 
     const config = priceConfig[planType as keyof typeof priceConfig];
