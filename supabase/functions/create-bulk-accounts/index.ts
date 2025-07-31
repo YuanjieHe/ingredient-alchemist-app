@@ -12,6 +12,19 @@ serve(async (req) => {
   }
 
   try {
+    // 检查是否有有效的管理员授权
+    const authHeader = req.headers.get("Authorization");
+    const adminKey = req.headers.get("X-Admin-Key");
+    
+    if (!adminKey || adminKey !== Deno.env.get("ADMIN_SECRET_KEY")) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Unauthorized: Admin access required"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
     // 使用服务角色密钥创建Supabase客户端
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
