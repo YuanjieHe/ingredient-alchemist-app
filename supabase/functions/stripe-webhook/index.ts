@@ -71,9 +71,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   
   if (session.amount_total) {
     const amount = session.amount_total;
-    if (amount >= 12500) { // $125 annual
-      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
-    } else { // Monthly plans
+    if (amount === 12500) { // $125 for 5 years
+      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 5);
+    } else if (amount === 16800) { // $168 lifetime
+      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 50); // 50 years for lifetime
+    } else if (amount === 2000) { // $20 quarterly (3 months)
+      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 3);
+    } else if (amount === 800) { // $8 monthly
+      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+    } else {
+      // Default to 1 month for unknown amounts
       subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
     }
   }
