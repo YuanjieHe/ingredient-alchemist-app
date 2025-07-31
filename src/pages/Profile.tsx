@@ -440,125 +440,128 @@ export default function Profile() {
                   </div>
 
                   {/* 购买选项 */}
-                  <div className="mt-6">
-                    <h4 className="font-medium mb-4 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      {t('upgradeToPremium')}
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* Monthly */}
-                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
-                        <CardContent className="p-3 text-center">
-                          <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥14' : '$8'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{t('monthly')}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{t('perMonth')}</div>
-                          <Button 
-                            className="w-full mt-3" 
-                            size="sm"
-                            onClick={() => handlePurchase('monthly', language === 'zh' ? 14 : 8)}
-                            disabled={paymentLoading}
-                          >
-                            {paymentLoading && selectedPlan === 'monthly' ? t('processing') : t('select')}
-                          </Button>
-                        </CardContent>
-                      </Card>
+                   {/* 购买选项已隐藏 - 支付功能仍可通过API调用使用 */}
+                   {false && (
+                     <div className="mt-6">
+                       <h4 className="font-medium mb-4 flex items-center gap-2">
+                         <Star className="w-4 h-4 text-yellow-500" />
+                         {t('upgradeToPremium')}
+                       </h4>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                         {/* Monthly */}
+                         <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                           <CardContent className="p-3 text-center">
+                             <div className="text-lg font-bold text-primary">
+                               {language === 'zh' ? '¥14' : '$8'}
+                             </div>
+                             <div className="text-sm text-muted-foreground">{t('monthly')}</div>
+                             <div className="text-xs text-muted-foreground mt-1">{t('perMonth')}</div>
+                             <Button 
+                               className="w-full mt-3" 
+                               size="sm"
+                               onClick={() => handlePurchase('monthly', language === 'zh' ? 14 : 8)}
+                               disabled={paymentLoading}
+                             >
+                               {paymentLoading && selectedPlan === 'monthly' ? t('processing') : t('select')}
+                             </Button>
+                           </CardContent>
+                         </Card>
 
-                      {/* Quarterly */}
-                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
-                        <CardContent className="p-3 text-center">
-                          <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥30' : '$20'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{t('quarterly')}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{t('months3')}</div>
-                          <div className="text-xs text-green-600">
-                            {t('saveAmount')} {language === 'zh' ? '¥12' : '$4'}
-                          </div>
-                          <Button 
-                            className="w-full mt-3" 
-                            size="sm"
-                            onClick={() => handlePurchase('quarterly', language === 'zh' ? 30 : 20)}
-                            disabled={paymentLoading}
-                          >
-                            {paymentLoading && selectedPlan === 'quarterly' ? t('processing') : t('select')}
-                          </Button>
-                        </CardContent>
-                      </Card>
+                         {/* Quarterly */}
+                         <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+                           <CardContent className="p-3 text-center">
+                             <div className="text-lg font-bold text-primary">
+                               {language === 'zh' ? '¥30' : '$20'}
+                             </div>
+                             <div className="text-sm text-muted-foreground">{t('quarterly')}</div>
+                             <div className="text-xs text-muted-foreground mt-1">{t('months3')}</div>
+                             <div className="text-xs text-green-600">
+                               {t('saveAmount')} {language === 'zh' ? '¥12' : '$4'}
+                             </div>
+                             <Button 
+                               className="w-full mt-3" 
+                               size="sm"
+                               onClick={() => handlePurchase('quarterly', language === 'zh' ? 30 : 20)}
+                               disabled={paymentLoading}
+                             >
+                               {paymentLoading && selectedPlan === 'quarterly' ? t('processing') : t('select')}
+                             </Button>
+                           </CardContent>
+                         </Card>
 
-                      {/* Annual */}
-                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
-                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-orange-500 text-white">{t('recommended')}</Badge>
-                        </div>
-                        <CardContent className="p-3 text-center">
-                          <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥98' : '$98'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{t('annual')}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{t('months12')}</div>
-                          <div className="text-xs text-green-600">
-                            {t('saveAmount')} {language === 'zh' ? '¥70' : '$70'}
-                          </div>
-                          <Button 
-                            className="w-full mt-3" 
-                            size="sm"
-                            onClick={() => handlePurchase('yearly', language === 'zh' ? 98 : 98)}
-                            disabled={paymentLoading}
-                          >
-                            {paymentLoading && selectedPlan === 'yearly' ? t('processing') : t('select')}
-                          </Button>
-                        </CardContent>
-                      </Card>
+                         {/* Annual */}
+                         <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                           <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                             <Badge className="bg-orange-500 text-white">{t('recommended')}</Badge>
+                           </div>
+                           <CardContent className="p-3 text-center">
+                             <div className="text-lg font-bold text-primary">
+                               {language === 'zh' ? '¥98' : '$98'}
+                             </div>
+                             <div className="text-sm text-muted-foreground">{t('annual')}</div>
+                             <div className="text-xs text-muted-foreground mt-1">{t('months12')}</div>
+                             <div className="text-xs text-green-600">
+                               {t('saveAmount')} {language === 'zh' ? '¥70' : '$70'}
+                             </div>
+                             <Button 
+                               className="w-full mt-3" 
+                               size="sm"
+                               onClick={() => handlePurchase('yearly', language === 'zh' ? 98 : 98)}
+                               disabled={paymentLoading}
+                             >
+                               {paymentLoading && selectedPlan === 'yearly' ? t('processing') : t('select')}
+                             </Button>
+                           </CardContent>
+                         </Card>
 
-                      {/* Lifetime */}
-                      <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
-                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-purple-500 text-white">{t('lifetime')}</Badge>
-                        </div>
-                        <CardContent className="p-3 text-center">
-                          <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥125' : '$125'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{t('lifetime')}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{t('permanentUse')}</div>
-                          <div className="text-xs text-green-600">{t('mostValue')}</div>
-                          <Button 
-                            className="w-full mt-3" 
-                            size="sm"
-                            onClick={() => handlePurchase('lifetime', language === 'zh' ? 125 : 125)}
-                            disabled={paymentLoading}
-                          >
-                            {paymentLoading && selectedPlan === 'lifetime' ? t('processing') : t('select')}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    {/* iOS恢复购买按钮 */}
-                    <div className="mt-4 flex justify-center">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleRestorePurchases}
-                        className="flex items-center gap-2"
-                      >
-                        <Smartphone className="w-4 h-4" />
-                        {t('restorePurchases')}
-                      </Button>
-                    </div>
-                    
-                    <div className="mt-4 p-3 bg-muted rounded-lg">
-                      <h4 className="font-medium mb-2 text-sm">{t('premiumBenefits')}</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        <li>{t('unlimitedRecipes')}</li>
-                        <li>{t('smartPortioning')}</li>
-                        <li>{t('completeMealPlans')}</li>
-                        <li>{t('prioritySupport')}</li>
-                      </ul>
-                    </div>
-                  </div>
+                         {/* Lifetime */}
+                         <Card className="border-2 hover:border-primary transition-colors cursor-pointer relative">
+                           <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                             <Badge className="bg-purple-500 text-white">{t('lifetime')}</Badge>
+                           </div>
+                           <CardContent className="p-3 text-center">
+                             <div className="text-lg font-bold text-primary">
+                               {language === 'zh' ? '¥125' : '$125'}
+                             </div>
+                             <div className="text-sm text-muted-foreground">{t('lifetime')}</div>
+                             <div className="text-xs text-muted-foreground mt-1">{t('permanentUse')}</div>
+                             <div className="text-xs text-green-600">{t('mostValue')}</div>
+                             <Button 
+                               className="w-full mt-3" 
+                               size="sm"
+                               onClick={() => handlePurchase('lifetime', language === 'zh' ? 125 : 125)}
+                               disabled={paymentLoading}
+                             >
+                               {paymentLoading && selectedPlan === 'lifetime' ? t('processing') : t('select')}
+                             </Button>
+                           </CardContent>
+                         </Card>
+                       </div>
+                       
+                       {/* iOS恢复购买按钮 */}
+                       <div className="mt-4 flex justify-center">
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={handleRestorePurchases}
+                           className="flex items-center gap-2"
+                         >
+                           <Smartphone className="w-4 h-4" />
+                           {t('restorePurchases')}
+                         </Button>
+                       </div>
+                       
+                       <div className="mt-4 p-3 bg-muted rounded-lg">
+                         <h4 className="font-medium mb-2 text-sm">{t('premiumBenefits')}</h4>
+                         <ul className="text-sm text-muted-foreground space-y-1">
+                           <li>{t('unlimitedRecipes')}</li>
+                           <li>{t('smartPortioning')}</li>
+                           <li>{t('completeMealPlans')}</li>
+                           <li>{t('prioritySupport')}</li>
+                         </ul>
+                       </div>
+                     </div>
+                   )}
                 </>
               ) : (
                 // 高级会员状态显示
