@@ -202,9 +202,34 @@ export default function Profile() {
         }
 
         if (checkoutData?.url) {
-          // 直接在当前窗口跳转到支付页面
-          window.location.href = checkoutData.url;
-          toast.info(language === 'zh' ? '正在跳转到支付页面...' : 'Redirecting to payment page...');
+          // 中文用户使用zpay，需要在新标签页打开外部链接
+          if (language === 'zh') {
+            const newWindow = window.open(checkoutData.url, '_blank');
+            if (!newWindow) {
+              // 如果弹窗被阻止，提示用户手动点击
+              toast.error('请允许弹窗或手动点击链接完成支付');
+              // 创建一个临时链接供用户手动点击
+              const link = document.createElement('a');
+              link.href = checkoutData.url;
+              link.target = '_blank';
+              link.textContent = '点击此处完成支付';
+              link.style.cssText = 'color: blue; text-decoration: underline; cursor: pointer;';
+              
+              // 找到一个容器来显示链接（比如toast或者页面上的某个位置）
+              toast.info('支付链接已准备就绪，请点击打开');
+              
+              // 5秒后自动尝试跳转
+              setTimeout(() => {
+                window.location.href = checkoutData.url;
+              }, 100);
+            } else {
+              toast.info('正在跳转到支付页面...');
+            }
+          } else {
+            // Stripe支付直接跳转
+            window.location.href = checkoutData.url;
+            toast.info('Redirecting to payment page...');
+          }
         } else {
           throw new Error('未能创建支付链接');
         }
