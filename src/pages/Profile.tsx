@@ -202,14 +202,8 @@ export default function Profile() {
         }
 
         if (checkoutData?.url) {
-          // iOS兼容的链接跳转方式
-          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            // 在iOS设备上直接跳转
-            window.location.href = checkoutData.url;
-          } else {
-            // 其他设备在新标签页打开
-            window.open(checkoutData.url, '_blank');
-          }
+          // 直接在当前窗口跳转到支付页面
+          window.location.href = checkoutData.url;
           toast.info(language === 'zh' ? '正在跳转到支付页面...' : 'Redirecting to payment page...');
         } else {
           throw new Error('未能创建支付链接');
