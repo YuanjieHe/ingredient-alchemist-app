@@ -519,7 +519,7 @@ export default function Profile() {
                         </div>
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥125' : '$125'}
+                            {language === 'zh' ? '¥168' : '$168'}
                           </div>
                           <div className="text-sm text-muted-foreground">{t('lifetime')}</div>
                           <div className="text-xs text-muted-foreground mt-1">{t('permanentUse')}</div>
@@ -527,7 +527,7 @@ export default function Profile() {
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
-                            onClick={() => handlePurchase('lifetime', language === 'zh' ? 125 : 125)}
+                            onClick={() => handlePurchase('lifetime', language === 'zh' ? 168 : 168)}
                             disabled={paymentLoading}
                           >
                             {paymentLoading && selectedPlan === 'lifetime' ? t('processing') : t('select')}
