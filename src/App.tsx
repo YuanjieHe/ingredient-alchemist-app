@@ -19,8 +19,8 @@ import BottomNavigation from "./components/BottomNavigation";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <LanguageProvider>
-    <AuthProvider>
+  <AuthProvider>
+    <LanguageProvider>
       <SubscriptionProvider>
         <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -84,8 +84,8 @@ const App = () => (
         </TooltipProvider>
       </QueryClientProvider>
       </SubscriptionProvider>
-    </AuthProvider>
-  </LanguageProvider>
+    </LanguageProvider>
+  </AuthProvider>
 );
 
 export default App;
