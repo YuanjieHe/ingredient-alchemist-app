@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
 export type Language = 'en' | 'zh';
 
@@ -729,13 +731,74 @@ const translations = {
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>('en');
+  const { user } = useAuth();
+
+  // Load language preference from database or localStorage on mount
+  useEffect(() => {
+    const loadLanguagePreference = async () => {
+      if (user) {
+        // Load from database for authenticated users
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error loading language preference:', error);
+          } else if (profile && (profile as any).language) {
+            const dbLanguage = (profile as any).language === 'English' ? 'en' : 'zh';
+            setLanguage(dbLanguage);
+            // Also save to localStorage for consistency
+            localStorage.setItem('language', dbLanguage);
+            return;
+          }
+        } catch (error) {
+          console.error('Error loading language preference:', error);
+        }
+      }
+
+      // Fallback to localStorage for non-authenticated users or on error
+      const savedLanguage = localStorage.getItem('language') as Language;
+      if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'zh')) {
+        setLanguage(savedLanguage);
+      }
+    };
+
+    loadLanguagePreference();
+  }, [user]);
+
+  const setLanguageWithPersistence = async (lang: Language) => {
+    setLanguage(lang);
+    
+    // Save to localStorage immediately
+    localStorage.setItem('language', lang);
+    
+    // Save to database if user is authenticated
+    if (user) {
+      try {
+        const languageValue = lang === 'en' ? 'English' : '中文';
+        const { error } = await supabase
+          .from('profiles')
+          .update({ language: languageValue } as any)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error saving language preference:', error);
+        }
+      } catch (error) {
+        console.error('Error saving language preference:', error);
+      }
+    }
+  };
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations['en']] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: setLanguageWithPersistence, t }}>
       {children}
     </LanguageContext.Provider>
   );
