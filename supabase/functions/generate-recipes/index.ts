@@ -223,7 +223,88 @@ serve(async (req) => {
       console.error('Failed to parse JSON response:', parseError);
       console.error('Response text:', generatedText);
       
-      // Fallback: create a simple recipe structure
+      // Try one more time with more aggressive cleaning
+      try {
+        let finalCleanText = generatedText.trim();
+        
+        // Remove markdown blocks
+        const jsonMatch = finalCleanText.match(/```(?:json)?\s*(\[[\s\S]*?\]|\{[\s\S]*?\})\s*```/);
+        if (jsonMatch) {
+          finalCleanText = jsonMatch[1];
+        }
+        
+        // More aggressive cleaning
+        finalCleanText = finalCleanText
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+          .replace(/\\n/g, '\\n') // Ensure newlines are properly escaped
+          .replace(/\\"/g, '\\"') // Ensure quotes are properly escaped
+          .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+          .replace(/([{,]\s*)"([^"]+)"\s*:\s*([^",}\]]+)([,}\]])/g, '$1"$2": "$3"$4') // Quote unquoted values
+          .trim();
+        
+        console.log('Attempting final parse with aggressive cleaning...');
+        recipes = JSON.parse(finalCleanText);
+        console.log('Successfully parsed with aggressive cleaning');
+        
+      } catch (finalError) {
+        console.error('Final parse attempt failed:', finalError);
+        
+        // If we used 302.ai and still failed, try to extract partial data
+        if (usingFallback) {
+          console.log('Attempting to extract partial recipe data from 302.ai response...');
+          // Try to extract title and description at minimum
+          const titleMatch = generatedText.match(/"title"\s*:\s*"([^"]+)"/);
+          const descMatch = generatedText.match(/"description"\s*:\s*"([^"]+)"/);
+          
+          if (titleMatch || descMatch) {
+            console.log('Extracted partial data, creating simplified recipe');
+            const isEnglish = language === 'English';
+            recipes = [{
+              id: "parsed-recipe",
+              title: titleMatch ? titleMatch[1] : (isEnglish ? `${cuisineType} ${mealType} Feast` : `${cuisineType}风味${mealType}`),
+              description: descMatch ? descMatch[1] : (isEnglish ? `A delicious ${mealType} featuring authentic ${cuisineType} flavors.` : `正宗${cuisineType}风味的美味${mealType}。`),
+              prepTime: 20,
+              cookTime: 40,
+              servings: peopleCount,
+              difficulty: skillLevel,
+              ingredients: ingredients.map(ing => ({item: ing, amount: "appropriate amount", usedIn: "various dishes"})),
+              dishInstructions: [{
+                dishName: isEnglish ? "Featured Dish" : "特色菜",
+                steps: [
+                  {
+                    stepNumber: 1,
+                    title: isEnglish ? "Ingredient Preparation" : "食材准备",
+                    description: isEnglish ? `Carefully prepare all ingredients: ${ingredients.join(', ')}. Follow traditional ${cuisineType} preparation methods.` : `仔细准备所有食材：${ingredients.join('、')}。遵循传统${cuisineType}制作方法。`,
+                    duration: isEnglish ? "15 minutes" : "15分钟",
+                    tips: isEnglish ? "Quality ingredients are key to authentic flavors." : "优质食材是正宗口味的关键。"
+                  },
+                  {
+                    stepNumber: 2,
+                    title: isEnglish ? "Cooking Process" : "烹饪过程",
+                    description: isEnglish ? `Cook using traditional ${cuisineType} techniques. Pay attention to heat control and timing.` : `使用传统${cuisineType}技法烹饪。注意火候和时间控制。`,
+                    duration: isEnglish ? "25 minutes" : "25分钟",
+                    tips: isEnglish ? "Adjust seasoning throughout the cooking process." : "在烹饪过程中适时调整调料。"
+                  }
+                ]
+              }],
+              coordinationTips: [
+                isEnglish ? "Prepare all ingredients before starting to cook" : "开始烹饪前准备好所有食材",
+                isEnglish ? "Follow traditional cooking sequence" : "遵循传统烹饪顺序"
+              ],
+              tags: ["authentic", cuisineType.toLowerCase(), "homemade"]
+            }];
+          } else {
+            throw parseError; // Fall back to complete fallback
+          }
+        } else {
+          throw parseError; // Fall back to complete fallback
+        }
+      }
+    }
+
+    // If we still don't have recipes, create complete fallback
+    if (!recipes) {
+      console.log('Using complete fallback recipe structure');
       const isEnglish = language === 'English';
       recipes = [{
         id: "fallback-recipe",
