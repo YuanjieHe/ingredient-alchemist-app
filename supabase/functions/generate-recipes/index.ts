@@ -208,6 +208,16 @@ serve(async (req) => {
         cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
       
+      // Additional cleaning for common JSON issues
+      cleanedText = cleanedText
+        .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+        .replace(/[\u201C\u201D]/g, '"') // Replace smart quotes
+        .replace(/"/g, '"') // Replace curly quotes  
+        .replace(/"/g, '"') // Replace curly quotes
+        .replace(/,\s*}/g, '}') // Remove trailing commas before }
+        .replace(/,\s*]/g, ']'); // Remove trailing commas before ]
+      
+      console.log('Attempting to parse cleaned JSON...');
       recipes = JSON.parse(cleanedText);
     } catch (parseError) {
       console.error('Failed to parse JSON response:', parseError);
