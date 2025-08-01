@@ -185,18 +185,26 @@ const RecipeDetail = () => {
         <div className="flex gap-2">
           <Button
             variant="ghost"
-            onClick={() => navigate('/recipes')}
+            onClick={() => {
+              // Check if we came from generated recipes, otherwise go to recipe generator
+              const hasGeneratedRecipes = localStorage.getItem('generatedRecipes');
+              if (hasGeneratedRecipes) {
+                navigate(-1); // Go back to the generated recipes view
+              } else {
+                navigate('/recipes'); // Go to recipe generator
+              }
+            }}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t('backToRecipes')}
+            {t('backToGeneratedRecipes')}
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/recipes')}
             className="flex items-center gap-2"
           >
-            {t('backToPreviousPage')}
+            {t('backToRecipes')}
           </Button>
         </div>
         
