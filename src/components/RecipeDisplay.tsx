@@ -219,6 +219,34 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                       key={`${recipe.id}-${dishIndex}`} 
                       className="overflow-hidden shadow-warm hover:shadow-primary transition-all duration-300 cursor-pointer"
                       onClick={() => {
+                        // Get available ingredients from bank
+                        const bankIngredients = localStorage.getItem('ingredientsBank');
+                        let availableIngredients: string[] = [];
+                        if (bankIngredients) {
+                          try {
+                            const parsedIngredients = JSON.parse(bankIngredients);
+                            availableIngredients = parsedIngredients
+                              .filter((ing: any) => ing.quantity > 0)
+                              .map((ing: any) => ing.name);
+                          } catch (error) {
+                            console.error('Error parsing bank ingredients:', error);
+                          }
+                        }
+                        
+                        // Process ingredients for this dish to mark availability correctly
+                        const processedIngredients = recipe.ingredients
+                          .filter(ing => !ing.usedIn || ing.usedIn === dish.name)
+                          .map(ing => {
+                            const isAvailable = availableIngredients.some(available => 
+                              available.toLowerCase().includes(ing.item.toLowerCase()) ||
+                              ing.item.toLowerCase().includes(available.toLowerCase())
+                            );
+                            return {
+                              ...ing,
+                              needed: !isAvailable
+                            };
+                          });
+
                         // Create a sub-recipe for this dish
                         const dishRecipe = {
                           ...recipe,
@@ -226,10 +254,8 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                           title: dish.name,
                           description: dish.description,
                           dishes: [dish],
-                          // Filter ingredients for this dish
-                          ingredients: recipe.ingredients.filter(ing => 
-                            !ing.usedIn || ing.usedIn === dish.name
-                          ),
+                          // Use processed ingredients with correct availability status
+                          ingredients: processedIngredients,
                           // Clear detailed steps so they regenerate for this specific dish
                           detailedSteps: [],
                           instructions: recipe.instructions || []
@@ -251,20 +277,45 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const dishRecipe = {
-                                  ...recipe,
-                                  id: `${recipe.id}-dish-${dishIndex}`,
-                                  title: dish.name,
-                                  description: dish.description,
-                                  dishes: [dish],
-                                  ingredients: recipe.ingredients.filter(ing => 
-                                    !ing.usedIn || ing.usedIn === dish.name
-                                  ),
-                                  detailedSteps: []
-                                };
-                                handleSave(dishRecipe);
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 // Get available ingredients from bank
+                                 const bankIngredients = localStorage.getItem('ingredientsBank');
+                                 let availableIngredients: string[] = [];
+                                 if (bankIngredients) {
+                                   try {
+                                     const parsedIngredients = JSON.parse(bankIngredients);
+                                     availableIngredients = parsedIngredients
+                                       .filter((ing: any) => ing.quantity > 0)
+                                       .map((ing: any) => ing.name);
+                                   } catch (error) {
+                                     console.error('Error parsing bank ingredients:', error);
+                                   }
+                                 }
+                                 
+                                 const processedIngredients = recipe.ingredients
+                                   .filter(ing => !ing.usedIn || ing.usedIn === dish.name)
+                                   .map(ing => {
+                                     const isAvailable = availableIngredients.some(available => 
+                                       available.toLowerCase().includes(ing.item.toLowerCase()) ||
+                                       ing.item.toLowerCase().includes(available.toLowerCase())
+                                     );
+                                     return {
+                                       ...ing,
+                                       needed: !isAvailable
+                                     };
+                                   });
+
+                                 const dishRecipe = {
+                                   ...recipe,
+                                   id: `${recipe.id}-dish-${dishIndex}`,
+                                   title: dish.name,
+                                   description: dish.description,
+                                   dishes: [dish],
+                                   ingredients: processedIngredients,
+                                   detailedSteps: []
+                                 };
+                                 handleSave(dishRecipe);
                               }}
                               className="hover:bg-white/20 h-8 w-8"
                             >
@@ -273,20 +324,45 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const dishRecipe = {
-                                  ...recipe,
-                                  id: `${recipe.id}-dish-${dishIndex}`,
-                                  title: dish.name,
-                                  description: dish.description,
-                                  dishes: [dish],
-                                  ingredients: recipe.ingredients.filter(ing => 
-                                    !ing.usedIn || ing.usedIn === dish.name
-                                  ),
-                                  detailedSteps: []
-                                };
-                                handleShare(dishRecipe);
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 // Get available ingredients from bank
+                                 const bankIngredients = localStorage.getItem('ingredientsBank');
+                                 let availableIngredients: string[] = [];
+                                 if (bankIngredients) {
+                                   try {
+                                     const parsedIngredients = JSON.parse(bankIngredients);
+                                     availableIngredients = parsedIngredients
+                                       .filter((ing: any) => ing.quantity > 0)
+                                       .map((ing: any) => ing.name);
+                                   } catch (error) {
+                                     console.error('Error parsing bank ingredients:', error);
+                                   }
+                                 }
+                                 
+                                 const processedIngredients = recipe.ingredients
+                                   .filter(ing => !ing.usedIn || ing.usedIn === dish.name)
+                                   .map(ing => {
+                                     const isAvailable = availableIngredients.some(available => 
+                                       available.toLowerCase().includes(ing.item.toLowerCase()) ||
+                                       ing.item.toLowerCase().includes(available.toLowerCase())
+                                     );
+                                     return {
+                                       ...ing,
+                                       needed: !isAvailable
+                                     };
+                                   });
+
+                                 const dishRecipe = {
+                                   ...recipe,
+                                   id: `${recipe.id}-dish-${dishIndex}`,
+                                   title: dish.name,
+                                   description: dish.description,
+                                   dishes: [dish],
+                                   ingredients: processedIngredients,
+                                   detailedSteps: []
+                                 };
+                                 handleShare(dishRecipe);
                               }}
                               className="hover:bg-white/20 h-8 w-8"
                             >

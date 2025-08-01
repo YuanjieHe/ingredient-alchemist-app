@@ -55,7 +55,10 @@ const RecipeDetail = () => {
         const parsedRecipe = JSON.parse(savedRecipe);
         setRecipe(parsedRecipe);
         
-        // Only generate detailed steps if explicitly requested, not automatically
+        // Automatically generate detailed steps if not available
+        if (!parsedRecipe.detailedSteps || parsedRecipe.detailedSteps.length === 0) {
+          generateDetailedRecipe(parsedRecipe);
+        }
       } catch (error) {
         console.error('Error parsing saved recipe:', error);
         navigate('/recipes');
