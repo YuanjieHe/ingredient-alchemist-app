@@ -696,7 +696,44 @@ async function generateDetailedSingleRecipe(params: any): Promise<any> {
     ? 'You are a master chef creating extremely detailed, step-by-step cooking instructions. Focus on precision, technique, and professional tips. Respond only with valid JSON.'
     : '您是一位烹饪大师，创建极其详细的逐步烹饪说明。专注于精确性、技法和专业提示。仅用有效的JSON格式回复。';
 
-  const prompt = `为菜品"${dishName}"生成极其详细的烹饪步骤。
+  const prompt = isEnglish 
+    ? `Generate extremely detailed cooking steps for the dish "${dishName}".
+
+Dish Information:
+- Dish Name: ${dishName}
+- Description: ${dishDescription}
+- Available Ingredients: ${ingredients.join(', ')}
+- Skill Level: ${skillLevel}
+- Serving Size: ${peopleCount} people
+
+Requirements for detailed recipe generation:
+1. Each step must be extremely detailed, including precise timing, temperature, and techniques
+2. Provide professional cooking tips and critical control points
+3. Include nutrition information and complete ingredient list
+
+Please respond in the following JSON format:
+{
+  "detailedSteps": [
+    {
+      "stepNumber": 1,
+      "title": "Detailed Step Title",
+      "description": "Very detailed step description including specific methods, timing, temperature, techniques, etc.",
+      "duration": "X minutes",
+      "tips": "Professional tips and critical control points"
+    }
+  ],
+  "ingredients": [
+    {"item": "Ingredient Name", "amount": "Amount", "needed": false}
+  ],
+  "tips": ["Cooking tip 1", "Cooking tip 2"],
+  "nutritionInfo": {
+    "calories": 350,
+    "protein": "25g",
+    "carbs": "30g", 
+    "fat": "12g"
+  }
+}`
+    : `为菜品"${dishName}"生成极其详细的烹饪步骤。
 
 菜品信息：
 - 菜名：${dishName}
