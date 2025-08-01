@@ -731,7 +731,16 @@ const translations = {
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>('en');
-  const { user } = useAuth();
+  
+  // Safely get auth context, handle case where it might not be available yet
+  let user = null;
+  try {
+    const authContext = useAuth();
+    user = authContext.user;
+  } catch (error) {
+    // Auth context not available yet, user will remain null
+    console.log('Auth context not available yet');
+  }
 
   // Load language preference from database or localStorage on mount
   useEffect(() => {
