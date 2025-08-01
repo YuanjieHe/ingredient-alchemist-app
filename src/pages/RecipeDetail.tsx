@@ -42,7 +42,7 @@ interface DetailedRecipe {
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const [recipe, setRecipe] = useState<DetailedRecipe | null>(null);
   const [isGeneratingDetails, setIsGeneratingDetails] = useState(false);
@@ -79,7 +79,7 @@ const RecipeDetail = () => {
           ingredients: baseRecipe.ingredients?.map((ing: any) => ing.item) || [],
           skillLevel: baseRecipe.difficulty || 'beginner',
           peopleCount: baseRecipe.servings || 4,
-          language: 'zh'
+          language: language
         }
       });
 

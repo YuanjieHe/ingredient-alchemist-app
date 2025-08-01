@@ -229,7 +229,10 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                           // Filter ingredients for this dish
                           ingredients: recipe.ingredients.filter(ing => 
                             !ing.usedIn || ing.usedIn === dish.name
-                          )
+                          ),
+                          // Clear detailed steps so they regenerate for this specific dish
+                          detailedSteps: [],
+                          instructions: recipe.instructions || []
                         };
                         localStorage.setItem('selectedRecipe', JSON.stringify(dishRecipe));
                         window.location.href = `/recipe/${dishRecipe.id}`;
@@ -255,7 +258,11 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                                   id: `${recipe.id}-dish-${dishIndex}`,
                                   title: dish.name,
                                   description: dish.description,
-                                  dishes: [dish]
+                                  dishes: [dish],
+                                  ingredients: recipe.ingredients.filter(ing => 
+                                    !ing.usedIn || ing.usedIn === dish.name
+                                  ),
+                                  detailedSteps: []
                                 };
                                 handleSave(dishRecipe);
                               }}
@@ -273,7 +280,11 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                                   id: `${recipe.id}-dish-${dishIndex}`,
                                   title: dish.name,
                                   description: dish.description,
-                                  dishes: [dish]
+                                  dishes: [dish],
+                                  ingredients: recipe.ingredients.filter(ing => 
+                                    !ing.usedIn || ing.usedIn === dish.name
+                                  ),
+                                  detailedSteps: []
                                 };
                                 handleShare(dishRecipe);
                               }}
