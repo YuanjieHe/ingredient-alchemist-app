@@ -298,6 +298,7 @@ const translations = {
     updated: 'Updated',
     removed: 'Removed',
     navigatingToRecipeGenerator: 'Navigating to recipe generator',
+    pleaseSelectIngredients: 'Please select ingredients to cook with',
     
     // Input guidance
     whatsInYourKitchen: 'What\'s in your kitchen? 🥗',
@@ -652,6 +653,7 @@ const translations = {
     updated: '已更新',
     removed: '已移除',
     navigatingToRecipeGenerator: '正在跳转到食谱生成器',
+    pleaseSelectIngredients: '请选择要烹饪的食材',
     
     // Input guidance
     whatsInYourKitchen: '你的厨房里有什么？🥗',

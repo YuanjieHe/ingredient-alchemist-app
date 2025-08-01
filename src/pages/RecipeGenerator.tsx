@@ -39,8 +39,24 @@ const RecipeGenerator = () => {
   const API_KEY = 'AIzaSyBqc53GHt1LfXyvYaD4XZm99XLCQ9vtLu0';
   const recipeService = new RecipeService(API_KEY);
 
-  // Load ingredients from bank
+  // Load ingredients from bank and selected ingredients for cooking
   useEffect(() => {
+    // First check if there are selected ingredients from the bank
+    const selectedForCooking = localStorage.getItem('selectedIngredientsForCooking');
+    if (selectedForCooking) {
+      try {
+        const selectedIngredients = JSON.parse(selectedForCooking);
+        console.log('Selected ingredients for cooking:', selectedIngredients);
+        setIngredients(selectedIngredients);
+        // Clear the selection after loading
+        localStorage.removeItem('selectedIngredientsForCooking');
+        return;
+      } catch (error) {
+        console.error('Error parsing selected ingredients:', error);
+      }
+    }
+
+    // If no selected ingredients, load all from bank as fallback
     const bankIngredients = localStorage.getItem('ingredientsBank');
     if (bankIngredients) {
       try {
@@ -74,9 +90,6 @@ const RecipeGenerator = () => {
         console.error('Error parsing ingredients:', error);
         setIngredients([]);
       }
-    } else {
-      // No bank data - no ingredients
-      setIngredients([]);
     }
   }, []);
 

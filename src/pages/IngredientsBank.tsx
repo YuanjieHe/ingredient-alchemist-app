@@ -254,8 +254,17 @@ const IngredientsBank = () => {
   };
 
   const handleCookWithSelected = () => {
+    if (selectedIngredients.length === 0) {
+      toast.error(t('pleaseSelectIngredients'));
+      return;
+    }
+    
+    // Store selected ingredients in localStorage for the recipe generator
+    const ingredientNames = selectedIngredients.map(ing => ing.name);
+    localStorage.setItem('selectedIngredientsForCooking', JSON.stringify(ingredientNames));
+    
     toast.success(t('navigatingToRecipeGenerator'));
-    navigate('/');
+    navigate('/recipes');
   };
 
   const startEditing = (ingredient: IngredientWithQuantity) => {
