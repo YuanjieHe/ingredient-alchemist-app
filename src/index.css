@@ -6,39 +6,39 @@
 
 @layer base {
   :root {
-    /* Cheese yellow theme */
-    --background: 48 15% 98%;
-    --foreground: 45 20% 15%;
+    /* Warm deep cheese yellow theme */
+    --background: 42 18% 96%;
+    --foreground: 38 25% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 45 20% 15%;
+    --card-foreground: 38 25% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 45 20% 15%;
-    --primary: 48 95% 65%;
-    --primary-foreground: 45 20% 15%;
-    --secondary: 50 40% 92%;
-    --secondary-foreground: 45 20% 15%;
-    --muted: 50 30% 95%;
-    --muted-foreground: 45 15% 50%;
-    --accent: 52 85% 88%;
-    --accent-foreground: 45 20% 15%;
+    --popover-foreground: 38 25% 12%;
+    --primary: 42 98% 55%;
+    --primary-foreground: 38 25% 12%;
+    --secondary: 44 45% 88%;
+    --secondary-foreground: 38 25% 12%;
+    --muted: 44 35% 92%;
+    --muted-foreground: 38 20% 45%;
+    --accent: 46 90% 82%;
+    --accent-foreground: 38 25% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 50 25% 88%;
-    --input: 50 25% 88%;
-    --ring: 48 95% 65%;
+    --border: 44 30% 85%;
+    --input: 44 30% 85%;
+    --ring: 42 98% 55%;
     --radius: 1rem;
     
     /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(48, 95%, 65%), hsl(50, 85%, 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(50, 40%, 92%), hsl(52, 30%, 95%));
-    --gradient-accent: linear-gradient(135deg, hsl(52, 85%, 88%), hsl(48, 75%, 90%));
-    --shadow-soft: 0 4px 20px -8px hsl(48, 95%, 65%, 0.15);
-    --shadow-medium: 0 8px 30px -12px hsl(48, 95%, 65%, 0.2);
-    --shadow-large: 0 20px 60px -20px hsl(48, 95%, 65%, 0.25);
+    --gradient-primary: linear-gradient(135deg, hsl(42, 98%, 55%), hsl(44, 90%, 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(44, 45%, 88%), hsl(46, 35%, 92%));
+    --gradient-accent: linear-gradient(135deg, hsl(46, 90%, 82%), hsl(42, 80%, 85%));
+    --shadow-soft: 0 4px 20px -8px hsl(42, 98%, 55%, 0.15);
+    --shadow-medium: 0 8px 30px -12px hsl(42, 98%, 55%, 0.2);
+    --shadow-large: 0 20px 60px -20px hsl(42, 98%, 55%, 0.25);
     
     /* Food card specific colors */
-    --food-card-bg: hsl(50, 40%, 95%);
-    --food-card-shadow: 0 6px 25px -10px hsl(48, 95%, 65%, 0.18);
+    --food-card-bg: hsl(44, 45%, 92%);
+    --food-card-shadow: 0 6px 25px -10px hsl(42, 98%, 55%, 0.18);
     --discount-bg: linear-gradient(135deg, hsl(30, 100%, 85%), hsl(40, 90%, 88%));
     
     --sidebar-background: 0 0% 98%;
