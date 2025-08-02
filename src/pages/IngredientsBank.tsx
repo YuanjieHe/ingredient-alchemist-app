@@ -328,7 +328,7 @@ const IngredientsBank = () => {
           <Separator />
           <Card className="shadow-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/10">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex flex-col space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
@@ -342,7 +342,7 @@ const IngredientsBank = () => {
                   </Badge>
                 </div>
                 {bankIngredients.length > 0 && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={selectAllIngredients} className="text-xs">
                       <Package className="w-3 h-3 mr-1" />
                       {t('selectAll')}
