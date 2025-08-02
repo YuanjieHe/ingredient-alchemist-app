@@ -149,4 +149,12 @@
   .location-indicator {
     @apply flex items-center space-x-2 text-muted-foreground;
   }
+  
+  /* Text truncation */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }

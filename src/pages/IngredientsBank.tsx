@@ -355,7 +355,7 @@ const IngredientsBank = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                 {bankIngredients.map((ingredient, index) => (
                   <div
                     key={index}
@@ -365,57 +365,91 @@ const IngredientsBank = () => {
                         : ''
                     }`}
                   >
-                    <div className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                      selectedIngredients.some(item => item.name === ingredient.name)
-                        ? 'bg-gradient-to-br from-primary to-secondary text-white border-primary shadow-lg shadow-primary/25'
-                        : 'bg-card hover:bg-gradient-to-br hover:from-cooking-warm hover:to-cooking-spice border-border hover:border-primary/50'
-                    }`}>
-                      {/* Ingredient Header */}
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => toggleIngredientSelection(ingredient)}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-2xl">
-                            {getIngredientEmoji(ingredient.name)}
-                          </div>
-                          {selectedIngredients.some(item => item.name === ingredient.name) && (
-                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs font-bold">✓</span>
-                            </div>
-                          )}
+                    <div 
+                      className={`aspect-square p-3 rounded-2xl border-2 transition-all duration-200 cursor-pointer ${
+                        selectedIngredients.some(item => item.name === ingredient.name)
+                          ? 'bg-gradient-to-br from-primary to-secondary text-white border-primary shadow-lg shadow-primary/25'
+                          : 'bg-card hover:bg-primary/5 border-border hover:border-primary/50 hover:shadow-md'
+                      }`}
+                      onClick={() => toggleIngredientSelection(ingredient)}
+                    >
+                      {/* Selection indicator */}
+                      {selectedIngredients.some(item => item.name === ingredient.name) && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                          <span className="text-white text-xs font-bold">✓</span>
                         </div>
-                        <div className="text-sm font-semibold break-words leading-tight mb-2">
-                          {ingredient.name}
+                      )}
+                      
+                      {/* Emoji - Large and centered */}
+                      <div className="flex justify-center items-center mb-2">
+                        <div className="text-3xl">
+                          {getIngredientEmoji(ingredient.name)}
                         </div>
                       </div>
-
-                      {/* Quantity Controls */}
-                      {editingIngredient === ingredient.name ? (
-                        <div className="space-y-2">
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              value={editQuantity}
-                              onChange={(e) => setEditQuantity(e.target.value)}
-                              className="h-8 text-xs"
-                              min="0.1"
-                              step="0.1"
-                            />
-                            <Input
-                              value={editUnit}
-                              onChange={(e) => setEditUnit(e.target.value)}
-                              className="h-8 text-xs"
-                              placeholder={t('unit')}
-                            />
-                          </div>
-                          <div className="flex gap-1">
+                      
+                      {/* Ingredient name - Small and centered */}
+                      <div className="text-xs font-medium text-center break-words leading-tight mb-2 line-clamp-2">
+                        {ingredient.name}
+                      </div>
+                      
+                      {/* Quantity - Small and bottom */}
+                      <div className="text-xs font-bold text-center">
+                        {ingredient.quantity}{ingredient.unit !== 'pieces' ? ingredient.unit : '个'}
+                      </div>
+                      
+                      {/* Edit/Remove controls on hover */}
+                      <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditing(ingredient);
+                          }}
+                          className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-black"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFromBank(ingredient.name);
+                          }}
+                          className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-red-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Edit form overlay */}
+                    {editingIngredient === ingredient.name && (
+                      <div className="absolute inset-0 bg-white rounded-2xl border-2 border-primary p-2 z-20 shadow-lg">
+                        <div className="space-y-2 h-full flex flex-col">
+                          <Input
+                            type="number"
+                            value={editQuantity}
+                            onChange={(e) => setEditQuantity(e.target.value)}
+                            className="h-8 text-xs"
+                            min="0.1"
+                            step="0.1"
+                            placeholder="数量"
+                          />
+                          <Input
+                            value={editUnit}
+                            onChange={(e) => setEditUnit(e.target.value)}
+                            className="h-8 text-xs"
+                            placeholder="单位"
+                          />
+                          <div className="flex gap-1 flex-1 items-end">
                             <Button
                               size="sm"
                               onClick={() => updateIngredientDetails(ingredient.name, parseFloat(editQuantity), editUnit)}
                               className="flex-1 h-6 text-xs"
                             >
-                              {t('save')}
+                              ✓
                             </Button>
                             <Button
                               variant="outline"
@@ -423,58 +457,12 @@ const IngredientsBank = () => {
                               onClick={() => setEditingIngredient(null)}
                               className="flex-1 h-6 text-xs"
                             >
-                              {t('cancel')}
+                              ✗
                             </Button>
                           </div>
                         </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold">
-                              {ingredient.quantity} {ingredient.unit}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => startEditing(ingredient)}
-                              className="h-6 w-6 p-0 hover:bg-white/20"
-                            >
-                              <Edit3 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantity(ingredient.name, ingredient.quantity - 0.5)}
-                              className="flex-1 h-6 text-xs"
-                              disabled={ingredient.quantity <= 0.5}
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantity(ingredient.name, ingredient.quantity + 0.5)}
-                              className="flex-1 h-6 text-xs"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Remove Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFromBank(ingredient.name);
-                      }}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-xs shadow-lg"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
