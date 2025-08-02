@@ -127,8 +127,10 @@ serve(async (req) => {
             }]
           }],
           generationConfig: {
-            temperature: 0.8,
+            temperature: 1.0, // 增加随机性
             maxOutputTokens: 8000,
+            topP: 0.95,  // 增加创造性
+            topK: 40     // 控制随机性范围
           }
         }),
       });
@@ -515,7 +517,19 @@ function createEnhancedPrompt(params: any) {
     });
   }
 
+  // 添加随机元素和时间戳确保每次生成不同结果
+  const randomSeed = Math.floor(Math.random() * 1000000);
+  const timestamp = Date.now();
+  
   return `${isEnglish ? '🚨 CRITICAL: RESPOND EXCLUSIVELY IN ENGLISH LANGUAGE - NO OTHER LANGUAGES ALLOWED' : '只用中文回复'}: ${isEnglish ? 'Create a COMPLETE TABLE SETTING' : '关键要求：创建完整的餐桌搭配'} with ${dishCount} ${isEnglish ? 'different dishes' : '不同菜品'} for ${peopleCount} ${isEnglish ? 'people eating' : '人用餐'} ${mealType}.
+
+🎲 ${isEnglish ? 'CREATIVITY & RANDOMNESS REQUIREMENTS' : '创意和随机性要求'} (${isEnglish ? 'Random Seed' : '随机种子'}: ${randomSeed}, ${isEnglish ? 'Generation Time' : '生成时间'}: ${timestamp}):
+- ${isEnglish ? 'NEVER repeat exact combinations from previous generations' : '绝不重复之前生成的确切组合'}
+- ${isEnglish ? 'Be HIGHLY CREATIVE and explore unexpected flavor combinations' : '极其富有创意，探索意想不到的风味组合'}
+- ${isEnglish ? 'Use DIFFERENT cooking techniques each time (stir-fry, braise, steam, roast, etc.)' : '每次使用不同的烹饪技法（炒、焖、蒸、烤等）'}
+- ${isEnglish ? 'Vary the cultural fusion and regional influences' : '变化文化融合和地域影响'}
+- ${isEnglish ? 'Create UNIQUE dish names and innovative presentations' : '创造独特的菜名和创新的摆盘'}
+- ${isEnglish ? 'Experiment with different seasoning profiles and spice combinations' : '尝试不同的调味特征和香料组合'}
 
 ${isEnglish ? 'As a master' : '作为一位'} ${cuisineType} ${isEnglish ? 'chef, create 1 RICH MEAL COMBINATION (NOT individual recipes)' : '料理大师，创造1个丰富的套餐组合（不是单独的食谱）'} with ${dishCount} ${isEnglish ? 'complementary dishes using these ingredients' : '道互补菜品，使用这些食材'}: ${ingredients.join(', ')}.
 
@@ -682,8 +696,11 @@ async function generateWith302AI(systemPrompt: string, prompt: string): Promise<
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.8,
+      temperature: 1.0, // 增加随机性
       max_tokens: 8000,
+      top_p: 0.95,
+      frequency_penalty: 0.8, // 减少重复内容
+      presence_penalty: 0.6,  // 鼓励新颖性
       stream: false
     }),
   });
@@ -730,10 +747,17 @@ Dish Information:
 - Skill Level: ${skillLevel}
 - Serving Size: ${peopleCount} people
 
+🎲 CREATIVITY REQUIREMENTS (Random Seed: ${Math.floor(Math.random() * 1000000)}):
+- Use UNIQUE and CREATIVE cooking techniques different from standard approaches
+- Experiment with INNOVATIVE ingredient combinations and preparations  
+- Create ORIGINAL and unexpected flavor profiles
+- Vary cooking temperatures, timing, and methods for uniqueness
+
 Requirements for detailed recipe generation:
 1. Each step must be extremely detailed, including precise timing, temperature, and techniques
 2. Provide professional cooking tips and critical control points
 3. Include nutrition information and complete ingredient list
+4. NEVER repeat exact same preparation methods - be creative and innovative
 
 Please respond in the following JSON format:
 {
@@ -766,6 +790,12 @@ Please respond in the following JSON format:
   }
 }`
     : `为菜品"${dishName}"生成极其详细的烹饪步骤。
+
+🎲 创意要求（随机种子：${Math.floor(Math.random() * 1000000)}）：
+- 使用独特且富有创意的烹饪技法，不同于标准做法
+- 尝试创新的食材组合和处理方式
+- 创造原创且意想不到的风味特征
+- 变化烹饪温度、时间和方法以确保独特性
 
 菜品信息：
 - 菜名：${dishName}
@@ -825,8 +855,10 @@ Please respond in the following JSON format:
           }]
         }],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 1.0, // 增加随机性
           maxOutputTokens: 4000,
+          topP: 0.95,
+          topK: 40
         }
       }),
     });
