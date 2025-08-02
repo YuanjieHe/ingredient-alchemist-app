@@ -265,15 +265,15 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                       }}
                     >
                       <CardHeader className="bg-gradient-warm pb-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1 min-w-0 pr-2">
-                            <div className="flex items-start space-x-2 mb-2">
-                              <span className="text-2xl flex-shrink-0">{getDishIcon(dish.type)}</span>
-                              <CardTitle className="text-lg line-clamp-2 flex-1 min-w-0">{dish.name}</CardTitle>
-                            </div>
-                            <p className="text-muted-foreground text-sm line-clamp-2">{dish.description}</p>
+                        {/* Top section with icon and action buttons */}
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-2xl">{getDishIcon(dish.type)}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {getDishTypeText(dish.type)}
+                            </Badge>
                           </div>
-                          <div className="flex space-x-1 ml-2">
+                          <div className="flex space-x-1">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -371,10 +371,18 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          <Badge variant="outline" className="text-xs">
-                            {getDishTypeText(dish.type)}
-                          </Badge>
+                        {/* Title section */}
+                        <div className="mb-3">
+                          <CardTitle className="text-lg leading-tight line-clamp-3 mb-2">
+                            {dish.name}
+                          </CardTitle>
+                          <p className="text-muted-foreground text-sm line-clamp-2">
+                            {dish.description}
+                          </p>
+                        </div>
+
+                        {/* Badges section */}
+                        <div className="flex flex-wrap gap-2">
                           <Badge className={getDifficultyColor(recipe.difficulty) + " text-xs"}>
                             <ChefHat className="w-3 h-3 mr-1" />
                             {recipe.difficulty === 'beginner' ? t('beginner') : recipe.difficulty === 'intermediate' ? t('intermediate') : t('advanced')}
