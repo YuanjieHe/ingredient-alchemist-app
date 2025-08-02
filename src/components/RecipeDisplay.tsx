@@ -266,12 +266,12 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                     >
                       <CardHeader className="bg-gradient-warm pb-4">
                         <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <span className="text-2xl">{getDishIcon(dish.type)}</span>
-                              <CardTitle className="text-lg line-clamp-2">{dish.name}</CardTitle>
+                          <div className="flex-1 min-w-0 pr-2">
+                            <div className="flex items-start space-x-2 mb-2">
+                              <span className="text-2xl flex-shrink-0">{getDishIcon(dish.type)}</span>
+                              <CardTitle className="text-lg line-clamp-2 flex-1 min-w-0">{dish.name}</CardTitle>
                             </div>
-                            <p className="text-muted-foreground text-sm">{dish.description}</p>
+                            <p className="text-muted-foreground text-sm line-clamp-2">{dish.description}</p>
                           </div>
                           <div className="flex space-x-1 ml-2">
                             <Button
