@@ -911,7 +911,7 @@ Please respond in the following JSON format:
           "符合均衡饮食的营养要求"
         ]
       }
-      }
     };
   }
+}
 }
