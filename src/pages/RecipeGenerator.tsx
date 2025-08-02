@@ -310,7 +310,7 @@ const RecipeGenerator = () => {
               ))}
             </div>
 
-            <div className="flex justify-center space-x-6">
+            <div className="flex flex-col items-center space-y-4">
               <Button 
                 variant="outline" 
                 onClick={() => setStep('preferences')}
