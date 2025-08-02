@@ -269,7 +269,7 @@ export const RecipeDisplay = ({ recipes, onSaveRecipe, onShareRecipe }: RecipeDi
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className="text-2xl">{getDishIcon(dish.type)}</span>
-                              <CardTitle className="text-lg">{dish.name}</CardTitle>
+                              <CardTitle className="text-lg line-clamp-2">{dish.name}</CardTitle>
                             </div>
                             <p className="text-muted-foreground text-sm">{dish.description}</p>
                           </div>
