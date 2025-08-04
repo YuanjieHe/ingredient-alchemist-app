@@ -10,6 +10,7 @@ import RecipeGenerator from "./pages/RecipeGenerator";
 import Profile from "./pages/Profile";
 import IngredientsBank from "./pages/IngredientsBank";
 import Subscription from "./pages/Subscription";
+import DataBackup from "./pages/DataBackup";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -63,6 +64,14 @@ const App = () => (
                 element={
                   <div className="pb-20">
                     <Subscription />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/backup" 
+                element={
+                  <div className="pb-20">
+                    <DataBackup />
                   </div>
                 } 
               />
