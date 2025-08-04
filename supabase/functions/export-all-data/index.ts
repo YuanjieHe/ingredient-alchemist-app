@@ -71,9 +71,27 @@ serve(async (req) => {
 
     // 导出Auth用户数据（重要：包含邮箱等认证信息）
     console.log('导出认证用户数据...');
-    const authUsersResult = await supabaseAdmin
-      .from('auth.users')
-      .select('id, email, phone, created_at, updated_at, email_confirmed_at, phone_confirmed_at, raw_user_meta_data, app_metadata');
+    let authUsersResult = { data: [], error: null };
+    
+    try {
+      // 使用rpc调用来获取auth用户数据，因为直接查询auth schema需要特殊权限
+      const { data, error } = await supabaseAdmin.rpc('get_auth_users');
+      
+      if (error) {
+        console.log('RPC调用失败，尝试直接查询auth.users...');
+        // 备选方案：直接查询auth.users（需要service role权限）
+        const directResult = await supabaseAdmin
+          .schema('auth')
+          .from('users')
+          .select('id, email, phone, created_at, updated_at, email_confirmed_at, phone_confirmed_at, raw_user_meta_data, app_metadata');
+        authUsersResult = directResult;
+      } else {
+        authUsersResult = { data, error: null };
+      }
+    } catch (err) {
+      console.log('获取认证用户数据失败，将跳过此部分:', err);
+      authUsersResult = { data: [], error: null };
+    }
 
     // 导出存储桶信息
     console.log('导出存储配置...');
