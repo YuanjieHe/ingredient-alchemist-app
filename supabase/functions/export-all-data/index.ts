@@ -74,22 +74,21 @@ serve(async (req) => {
     let authUsersResult = { data: [], error: null };
     
     try {
-      // 使用rpc调用来获取auth用户数据，因为直接查询auth schema需要特殊权限
-      const { data, error } = await supabaseAdmin.rpc('get_auth_users');
+      // 直接查询auth.users表（使用schema指定）
+      const { data, error } = await supabaseAdmin
+        .schema('auth')
+        .from('users')
+        .select('id, email, phone, created_at, updated_at, email_confirmed_at, phone_confirmed_at, raw_user_meta_data, app_metadata');
       
       if (error) {
-        console.log('RPC调用失败，尝试直接查询auth.users...');
-        // 备选方案：直接查询auth.users（需要service role权限）
-        const directResult = await supabaseAdmin
-          .schema('auth')
-          .from('users')
-          .select('id, email, phone, created_at, updated_at, email_confirmed_at, phone_confirmed_at, raw_user_meta_data, app_metadata');
-        authUsersResult = directResult;
+        console.log('认证用户数据查询失败:', error);
+        authUsersResult = { data: [], error };
       } else {
         authUsersResult = { data, error: null };
+        console.log(`auth_users: ${data?.length || 0} 条记录`);
       }
     } catch (err) {
-      console.log('获取认证用户数据失败，将跳过此部分:', err);
+      console.log('获取认证用户数据异常:', err);
       authUsersResult = { data: [], error: null };
     }
 
@@ -100,8 +99,10 @@ serve(async (req) => {
     
     try {
       storageBucketsResult = await supabaseAdmin
-        .from('storage.buckets')
+        .schema('storage')
+        .from('buckets')
         .select('*');
+      console.log(`storage_buckets: ${storageBucketsResult.data?.length || 0} 条记录`);
     } catch (err) {
       console.log('存储桶查询失败（可能没有存储桶）:', err);
       storageBucketsResult = { data: [], error: null };
@@ -109,15 +110,17 @@ serve(async (req) => {
 
     try {
       storageObjectsResult = await supabaseAdmin
-        .from('storage.objects')
+        .schema('storage')
+        .from('objects')
         .select('*');
+      console.log(`storage_objects: ${storageObjectsResult.data?.length || 0} 条记录`);
     } catch (err) {
       console.log('存储对象查询失败（可能没有存储对象）:', err);
       storageObjectsResult = { data: [], error: null };
     }
 
-    // 检查错误
-    const results = [
+    // 检查业务数据错误（认证和存储数据错误不阻止导出）
+    const businessResults = [
       { name: 'profiles', result: profilesResult },
       { name: 'user_subscriptions', result: subscriptionsResult },
       { name: 'ingredients_bank', result: ingredientsResult },
@@ -127,13 +130,10 @@ serve(async (req) => {
       { name: 'cooking_techniques', result: techniquesResult },
       { name: 'zpay_orders', result: ordersResult },
       { name: 'dish_ingredients', result: dishIngredientsResult },
-      { name: 'dish_techniques', result: dishTechniquesResult },
-      { name: 'auth_users', result: authUsersResult },
-      { name: 'storage_buckets', result: storageBucketsResult },
-      { name: 'storage_objects', result: storageObjectsResult }
+      { name: 'dish_techniques', result: dishTechniquesResult }
     ];
 
-    for (const { name, result } of results) {
+    for (const { name, result } of businessResults) {
       if (result.error) {
         console.error(`导出${name}表时出错:`, result.error);
         return new Response(
@@ -147,8 +147,9 @@ serve(async (req) => {
       console.log(`${name}: ${result.data?.length || 0} 条记录`);
     }
 
-    // 统计数据
+    // 统计数据（包含认证和存储数据）
     const stats = {
+      // 业务数据表
       profiles: profilesResult.data?.length || 0,
       user_subscriptions: subscriptionsResult.data?.length || 0,
       ingredients_bank: ingredientsResult.data?.length || 0,
@@ -159,6 +160,7 @@ serve(async (req) => {
       zpay_orders: ordersResult.data?.length || 0,
       dish_ingredients: dishIngredientsResult.data?.length || 0,
       dish_techniques: dishTechniquesResult.data?.length || 0,
+      // 系统数据
       auth_users: authUsersResult.data?.length || 0,
       storage_buckets: storageBucketsResult.data?.length || 0,
       storage_objects: storageObjectsResult.data?.length || 0
