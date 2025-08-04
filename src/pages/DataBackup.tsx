@@ -5,14 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Database, CheckCircle, AlertCircle, User, UserX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { downloadBackupFile, createBackupData } from '@/utils/dataExport';
+import { downloadBackupFile, createBackupData, exportAllDataAdmin } from '@/utils/dataExport';
 import { toast } from 'sonner';
 
 export default function DataBackup() {
   const [isExporting, setIsExporting] = useState(false);
+  const [isAdminExporting, setIsAdminExporting] = useState(false);
   const [exportStats, setExportStats] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [adminApiKey, setAdminApiKey] = useState('');
 
   useEffect(() => {
     checkAuth();
@@ -120,6 +122,41 @@ export default function DataBackup() {
     }
   };
 
+  const exportAllDataAsAdmin = async () => {
+    setIsAdminExporting(true);
+    try {
+      console.log('开始管理员级别数据导出...');
+      
+      const backupData = await exportAllDataAdmin(adminApiKey || undefined);
+      
+      // 设置统计信息
+      setExportStats(backupData.stats || {
+        profiles: backupData.profiles?.length || 0,
+        user_subscriptions: backupData.user_subscriptions?.length || 0,
+        ingredients_bank: backupData.ingredients_bank?.length || 0,
+        favorite_recipes: backupData.favorite_recipes?.length || 0,
+        recipes_history: backupData.recipes_history?.length || 0,
+        dishes_knowledge_base: backupData.dishes_knowledge_base?.length || 0,
+        cooking_techniques: backupData.cooking_techniques?.length || 0,
+        zpay_orders: backupData.zpay_orders?.length || 0,
+        dish_ingredients: backupData.dish_ingredients?.length || 0,
+        dish_techniques: backupData.dish_techniques?.length || 0
+      });
+
+      // 下载备份文件
+      downloadBackupFile(backupData);
+
+      toast.success('管理员数据备份导出成功！包含所有用户数据。');
+      console.log('管理员导出完成');
+
+    } catch (error) {
+      console.error('管理员导出失败:', error);
+      toast.error(`管理员导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setIsAdminExporting(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -208,6 +245,61 @@ export default function DataBackup() {
           </CardContent>
         </Card>
 
+        {/* 管理员导出功能 */}
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-orange-600">
+              <Database className="w-5 h-5" />
+              <span>管理员级别导出 - 所有用户数据</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-orange-200">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertDescription>
+                <strong>管理员功能:</strong> 此功能将导出数据库中所有用户的完整数据，
+                包括所有用户的个人信息、食材库、收藏菜谱等。适用于数据库迁移场景。
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                管理员API密钥 (可选)
+              </label>
+              <input
+                type="password"
+                value={adminApiKey}
+                onChange={(e) => setAdminApiKey(e.target.value)}
+                placeholder="如果设置了API密钥验证，请输入"
+                className="w-full px-3 py-2 border border-border rounded-md text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                如果您在Supabase边缘函数中配置了ADMIN_EXPORT_API_KEY，请在此输入
+              </p>
+            </div>
+
+            <Button 
+              onClick={exportAllDataAsAdmin} 
+              disabled={isAdminExporting}
+              size="lg"
+              className="w-full bg-orange-600 hover:bg-orange-700"
+              variant="default"
+            >
+              {isAdminExporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-background border-t-transparent mr-2" />
+                  正在导出所有用户数据...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  导出所有用户数据 (管理员)
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
         {exportStats && (
           <Card>
             <CardHeader>
@@ -219,27 +311,27 @@ export default function DataBackup() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.profiles}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.profiles || exportStats.user_subscriptions || 0}</div>
                   <div className="text-sm text-muted-foreground">用户档案</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.subscriptions}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.subscriptions || exportStats.user_subscriptions || 0}</div>
                   <div className="text-sm text-muted-foreground">订阅记录</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.ingredients}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.ingredients || exportStats.ingredients_bank || 0}</div>
                   <div className="text-sm text-muted-foreground">食材记录</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.favorites}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.favorites || exportStats.favorite_recipes || 0}</div>
                   <div className="text-sm text-muted-foreground">收藏菜谱</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.dishes}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.dishes || exportStats.dishes_knowledge_base || 0}</div>
                   <div className="text-sm text-muted-foreground">知识库菜品</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.orders}</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.orders || exportStats.zpay_orders || 0}</div>
                   <div className="text-sm text-muted-foreground">支付订单</div>
                 </div>
               </div>

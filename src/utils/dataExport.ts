@@ -1,4 +1,6 @@
 // 数据导出工具
+import { supabase } from '@/integrations/supabase/client';
+
 export interface BackupData {
   profiles: any[];
   user_subscriptions: any[];
@@ -12,6 +14,8 @@ export interface BackupData {
   dish_techniques: any[];
   exportDate: string;
   version: string;
+  exportType?: string;
+  stats?: any;
 }
 
 export function downloadBackupFile(data: BackupData) {
@@ -54,4 +58,34 @@ export function createBackupData(
     exportDate: new Date().toISOString(),
     version: '1.0.0'
   };
+}
+
+// 管理员级别的完整数据导出
+export async function exportAllDataAdmin(apiKey?: string): Promise<BackupData> {
+  console.log('调用管理员数据导出边缘函数...');
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  
+  // 如果提供了API密钥，添加到请求头
+  if (apiKey) {
+    headers['x-api-key'] = apiKey;
+  }
+
+  const { data, error } = await supabase.functions.invoke('export-all-data', {
+    headers
+  });
+
+  if (error) {
+    console.error('边缘函数调用失败:', error);
+    throw new Error(`管理员导出失败: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('边缘函数返回空数据');
+  }
+
+  console.log('管理员导出成功，统计信息:', data.stats);
+  return data;
 }
