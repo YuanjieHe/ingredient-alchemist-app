@@ -30,7 +30,7 @@ serve(async (req) => {
       apiVersion: "2023-10-16" 
     });
 
-    // 查找现有客户
+    // 查找或创建客户
     const customers = await stripe.customers.list({ 
       email: user.email, 
       limit: 1 
@@ -39,6 +39,17 @@ serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      console.log(`Found existing customer: ${customerId}`);
+    } else {
+      // 创建新客户
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          user_id: user.id
+        }
+      });
+      customerId = customer.id;
+      console.log(`Created new customer: ${customerId}`);
     }
 
     // 定义价格配置

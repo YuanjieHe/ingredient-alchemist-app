@@ -100,6 +100,32 @@ const Subscription = () => {
           
           window.open(data.url, '_blank');
           toast.info('Please complete payment in the new tab');
+          
+          // 自动检查支付状态（每5秒检查一次）
+          const checkPayment = setInterval(async () => {
+            try {
+              const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-stripe-payment', {
+                headers: {
+                  Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                },
+              });
+              
+              if (!verifyError && verifyData?.hasActivePremium) {
+                clearInterval(checkPayment);
+                await refreshSubscription();
+                toast.success('Payment successful! Premium features activated!');
+                setIsLoading(false);
+              }
+            } catch (error) {
+              console.log('Checking payment status...');
+            }
+          }, 5000);
+          
+          // 30秒后停止检查
+          setTimeout(() => {
+            clearInterval(checkPayment);
+            setIsLoading(false);
+          }, 30000);
         }
       }
     } catch (error: any) {
