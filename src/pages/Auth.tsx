@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,18 +10,30 @@ import { toast } from 'sonner';
 import { ChefHat, ArrowRight, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { supabase } from '@/integrations/supabase/client';
 
 
 const Auth = () => {
   const { t } = useLanguage();
   const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+
+  // 检查是否是密码重置页面
+  useEffect(() => {
+    const isReset = searchParams.get('reset');
+    if (isReset) {
+      toast.info('请输入新密码完成重置');
+    }
+  }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +111,28 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('密码重置链接已发送到您的邮箱');
+        setShowForgotPassword(false);
+      }
+    } catch (error) {
+      toast.error('发送重置链接失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSkip = () => {
     navigate('/');
   };
@@ -161,6 +195,17 @@ const Auth = () => {
                     {loading ? t('signingIn') : t('signIn')}
                   </Button>
                 </form>
+                
+                <div className="text-center mt-4">
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm"
+                  >
+                    忘记密码？
+                  </Button>
+                </div>
               </TabsContent>
 
               
@@ -268,6 +313,46 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* 忘记密码弹出框 */}
+        {showForgotPassword && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>忘记密码</CardTitle>
+              <CardDescription>
+                输入您的邮箱地址，我们将发送密码重置链接
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">邮箱地址</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="输入您的邮箱"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" disabled={loading} className="flex-1">
+                    {loading ? '发送中...' : '发送重置链接'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowForgotPassword(false)}
+                    className="flex-1"
+                  >
+                    取消
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
