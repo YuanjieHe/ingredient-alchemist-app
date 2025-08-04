@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Download, Database, CheckCircle, AlertCircle } from 'lucide-react';
+import { Download, Database, CheckCircle, AlertCircle, User, UserX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadBackupFile, createBackupData } from '@/utils/dataExport';
 import { toast } from 'sonner';
@@ -11,11 +11,25 @@ import { toast } from 'sonner';
 export default function DataBackup() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportStats, setExportStats] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+    setAuthChecked(true);
+    console.log('用户认证状态:', user ? '已登录' : '未登录', user?.email);
+  };
 
   const exportAllData = async () => {
     setIsExporting(true);
     try {
       console.log('开始导出数据...');
+      console.log('当前用户:', user?.email || '未登录');
 
       // 获取所有表的数据
       const [
@@ -116,13 +130,32 @@ export default function DataBackup() {
           </p>
         </div>
 
-        <Alert>
-          <Database className="h-4 w-4" />
-          <AlertDescription>
-            此操作将导出您的所有应用数据，包括用户档案、食材库、收藏菜谱、订阅信息等。
-            导出的文件将以JSON格式保存，可用于数据迁移或恢复。
-          </AlertDescription>
-        </Alert>
+        {!authChecked ? (
+          <Alert>
+            <Database className="h-4 w-4" />
+            <AlertDescription>
+              正在检查用户认证状态...
+            </AlertDescription>
+          </Alert>
+        ) : user ? (
+          <Alert>
+            <User className="h-4 w-4" />
+            <AlertDescription>
+              <strong>已登录用户:</strong> {user.email}<br />
+              此操作将导出您的所有个人数据，包括用户档案、食材库、收藏菜谱、订阅信息等。
+              导出的文件将以JSON格式保存，可用于数据迁移或恢复。
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert variant="destructive">
+            <UserX className="h-4 w-4" />
+            <AlertDescription>
+              <strong>未登录状态</strong><br />
+              您当前未登录，只能导出公开的知识库数据（菜品库、烹饪技法等）。
+              如需导出个人数据（食材库、收藏菜谱等），请先登录您的账户。
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
@@ -151,11 +184,16 @@ export default function DataBackup() {
 
             <Button 
               onClick={exportAllData} 
-              disabled={isExporting}
+              disabled={isExporting || !authChecked}
               size="lg"
               className="w-full"
             >
-              {isExporting ? (
+              {!authChecked ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-background border-t-transparent mr-2" />
+                  检查认证状态...
+                </>
+              ) : isExporting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-background border-t-transparent mr-2" />
                   正在导出数据...
@@ -163,7 +201,7 @@ export default function DataBackup() {
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  开始导出所有数据
+                  {user ? '开始导出所有数据' : '导出知识库数据'}
                 </>
               )}
             </Button>
