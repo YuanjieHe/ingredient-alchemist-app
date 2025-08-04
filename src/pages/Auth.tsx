@@ -11,6 +11,7 @@ import { ChefHat, ArrowRight, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { supabase } from '@/integrations/supabase/client';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 
 const Auth = () => {
@@ -29,9 +30,13 @@ const Auth = () => {
 
   // 检查是否是密码重置页面
   useEffect(() => {
-    const isReset = searchParams.get('reset');
-    if (isReset) {
-      toast.info('请输入新密码完成重置');
+    try {
+      const isReset = searchParams.get('reset');
+      if (isReset) {
+        toast.info('请输入新密码完成重置');
+      }
+    } catch (error) {
+      console.error('Error reading search params:', error);
     }
   }, [searchParams]);
 
@@ -116,17 +121,22 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      console.log('Attempting to send password reset for:', resetEmail);
       const { data, error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       
       if (error) {
+        console.error('Password reset error:', error);
         toast.error(error.message);
       } else {
+        console.log('Password reset email sent successfully');
         toast.success('密码重置链接已发送到您的邮箱');
         setShowForgotPassword(false);
+        setResetEmail('');
       }
     } catch (error) {
+      console.error('Unexpected error during password reset:', error);
       toast.error('发送重置链接失败');
     } finally {
       setLoading(false);
@@ -138,6 +148,7 @@ const Auth = () => {
   };
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
@@ -355,6 +366,7 @@ const Auth = () => {
         )}
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
 
