@@ -304,8 +304,18 @@ const Index = () => {
               <div className="w-2 h-2 bg-primary rounded-full"></div>
               <span className="text-sm font-medium">Location</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold">👤</span>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/auth'}
+                className="bg-white/10 border-white/20 text-foreground hover:bg-white/20"
+              >
+                登录
+              </Button>
+              <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                <span className="text-white font-bold">👤</span>
+              </div>
             </div>
           </div>
 
