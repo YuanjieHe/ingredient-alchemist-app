@@ -309,14 +309,14 @@ export default function DataBackup() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{exportStats.profiles || exportStats.user_subscriptions || 0}</div>
                   <div className="text-sm text-muted-foreground">用户档案</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{exportStats.subscriptions || exportStats.user_subscriptions || 0}</div>
-                  <div className="text-sm text-muted-foreground">订阅记录</div>
+                  <div className="text-2xl font-bold text-primary">{exportStats.auth_users || 0}</div>
+                  <div className="text-sm text-muted-foreground">认证用户</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{exportStats.ingredients || exportStats.ingredients_bank || 0}</div>
@@ -333,6 +333,14 @@ export default function DataBackup() {
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{exportStats.orders || exportStats.zpay_orders || 0}</div>
                   <div className="text-sm text-muted-foreground">支付订单</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{exportStats.storage_buckets || 0}</div>
+                  <div className="text-sm text-muted-foreground">存储桶</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{exportStats.storage_objects || 0}</div>
+                  <div className="text-sm text-muted-foreground">存储文件</div>
                 </div>
               </div>
               

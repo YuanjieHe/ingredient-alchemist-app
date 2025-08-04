@@ -44,7 +44,7 @@ serve(async (req) => {
 
     console.log('开始导出所有数据表...');
 
-    // 导出所有表的数据（使用service role，绕过RLS）
+    // 导出业务数据表（使用service role，绕过RLS）
     const [
       profilesResult,
       subscriptionsResult,
@@ -69,6 +69,22 @@ serve(async (req) => {
       supabaseAdmin.from('dish_techniques').select('*')
     ]);
 
+    // 导出Auth用户数据（重要：包含邮箱等认证信息）
+    console.log('导出认证用户数据...');
+    const authUsersResult = await supabaseAdmin
+      .from('auth.users')
+      .select('id, email, phone, created_at, updated_at, email_confirmed_at, phone_confirmed_at, raw_user_meta_data, app_metadata');
+
+    // 导出存储桶信息
+    console.log('导出存储配置...');
+    const storageBucketsResult = await supabaseAdmin
+      .from('storage.buckets')
+      .select('*');
+
+    const storageObjectsResult = await supabaseAdmin
+      .from('storage.objects')
+      .select('*');
+
     // 检查错误
     const results = [
       { name: 'profiles', result: profilesResult },
@@ -80,7 +96,10 @@ serve(async (req) => {
       { name: 'cooking_techniques', result: techniquesResult },
       { name: 'zpay_orders', result: ordersResult },
       { name: 'dish_ingredients', result: dishIngredientsResult },
-      { name: 'dish_techniques', result: dishTechniquesResult }
+      { name: 'dish_techniques', result: dishTechniquesResult },
+      { name: 'auth_users', result: authUsersResult },
+      { name: 'storage_buckets', result: storageBucketsResult },
+      { name: 'storage_objects', result: storageObjectsResult }
     ];
 
     for (const { name, result } of results) {
@@ -108,11 +127,15 @@ serve(async (req) => {
       cooking_techniques: techniquesResult.data?.length || 0,
       zpay_orders: ordersResult.data?.length || 0,
       dish_ingredients: dishIngredientsResult.data?.length || 0,
-      dish_techniques: dishTechniquesResult.data?.length || 0
+      dish_techniques: dishTechniquesResult.data?.length || 0,
+      auth_users: authUsersResult.data?.length || 0,
+      storage_buckets: storageBucketsResult.data?.length || 0,
+      storage_objects: storageObjectsResult.data?.length || 0
     };
 
     // 创建完整备份数据
     const backupData = {
+      // 业务数据表
       profiles: profilesResult.data || [],
       user_subscriptions: subscriptionsResult.data || [],
       ingredients_bank: ingredientsResult.data || [],
@@ -123,10 +146,33 @@ serve(async (req) => {
       zpay_orders: ordersResult.data || [],
       dish_ingredients: dishIngredientsResult.data || [],
       dish_techniques: dishTechniquesResult.data || [],
+      
+      // 认证和系统数据
+      auth_users: authUsersResult.data || [],
+      storage_buckets: storageBucketsResult.data || [],
+      storage_objects: storageObjectsResult.data || [],
+      
+      // 元数据
       exportDate: new Date().toISOString(),
       version: '1.0.0',
       exportType: 'full_admin_export',
-      stats
+      stats,
+      
+      // 数据库架构信息（用于重建）
+      schema_info: {
+        database_functions: [
+          'handle_new_user()', 
+          'handle_new_user_subscription()', 
+          'update_updated_at_column()'
+        ],
+        rls_enabled_tables: [
+          'profiles', 'user_subscriptions', 'ingredients_bank', 
+          'favorite_recipes', 'recipes_history', 'cooking_techniques',
+          'dishes_knowledge_base', 'dish_ingredients', 'dish_techniques',
+          'zpay_orders'
+        ],
+        note: '迁移时需要重新创建RLS策略、触发器和数据库函数'
+      }
     };
 
     console.log('=== 导出完成 ===');
