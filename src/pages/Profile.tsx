@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn, Crown, Star, Smartphone } from 'lucide-react';
+import { Heart, Trash2, Clock, Users, ChefHat, Utensils, User, LogOut, LogIn, Crown, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +46,7 @@ interface FavoriteRecipe {
 export default function Profile() {
   const { t, language } = useLanguage();
   const { user, signOut } = useAuth();
-  const { subscription, loading: subscriptionLoading, remainingGenerations } = useSubscription();
+  const { subscription, loading: subscriptionLoading, remainingGenerations, refreshSubscription } = useSubscription();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -243,10 +243,33 @@ export default function Profile() {
     }
   };
 
-  // 恢复购买功能
-  const handleRestorePurchases = async () => {
-    const applePaymentService = ApplePaymentService.getInstance();
-    await applePaymentService.restorePurchases();
+  // 确认支付功能
+  const handleConfirmPayment = async () => {
+    setPaymentLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+
+      const { data, error } = await supabase.functions.invoke('verify-stripe-payment', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.hasActivePremium) {
+        await refreshSubscription();
+        toast.success(t('language') === 'English' ? 'Premium subscription activated!' : '高级订阅已激活！');
+      } else {
+        toast.info(t('language') === 'English' ? 'No premium subscription found. Please complete payment first.' : '未找到高级订阅，请先完成付款。');
+      }
+    } catch (error: any) {
+      console.error('Verify payment error:', error);
+      toast.error(error.message || (t('language') === 'English' ? 'Failed to verify payment' : '验证付款失败'));
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
   // 检查 URL 参数，显示支付结果
@@ -536,16 +559,17 @@ export default function Profile() {
                       </Card>
                     </div>
                     
-                    {/* iOS恢复购买按钮 */}
+                    {/* 确认支付按钮 */}
                     <div className="mt-4 flex justify-center">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={handleRestorePurchases}
+                        onClick={handleConfirmPayment}
+                        disabled={paymentLoading}
                         className="flex items-center gap-2"
                       >
-                        <Smartphone className="w-4 h-4" />
-                        {t('restorePurchases')}
+                        <Crown className="w-4 h-4" />
+                        {language === 'zh' ? '确认支付 (付款后请点击此按钮)' : 'Confirm Payment (Please press this button after purchase)'}
                       </Button>
                     </div>
                     
