@@ -90,13 +90,34 @@ serve(async (req) => {
       const latestPayment = successfulPayments[0];
       const paymentAmount = latestPayment.amount;
       
-      // Determine subscription duration based on amount
+      console.log(`Processing payment amount: $${paymentAmount/100}`);
+      
+      // Determine subscription duration based on amount (matching webhook logic)
       let durationMonths = 1; // Default to 1 month
-      if (paymentAmount >= 12500) { // $125 annual
-        durationMonths = 12;
-      } else if (paymentAmount >= 2000) { // $20 monthly
+      if (paymentAmount === 12500) { // $125 for both 5 years and lifetime
+        // Check payment metadata for plan type if available
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(latestPayment.id);
+          const metadata = paymentIntent.metadata;
+          if (metadata?.plan_type === 'lifetime') {
+            durationMonths = 50 * 12; // 50 years for lifetime
+          } else {
+            durationMonths = 5 * 12; // 5 years default for $125
+          }
+        } catch (error) {
+          console.log('Could not retrieve payment metadata, defaulting to 5 years');
+          durationMonths = 5 * 12; // Default to 5 years for $125
+        }
+      } else if (paymentAmount === 2000) { // $20 quarterly (3 months)
+        durationMonths = 3;
+      } else if (paymentAmount === 800) { // $8 monthly
         durationMonths = 1;
-      } else if (paymentAmount >= 800) { // $8 monthly
+      } else if (paymentAmount === 9800) { // $98 yearly
+        durationMonths = 12;
+      } else if (paymentAmount === 16800) { // $168 lifetime
+        durationMonths = 50 * 12; // 50 years for lifetime
+      } else {
+        // Default to 1 month for unknown amounts
         durationMonths = 1;
       }
       
