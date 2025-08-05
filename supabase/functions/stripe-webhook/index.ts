@@ -17,14 +17,28 @@ const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 serve(async (req) => {
   const signature = req.headers.get("stripe-signature");
   
-  if (!signature || !endpointSecret) {
-    console.error("Missing signature or webhook secret");
-    return new Response("Webhook signature verification failed", { status: 400 });
+  console.log("Webhook received:", {
+    hasSignature: !!signature,
+    hasSecret: !!endpointSecret,
+    method: req.method
+  });
+
+  if (!signature) {
+    console.error("Missing stripe-signature header");
+    return new Response("Missing stripe-signature header", { status: 400 });
+  }
+
+  if (!endpointSecret) {
+    console.error("Missing STRIPE_WEBHOOK_SECRET environment variable");
+    return new Response("Webhook secret not configured", { status: 500 });
   }
 
   try {
     const body = await req.text();
+    console.log("Webhook body length:", body.length);
+    
     const event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
+    console.log("Webhook event constructed successfully:", event.type);
 
     console.log(`Processing webhook event: ${event.type}`);
 
