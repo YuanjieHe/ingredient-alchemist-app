@@ -90,7 +90,7 @@ export class RecipeService {
         mealType: request.mealType,
         occasionType: request.occasionType,
         cuisineType: request.cuisineType,
-        language: request.language || 'zh'
+        language: request.language || 'English'
       }, null, 2));
       
       const response = await fetch(this.apiEndpoint, {
@@ -107,7 +107,7 @@ export class RecipeService {
           mealType: request.mealType,
           occasionType: request.occasionType,
           cuisineType: request.cuisineType,
-          language: request.language || 'zh'
+          language: request.language || 'English'
         })
       });
       
@@ -199,7 +199,7 @@ export class RecipeService {
 
   private createPrompt(request: RecipeRequest): string {
     const { ingredients, skillLevel, allowShopping, peopleCount, mealType, occasionType, cuisineType, language } = request;
-    const isEnglish = language === 'en';
+    const isEnglish = language === 'English';
     
     // 根据用餐人数计算菜的数量：每2-3人一道菜，最少3道菜，最多6道菜
     const dishCount = Math.max(3, Math.min(6, Math.ceil(peopleCount / 2)));

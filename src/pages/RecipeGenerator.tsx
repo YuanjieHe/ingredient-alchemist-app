@@ -138,7 +138,7 @@ const RecipeGenerator = () => {
         occasionType,
         cuisineType,
         apiKey: API_KEY,
-        language: language === 'en' ? 'English' : '中文' // 传递明确的语言名称
+        language: language === 'en' ? 'English' : 'Chinese' // 传递明确的语言名称
       });
 
       setRecipes(generatedRecipes);

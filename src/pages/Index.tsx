@@ -73,7 +73,7 @@ const Index = () => {
         mealType,
         occasionType,
         cuisineType,
-        language,
+        language: language === 'en' ? 'English' : 'Chinese',
         apiKey: API_KEY
       });
 
