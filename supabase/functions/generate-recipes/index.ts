@@ -42,7 +42,7 @@ serve(async (req) => {
       mealType, 
       occasionType, 
       cuisineType,
-      language = '中文',
+      language = 'English',
       // New parameters for single dish mode
       singleDishMode = false,
       dishName,
@@ -424,7 +424,7 @@ async function queryKnowledgeBase(ingredients: string[], cuisineType: string, sk
 }
 
 // Helper function to get cuisine-specific system prompt
-function getSystemPrompt(cuisineType: string, language: string = '中文') {
+function getSystemPrompt(cuisineType: string, language: string = 'English') {
   const isEnglish = language === 'English';
   
   const chefProfiles = {
@@ -483,7 +483,7 @@ function createEnhancedPrompt(params: any) {
     occasionType,
     cuisineType,
     knowledgeBaseInfo,
-    language = '中文'
+    language = 'English'
   } = params;
 
   console.log('Current language in prompt creation:', language);
@@ -730,7 +730,7 @@ async function generateWith302AI(systemPrompt: string, prompt: string): Promise<
 
 // Helper function to generate detailed recipe for a single dish
 async function generateDetailedSingleRecipe(params: any): Promise<any> {
-  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = '中文' } = params;
+  const { dishName, dishDescription, ingredients, skillLevel, peopleCount, language = 'English' } = params;
   const isEnglish = language === 'English';
   
   const systemPrompt = isEnglish 
