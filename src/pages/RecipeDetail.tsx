@@ -82,7 +82,7 @@ const RecipeDetail = () => {
           ingredients: baseRecipe.ingredients?.map((ing: any) => ing.item) || [],
           skillLevel: baseRecipe.difficulty || 'beginner',
           peopleCount: baseRecipe.servings || 4,
-          language: language
+          language: language === 'en' ? 'English' : 'Chinese'
         }
       });
 
