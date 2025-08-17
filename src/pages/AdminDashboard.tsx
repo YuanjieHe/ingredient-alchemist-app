@@ -42,7 +42,7 @@ export default function AdminDashboard() {
 
     // For now, we'll check if user email contains "admin" or is a specific admin email
     // In production, you'd want a proper role-based system
-    const adminEmails = ['admin@what2cook.com', 'jhty111j4@163.com']; // Add your admin emails here
+    const adminEmails = ['admin@what2cook.com', 'jhty111j4@163.com', 'jhty1114@163.com']; // Add your admin emails here
     const isAdminUser = adminEmails.includes(user.email || '') || user.email?.includes('admin');
     
     setIsAdmin(isAdminUser);
