@@ -186,10 +186,10 @@ const Subscription = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4">
-      <div className="container mx-auto max-w-4xl py-8">
+      <div className="container mx-auto max-w-6xl py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">
-            {isEN ? 'Subscription Plans' : '订阅方案'}
+            {isEN ? 'Upgrade to Premium' : '升级到高级版'}
           </h1>
           <p className="text-muted-foreground">
             {isEN ? 'Choose the plan that works best for you' : '选择最适合您的方案'}
@@ -231,268 +231,232 @@ const Subscription = () => {
                   </p>
                 </div>
               </div>
-              {subscription.subscription_type === 'free' && (
-                <div className="text-center">
-                  <Button 
-                    onClick={handleVerifyPayment} 
-                    disabled={isLoading}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {isLoading 
-                      ? (isEN ? 'Verifying...' : '验证中...') 
-                      : (isEN ? 'I just paid - Activate Premium' : '我刚付款了 - 激活高级版')
-                    }
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {isEN 
-                      ? 'Complete payment first, then click to activate premium features'
-                      : '请先完成付款，然后点击激活高级功能'
-                    }
-                  </p>
-                </div>
-              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Subscription Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Free Plan */}
-          <Card className={subscription?.subscription_type === 'free' ? 'ring-2 ring-primary' : ''}>
+        {/* Subscription Plans Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Monthly Plan */}
+          <Card className="border-yellow-500/20 hover:border-yellow-500/40 transition-colors">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Free Plan
-                {subscription?.subscription_type === 'free' && (
-                  <Badge variant="outline">Current</Badge>
-                )}
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Crown className="w-5 h-5 text-yellow-500" />
+                {language === 'zh' ? '月付' : 'Monthly'}
               </CardTitle>
               <CardDescription>
-                Perfect for trying out our service
+                {language === 'zh' ? '每月' : 'per month'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-4">
-                Free
+              <div className="text-3xl font-bold mb-4 text-yellow-600">
+                $4.99
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  3 recipe generations
+                  {language === 'zh' ? '无限食谱生成' : 'Unlimited generations'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Basic features
+                  {language === 'zh' ? '所有功能' : 'All features'}
                 </li>
               </ul>
               <Button 
-                variant="outline" 
-                className="w-full"
-                disabled={subscription?.subscription_type === 'free'}
-              >
-                {subscription?.subscription_type === 'free' 
-                  ? 'Current Plan'
-                  : 'Get Started'
-                }
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Basic Monthly Plan */}
-          <Card className={subscription?.subscription_type === 'premium' ? 'ring-2 ring-primary' : 'ring-2 ring-blue-500'}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-blue-500" />
-                {language === 'zh' ? '月付计划' : 'Basic Monthly'}
-                {subscription?.subscription_type === 'premium' && (
-                  <Badge variant="outline">{language === 'zh' ? '当前' : 'Current'}</Badge>
-                )}
-              </CardTitle>
-              <CardDescription>
-                {language === 'zh' ? '轻度用户的理想选择' : 'Great for light users'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥9.9' : '$4.99'}
-                <span className="text-lg font-normal">
-                  {language === 'zh' ? '/月' : '/month'}
-                </span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Unlimited recipe generations
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Basic features
-                </li>
-              </ul>
-              <Button 
-                className="w-full"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
                 onClick={() => handleUpgrade('monthly')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
-                 (language === 'zh' ? '选择月付' : 'Choose Basic')}
+                 (language === 'zh' ? '选择' : 'Select')}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Quarterly Plan */}
-          <Card className="ring-2 ring-yellow-500">
+          {/* Seasonal Plan */}
+          <Card className="border-yellow-500/20 hover:border-yellow-500/40 transition-colors">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Crown className="w-5 h-5 text-yellow-500" />
-                {language === 'zh' ? '季付计划' : 'Quarterly'}
-                <Badge variant="secondary">{language === 'zh' ? '热门' : 'Popular'}</Badge>
+                {language === 'zh' ? '季付' : 'Quarterly'}
+                <Badge className="bg-green-100 text-green-700 text-xs">
+                  {language === 'zh' ? '省 $4' : 'Save $4'}
+                </Badge>
               </CardTitle>
               <CardDescription>
-                {language === 'zh' ? '普通用户最受欢迎的选择' : 'Most popular choice for regular users'}
+                {language === 'zh' ? '3个月' : '3 months'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥29.9' : '$13.99'}
-                <span className="text-lg font-normal">
-                  {language === 'zh' ? '/3个月' : '/3 months'}
-                </span>
+              <div className="text-3xl font-bold mb-4 text-yellow-600">
+                $13.99
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Unlimited recipe generations
+                  {language === 'zh' ? '无限食谱生成' : 'Unlimited generations'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Advanced features
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Priority support
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Premium ingredients database
+                  {language === 'zh' ? '所有功能' : 'All features'}
                 </li>
               </ul>
               <Button 
-                className="w-full"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
                 onClick={() => handleUpgrade('seasonal')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
-                 (language === 'zh' ? '选择季付' : 'Choose Quarterly')}
+                 (language === 'zh' ? '选择' : 'Select')}
               </Button>
             </CardContent>
           </Card>
 
           {/* Annual Plan */}
-          <Card className="ring-2 ring-orange-500">
+          <Card className="border-orange-500/20 hover:border-orange-500/40 transition-colors relative">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-orange-500 text-white">
+                {language === 'zh' ? '推荐' : 'Recommended'}
+              </Badge>
+            </div>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Crown className="w-5 h-5 text-orange-500" />
-                {language === 'zh' ? '年付计划' : 'Annual'}
-                <Badge variant="secondary">{language === 'zh' ? '推荐' : 'Recommended'}</Badge>
+                {language === 'zh' ? '年付' : 'Annual'}
+                <Badge className="bg-green-100 text-green-700 text-xs">
+                  {language === 'zh' ? '省 $10' : 'Save $10'}
+                </Badge>
               </CardTitle>
               <CardDescription>
-                {language === 'zh' ? '普通用户的最佳性价比' : 'Best value for regular users'}
+                {language === 'zh' ? '12个月' : '12 months'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥99.9' : '$49.99'}
-                <span className="text-lg font-normal">
-                  {language === 'zh' ? '/年' : '/year'}
-                </span>
+              <div className="text-3xl font-bold mb-4 text-orange-600">
+                $49.99
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Unlimited recipe generations
+                  {language === 'zh' ? '无限食谱生成' : 'Unlimited generations'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Advanced features
+                  {language === 'zh' ? '所有功能' : 'All features'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Priority support
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Premium ingredients database
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Save $70 compared to monthly
+                  {language === 'zh' ? '最佳性价比' : 'Best value'}
                 </li>
               </ul>
               <Button 
-                className="w-full"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                 onClick={() => handleUpgrade('annual')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
-                 (language === 'zh' ? '选择年付' : 'Choose Annual')}
+                 (language === 'zh' ? '选择' : 'Select')}
               </Button>
             </CardContent>
           </Card>
 
           {/* Lifetime Plan */}
-          <Card>
+          <Card className="border-purple-500/20 hover:border-purple-500/40 transition-colors relative">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-purple-500 text-white">
+                {language === 'zh' ? '终身' : 'Lifetime'}
+              </Badge>
+            </div>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-purple-500" />
-                {language === 'zh' ? '终身计划' : 'Lifetime'}
-                <Badge variant="secondary">{language === 'zh' ? '最佳价值' : 'Best Value'}</Badge>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Zap className="w-5 h-5 text-purple-500" />
+                {language === 'zh' ? '终身' : 'Lifetime'}
+                <Badge className="bg-green-100 text-green-700 text-xs">
+                  {language === 'zh' ? '最佳价值' : 'Best Value'}
+                </Badge>
               </CardTitle>
               <CardDescription>
-                {language === 'zh' ? '一次付款，永久使用' : 'One-time payment, forever access'}
+                {language === 'zh' ? '永久使用' : 'Permanent use'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥159.9' : '$79.99'}
-                <span className="text-lg font-normal">
-                  {language === 'zh' ? ' 一次性' : ' once'}
-                </span>
+              <div className="text-3xl font-bold mb-4 text-purple-600">
+                $79.99
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Unlimited recipe generations
+                  {language === 'zh' ? '无限食谱生成' : 'Unlimited generations'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  All premium features
+                  {language === 'zh' ? '终身更新' : 'Lifetime updates'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  Priority support
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Premium ingredients database
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Lifetime access - no recurring payments
+                  {language === 'zh' ? '无需续费' : 'No renewals'}
                 </li>
               </ul>
               <Button 
-                className="w-full"
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white"
                 onClick={() => handleUpgrade('lifetime')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
-                 (language === 'zh' ? '选择终身' : 'Choose Lifetime')}
+                 (language === 'zh' ? '选择' : 'Select')}
               </Button>
             </CardContent>
           </Card>
-
         </div>
+
+        {/* Payment Confirmation */}
+        {subscription?.subscription_type === 'free' && (
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center gap-2">
+                <Crown className="w-5 h-5" />
+                {language === 'zh' ? '确认付款' : 'Confirm Payment'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'zh' ? '完成付款后点击此按钮激活高级功能' : 'Click this button after completing payment to activate premium features'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button 
+                onClick={handleVerifyPayment} 
+                disabled={isLoading}
+                className="w-full max-w-md"
+                size="lg"
+              >
+                {isLoading 
+                  ? (language === 'zh' ? '验证中...' : 'Verifying...') 
+                  : (language === 'zh' ? '确认付款（请在购买后点击此按钮）' : 'Confirm Payment (Please press this button after purchase)')
+                }
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Restore Purchases for Apple Pay */}
+        {paymentService.isApplePayAvailable() && (
+          <Card className="mt-6">
+            <CardContent className="pt-6 text-center">
+              <Button 
+                variant="outline"
+                onClick={() => handleUpgrade('restore')}
+                disabled={isLoading}
+              >
+                {language === 'zh' ? '恢复购买' : 'Restore Purchases'}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                {language === 'zh' 
+                  ? '如果您之前购买过，可以点击此按钮恢复'
+                  : 'If you previously purchased, click to restore'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
