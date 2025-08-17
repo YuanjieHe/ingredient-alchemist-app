@@ -12,6 +12,14 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { ApplePaymentService } from '@/services/applePaymentService';
 import { supabase } from '@/integrations/supabase/client';
 
+// Stripe Payment Links (no server needed)
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  monthly: 'https://buy.stripe.com/8x200i9hpbLb3Ea4HbbjW03',
+  seasonal: 'https://buy.stripe.com/8x24gy2T15mN2A6ddHbjW02',
+  annual: 'https://buy.stripe.com/bJe3cubpx3eFb6C6PjbjW01',
+  lifetime: 'https://buy.stripe.com/6oU14mgJR4iJb6C1uZbjW00',
+};
+
 interface Recipe {
   id: string;
   title: string;
@@ -191,34 +199,19 @@ export default function Profile() {
         }
       } else {
         // 根据语言选择支付系统
-        const functionName = language === 'zh' ? 'create-zpay-checkout' : 'create-checkout';
-        
-        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(functionName, {
-          body: { planType }
-        });
+        if (language === 'zh') {
+          const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-zpay-checkout', {
+            body: { planType }
+          });
 
-        if (checkoutError) {
-          throw new Error(checkoutError.message);
-        }
+          if (checkoutError) {
+            throw new Error(checkoutError.message);
+          }
 
-        if (checkoutData?.url) {
-          // 中文用户使用zpay，需要在新标签页打开外部链接
-          if (language === 'zh') {
+          if (checkoutData?.url) {
             const newWindow = window.open(checkoutData.url, '_blank');
             if (!newWindow) {
-              // 如果弹窗被阻止，提示用户手动点击
               toast.error('请允许弹窗或手动点击链接完成支付');
-              // 创建一个临时链接供用户手动点击
-              const link = document.createElement('a');
-              link.href = checkoutData.url;
-              link.target = '_blank';
-              link.textContent = '点击此处完成支付';
-              link.style.cssText = 'color: blue; text-decoration: underline; cursor: pointer;';
-              
-              // 找到一个容器来显示链接（比如toast或者页面上的某个位置）
-              toast.info('支付链接已准备就绪，请点击打开');
-              
-              // 5秒后自动尝试跳转
               setTimeout(() => {
                 window.location.href = checkoutData.url;
               }, 100);
@@ -226,12 +219,17 @@ export default function Profile() {
               toast.info('正在跳转到支付页面...');
             }
           } else {
-            // Stripe支付直接跳转
-            window.location.href = checkoutData.url;
-            toast.info('Redirecting to payment page...');
+            throw new Error('未能创建支付链接');
           }
         } else {
-          throw new Error('未能创建支付链接');
+          // Web 直接跳转 Stripe Payment Link（无需后端）
+          const url = STRIPE_PAYMENT_LINKS[planType];
+          if (!url) throw new Error('无效的计划类型');
+          const win = window.open(url, '_blank');
+          if (!win) {
+            window.location.href = url;
+          }
+          toast.info('已在新标签页打开支付页面');
         }
       }
     } catch (error: any) {

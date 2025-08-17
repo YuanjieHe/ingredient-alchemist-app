@@ -11,6 +11,14 @@ import { ApplePaymentService } from '@/services/applePaymentService';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
+// Stripe Payment Links (web fallback)
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  monthly: 'https://buy.stripe.com/8x200i9hpbLb3Ea4HbbjW03',
+  seasonal: 'https://buy.stripe.com/8x24gy2T15mN2A6ddHbjW02',
+  annual: 'https://buy.stripe.com/bJe3cubpx3eFb6C6PjbjW01',
+  lifetime: 'https://buy.stripe.com/6oU14mgJR4iJb6C1uZbjW00',
+};
+
 const Subscription = () => {
   const { subscription, remainingGenerations, canGenerate, refreshSubscription } = useSubscription();
   const { language, t } = useLanguage();
@@ -91,41 +99,14 @@ const Subscription = () => {
             toast.error(result.error || 'Purchase failed');
           }
         } else {
-          // Fallback to Stripe checkout for web users
-          const { data, error } = await supabase.functions.invoke('create-checkout', {
-            body: { planType }
-          });
-
-          if (error) throw error;
-          
-          window.open(data.url, '_blank');
-          toast.info('Please complete payment in the new tab');
-          
-          // 自动检查支付状态（每5秒检查一次）
-          const checkPayment = setInterval(async () => {
-            try {
-              const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-stripe-payment', {
-                headers: {
-                  Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-                },
-              });
-              
-              if (!verifyError && verifyData?.hasActivePremium) {
-                clearInterval(checkPayment);
-                await refreshSubscription();
-                toast.success('Payment successful! Premium features activated!');
-                setIsLoading(false);
-              }
-            } catch (error) {
-              console.log('Checking payment status...');
-            }
-          }, 5000);
-          
-          // 30秒后停止检查
-          setTimeout(() => {
-            clearInterval(checkPayment);
-            setIsLoading(false);
-          }, 30000);
+          // Web 直接跳转 Stripe Payment Link（无需后端）
+          const url = STRIPE_PAYMENT_LINKS[planType];
+          if (!url) throw new Error('Invalid plan type');
+          const win = window.open(url, '_blank');
+          if (!win) {
+            window.location.href = url;
+          }
+          toast.info(isEN ? 'Opened checkout in a new tab' : '已在新标签页打开支付页面');
         }
       }
     } catch (error: any) {
