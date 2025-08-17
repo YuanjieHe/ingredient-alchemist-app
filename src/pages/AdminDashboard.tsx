@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       
-      // Fetch all data in parallel
+      // Use RPC calls to bypass RLS for admin access
       const [
         usersResult,
         subscriptionsResult,
@@ -69,12 +69,12 @@ export default function AdminDashboard() {
         ingredientsResult,
         ordersResult
       ] = await Promise.all([
-        supabase.from('profiles').select('*'),
-        supabase.from('user_subscriptions').select('*'),
-        supabase.from('recipes_history').select('*'),
-        supabase.from('favorite_recipes').select('*'),
-        supabase.from('ingredients_bank').select('*'),
-        supabase.from('zpay_orders').select('*')
+        supabase.rpc('get_admin_user_count'),
+        supabase.rpc('get_admin_subscriptions'),
+        supabase.rpc('get_admin_recipes_count'),
+        supabase.rpc('get_admin_favorites_count'),
+        supabase.rpc('get_admin_ingredients_count'),
+        supabase.rpc('get_admin_orders')
       ]);
 
       // Calculate statistics
