@@ -314,7 +314,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥14' : '$8'}
+                {language === 'zh' ? '¥9.9' : '$4.99'}
                 <span className="text-lg font-normal">
                   {language === 'zh' ? '/月' : '/month'}
                 </span>
@@ -354,7 +354,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥30' : '$20'}
+                {language === 'zh' ? '¥29.9' : '$13.99'}
                 <span className="text-lg font-normal">
                   {language === 'zh' ? '/3个月' : '/3 months'}
                 </span>
@@ -379,7 +379,7 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => handleUpgrade('quarterly')}
+                onClick={() => handleUpgrade('seasonal')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
@@ -402,7 +402,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥98' : '$98'}
+                {language === 'zh' ? '¥99.9' : '$49.99'}
                 <span className="text-lg font-normal">
                   {language === 'zh' ? '/年' : '/year'}
                 </span>
@@ -431,7 +431,7 @@ const Subscription = () => {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => handleUpgrade('yearly')}
+                onClick={() => handleUpgrade('annual')}
                 disabled={isLoading}
               >
                 {isLoading ? (language === 'zh' ? '处理中...' : 'Processing...') : 
@@ -454,7 +454,7 @@ const Subscription = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-4">
-                {language === 'zh' ? '¥168' : '$168'}
+                {language === 'zh' ? '¥159.9' : '$79.99'}
                 <span className="text-lg font-normal">
                   {language === 'zh' ? ' 一次性' : ' once'}
                 </span>
