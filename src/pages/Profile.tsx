@@ -473,14 +473,14 @@ export default function Profile() {
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥14' : '$8'}
+                            {language === 'zh' ? '¥9.9' : '$4.99'}
                           </div>
                           <div className="text-sm text-muted-foreground">{t('monthly')}</div>
                           <div className="text-xs text-muted-foreground mt-1">{t('perMonth')}</div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
-                            onClick={() => handlePurchase('monthly', language === 'zh' ? 14 : 8)}
+                            onClick={() => handlePurchase('monthly', language === 'zh' ? 9.9 : 4.99)}
                             disabled={paymentLoading}
                           >
                             {paymentLoading && selectedPlan === 'monthly' ? t('processing') : t('select')}
@@ -492,20 +492,20 @@ export default function Profile() {
                       <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥30' : '$20'}
+                            {language === 'zh' ? '¥29.9' : '$13.99'}
                           </div>
                           <div className="text-sm text-muted-foreground">{t('quarterly')}</div>
                           <div className="text-xs text-muted-foreground mt-1">{t('months3')}</div>
                           <div className="text-xs text-green-600">
-                            {t('saveAmount')} {language === 'zh' ? '¥12' : '$4'}
+                            {t('saveAmount')} {language === 'zh' ? '¥4.9' : '$4.99'}
                           </div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
-                            onClick={() => handlePurchase('quarterly', language === 'zh' ? 30 : 20)}
+                            onClick={() => handlePurchase('seasonal', language === 'zh' ? 29.9 : 13.99)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'quarterly' ? t('processing') : t('select')}
+                            {paymentLoading && selectedPlan === 'seasonal' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -517,20 +517,20 @@ export default function Profile() {
                         </div>
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥98' : '$98'}
+                            {language === 'zh' ? '¥99.9' : '$49.99'}
                           </div>
                           <div className="text-sm text-muted-foreground">{t('annual')}</div>
                           <div className="text-xs text-muted-foreground mt-1">{t('months12')}</div>
                           <div className="text-xs text-green-600">
-                            {t('saveAmount')} {language === 'zh' ? '¥70' : '$70'}
+                            {t('saveAmount')} {language === 'zh' ? '¥18.9' : '$9.89'}
                           </div>
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
-                            onClick={() => handlePurchase('yearly', language === 'zh' ? 98 : 98)}
+                            onClick={() => handlePurchase('annual', language === 'zh' ? 99.9 : 49.99)}
                             disabled={paymentLoading}
                           >
-                            {paymentLoading && selectedPlan === 'yearly' ? t('processing') : t('select')}
+                            {paymentLoading && selectedPlan === 'annual' ? t('processing') : t('select')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -542,7 +542,7 @@ export default function Profile() {
                         </div>
                         <CardContent className="p-3 text-center">
                           <div className="text-lg font-bold text-primary">
-                            {language === 'zh' ? '¥168' : '$168'}
+                            {language === 'zh' ? '¥159.9' : '$79.99'}
                           </div>
                           <div className="text-sm text-muted-foreground">{t('lifetime')}</div>
                           <div className="text-xs text-muted-foreground mt-1">{t('permanentUse')}</div>
@@ -550,7 +550,7 @@ export default function Profile() {
                           <Button 
                             className="w-full mt-3" 
                             size="sm"
-                            onClick={() => handlePurchase('lifetime', language === 'zh' ? 168 : 168)}
+                            onClick={() => handlePurchase('lifetime', language === 'zh' ? 159.9 : 79.99)}
                             disabled={paymentLoading}
                           >
                             {paymentLoading && selectedPlan === 'lifetime' ? t('processing') : t('select')}
