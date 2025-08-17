@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -354,7 +354,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_admin_favorites_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_admin_ingredients_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_admin_orders: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string
+          plan_type: string
+          status: string
+          user_id: string
+        }[]
+      }
+      get_admin_recipe_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_admin_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          subscription_status: string
+          subscription_type: string
+          user_id: string
+        }[]
+      }
+      get_admin_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          display_name: string
+          id: string
+          language: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

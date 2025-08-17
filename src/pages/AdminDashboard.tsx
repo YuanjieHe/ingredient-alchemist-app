@@ -64,30 +64,33 @@ export default function AdminDashboard() {
       const [
         usersResult,
         subscriptionsResult,
-        recipesResult,
-        favoritesResult,
-        ingredientsResult,
+        recipesCountResult,
+        favoritesCountResult,
+        ingredientsCountResult,
         ordersResult
       ] = await Promise.all([
-        supabase.rpc('get_admin_user_count'),
-        supabase.rpc('get_admin_subscriptions'),
-        supabase.rpc('get_admin_recipes_count'),
-        supabase.rpc('get_admin_favorites_count'),
-        supabase.rpc('get_admin_ingredients_count'),
-        supabase.rpc('get_admin_orders')
+        (supabase as any).rpc('get_admin_users'),
+        (supabase as any).rpc('get_admin_subscriptions'),
+        (supabase as any).rpc('get_admin_recipe_count'),
+        (supabase as any).rpc('get_admin_favorites_count'),
+        (supabase as any).rpc('get_admin_ingredients_count'),
+        (supabase as any).rpc('get_admin_orders')
       ]);
 
       // Calculate statistics
-      const totalUsers = usersResult.data?.length || 0;
-      const subscriptions = subscriptionsResult.data || [];
-      const paidUsers = subscriptions.filter(sub => sub.subscription_type !== 'free').length;
+      const usersData = usersResult.data ?? [];
+      const subscriptions = subscriptionsResult.data ?? [];
+      const ordersData = ordersResult.data ?? [];
+
+      const totalUsers = usersData.length;
+      const paidUsers = subscriptions.filter((sub: any) => sub.subscription_type !== 'free').length;
       const freeUsers = totalUsers - paidUsers;
 
-      // Get recent users (last 10)
-      const recentUsers = usersResult.data?.slice(-10) || [];
+      // Get recent users (latest 10)
+      const recentUsers = usersData.slice(0, 10);
       
-      // Get recent orders (last 10)
-      const recentOrders = ordersResult.data?.slice(-10) || [];
+      // Get recent orders (latest 10)
+      const recentOrders = ordersData.slice(0, 10);
 
       // Subscription breakdown
       const subscriptionBreakdown = subscriptions.reduce((acc: any, sub) => {
