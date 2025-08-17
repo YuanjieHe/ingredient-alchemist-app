@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import IngredientsBank from "./pages/IngredientsBank";
 import Subscription from "./pages/Subscription";
 import DataBackup from "./pages/DataBackup";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -74,6 +75,10 @@ const App = () => (
                     <DataBackup />
                   </div>
                 } 
+              />
+              <Route 
+                path="/admin" 
+                element={<AdminDashboard />} 
               />
               <Route 
                 path="/recipe/:id" 
