@@ -2,8 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
-const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = 'AIzaSyC5SRTd-W6TGeiWnSEia1rrzoXRAZl9h2Q';
+const api302Key = 'sk-482tbry6f6ZOssiuzD1kDyIqNczz231pyVoj2HS7AxgdzjL7';
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -24,9 +24,9 @@ serve(async (req) => {
   try {
     console.log('=== EDGE FUNCTION STARTED ===');
     
-    if (!deepseekApiKey && !openaiApiKey) {
-      console.error('Neither DeepSeek nor OpenAI API key configured');
-      throw new Error('No API key configured');
+    if (!geminiApiKey) {
+      console.error('Gemini API key not configured');
+      throw new Error('Gemini API key not configured');
     }
 
     const requestBody = await req.json();
@@ -108,92 +108,83 @@ serve(async (req) => {
 
     let generatedText;
     let usingFallback = false;
-    let deepseekError = null;
-    let openaiError = null;
+    let geminiError = null;
+    let api302Error = null;
 
     try {
-      console.log('=== CALLING DEEPSEEK API ===');
-      console.log('Generating recipes with DeepSeek...');
+      console.log('=== CALLING GEMINI API ===');
+      console.log('Generating recipes with Gemini...');
       
-      if (deepseekApiKey) {
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${deepseekApiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'deepseek-chat',
-            messages: [
-              {
-                role: 'system',
-                content: getSystemPrompt(cuisineType, language)
-              },
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            temperature: 0.8,
-            max_tokens: 8000,
-            stream: false
-          }),
-        });
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${getSystemPrompt(cuisineType, language)}\n\n${prompt}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 1.0, // 增加随机性
+            maxOutputTokens: 8000,
+            topP: 0.95,  // 增加创造性
+            topK: 40     // 控制随机性范围
+          }
+        }),
+      });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          deepseekError = {
-            status: response.status,
-            statusText: response.statusText,
-            message: errorText
-          };
-          console.error('DeepSeek API error:', response.status, response.statusText, errorText);
-          
-          // If DeepSeek fails, try OpenAI
-          if (openaiApiKey) {
-            console.log('DeepSeek failed, switching to OpenAI...');
-            usingFallback = true;
-            try {
-              generatedText = await generateWithOpenAI(getSystemPrompt(cuisineType, language), prompt);
-            } catch (openaiErr) {
-              openaiError = openaiErr;
-              throw new Error(`Both APIs failed - DeepSeek: ${response.status} ${response.statusText}, OpenAI: ${openaiErr.message}`);
-            }
-          } else {
-            throw new Error(`DeepSeek API error: ${response.status} ${response.statusText} - ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        geminiError = {
+          status: response.status,
+          statusText: response.statusText,
+          message: errorText
+        };
+        console.error('Gemini API error:', response.status, response.statusText, errorText);
+        
+        // If Gemini fails, try 302.ai
+        if (api302Key) {
+          console.log('Gemini failed, switching to 302.ai...');
+          usingFallback = true;
+          try {
+            generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
+          } catch (api302Err) {
+            api302Error = api302Err;
+            throw new Error(`Both APIs failed - Gemini: ${response.status} ${response.statusText}, 302.ai: ${api302Err.message}`);
           }
         } else {
-          const data = await response.json();
-          generatedText = data.choices[0].message.content;
-          console.log('Raw DeepSeek response received successfully');
-          console.log('=== COMPLETE DEEPSEEK RESPONSE ===');
-          console.log(generatedText);
-          console.log('=== END DEEPSEEK RESPONSE ===');
+          throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
         }
-      } else if (openaiApiKey) {
-        console.log('Using OpenAI as primary API...');
-        generatedText = await generateWithOpenAI(getSystemPrompt(cuisineType, language), prompt);
+      } else {
+        const data = await response.json();
+        generatedText = data.candidates[0].content.parts[0].text;
+        console.log('Raw Gemini response received successfully');
+        console.log('=== COMPLETE GEMINI RESPONSE ===');
+        console.log(generatedText);
+        console.log('=== END GEMINI RESPONSE ===');
       }
     } catch (error) {
-      // If DeepSeek fails completely and we have OpenAI API key, try OpenAI as fallback
-      if (openaiApiKey && !usingFallback) {
-        console.log('DeepSeek failed completely, trying OpenAI as fallback...');
+      // If Gemini fails completely and we have 302.ai API key, try 302.ai as fallback
+      if (api302Key && !usingFallback) {
+        console.log('Gemini failed completely, trying 302.ai as fallback...');
         try {
-          generatedText = await generateWithOpenAI(getSystemPrompt(cuisineType, language), prompt);
+          generatedText = await generateWith302AI(getSystemPrompt(cuisineType, language), prompt);
           usingFallback = true;
-        } catch (openaiErr) {
-          openaiError = openaiErr;
-          console.error('Both APIs failed:', error.message, openaiErr.message);
+        } catch (api302Err) {
+          api302Error = api302Err;
+          console.error('Both APIs failed:', error.message, api302Err.message);
           
           // Return detailed error information for debugging
           return new Response(JSON.stringify({ 
             error: 'Both APIs failed', 
             details: {
-              deepseek: deepseekError || { message: error.message },
-              openai: { message: openaiErr.message, status: openaiErr.status || 'unknown' }
+              gemini: geminiError || { message: error.message },
+              api302: { message: api302Err.message, status: api302Err.status || 'unknown' }
             },
             message: 'Recipe generation failed. Please check API status and try again.',
-            debugInfo: `DeepSeek: ${deepseekError?.status || 'unknown error'}, OpenAI: ${openaiErr.status || 'unknown error'}`
+            debugInfo: `Gemini: ${geminiError?.status || 'unknown error'}, 302.ai: ${api302Err.status || 'unknown error'}`
           }), {
             status: 503,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -205,7 +196,7 @@ serve(async (req) => {
     }
 
     if (usingFallback) {
-      console.log('Successfully generated recipes using OpenAI fallback');
+      console.log('Successfully generated recipes using 302.ai fallback');
     }
 
     // Clean and parse the JSON response
@@ -260,9 +251,9 @@ serve(async (req) => {
       } catch (finalError) {
         console.error('Final parse attempt failed:', finalError);
         
-        // If we used OpenAI fallback and still failed, try to extract partial data
+        // If we used 302.ai and still failed, try to extract partial data
         if (usingFallback) {
-          console.log('Attempting to extract partial recipe data from fallback API response...');
+          console.log('Attempting to extract partial recipe data from 302.ai response...');
           // Try to extract title and description at minimum
           const titleMatch = generatedText.match(/"title"\s*:\s*"([^"]+)"/);
           const descMatch = generatedText.match(/"description"\s*:\s*"([^"]+)"/);
@@ -684,44 +675,42 @@ ${isEnglish ? 'Every step must include' : '每个步骤必须包含'}:
 ${isEnglish ? 'CRITICAL: Every step must be as detailed as the Braised Pork example provided, with precise measurements, timing, temperatures, and professional techniques. Include exact quantities, specific time windows, alternative methods, and critical control points. Respond ONLY with valid JSON. No other text.' : 'CRITICAL: 每个步骤都必须像提供的红烧肉示例一样详细，包含精确的用量、时间、温度和专业技法。包括确切的数量、具体的时间窗口、替代方法和关键控制点。仅用有效的JSON格式回复，不要其他文本。'}`;
 }
 
-// Helper function to generate with OpenAI API
-async function generateWithOpenAI(systemPrompt: string, userPrompt: string): Promise<string> {
-  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-  
-  if (!openaiApiKey) {
-    throw new Error('OpenAI API key not configured');
+// Helper function to generate recipes using 302.ai API as fallback
+async function generateWith302AI(systemPrompt: string, prompt: string): Promise<string> {
+  if (!api302Key) {
+    throw new Error('302.ai API key not available');
   }
 
-  console.log('Using OpenAI API for recipe generation...');
+  console.log('Using 302.ai API for recipe generation...');
   
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://api.302.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openaiApiKey}`,
+      'Authorization': `Bearer ${api302Key}`,
+      'User-Agent': 'https://api.302.ai/v1/chat/completions',
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: '302-agent-what2cookgpt4o',
       messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user', 
-          content: userPrompt
-        }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
       ],
-      temperature: 0.8,
-      max_tokens: 8000
+      temperature: 1.0, // 增加随机性
+      max_tokens: 8000,
+      top_p: 0.95,
+      frequency_penalty: 0.8, // 减少重复内容
+      presence_penalty: 0.6,  // 鼓励新颖性
+      stream: false
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('OpenAI API error:', response.status, response.statusText, errorText);
+    console.error('302.ai API error:', response.status, response.statusText, errorText);
     
-    const error = new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+    // Create detailed error object for better debugging
+    const error = new Error(`302.ai API error: ${response.status} ${response.statusText} - ${errorText}`);
     (error as any).status = response.status;
     (error as any).statusText = response.statusText;
     (error as any).details = errorText;
@@ -731,10 +720,10 @@ async function generateWithOpenAI(systemPrompt: string, userPrompt: string): Pro
 
   const data = await response.json();
   const generatedText = data.choices[0].message.content;
-  console.log('Raw OpenAI response received successfully');
-  console.log('=== COMPLETE OPENAI RESPONSE ===');
+  console.log('Raw 302.ai response received successfully');
+  console.log('=== COMPLETE 302.AI RESPONSE ===');
   console.log(generatedText);
-  console.log('=== END OPENAI RESPONSE ===');
+  console.log('=== END 302.AI RESPONSE ===');
   
   return generatedText;
 }
@@ -852,100 +841,48 @@ Please respond in the following JSON format:
 }`;
 
   try {
-    const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('Generating detailed recipe with Gemini...');
     
-    let result;
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + geminiApiKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 1.0, // 增加随机性
+          maxOutputTokens: 4000,
+          topP: 0.95,
+          topK: 40
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error in single recipe generation:', response.status, response.statusText, errorText);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    let generatedText = data.candidates[0].content.parts[0].text;
     
-    if (deepseekApiKey) {
-      console.log('Generating detailed recipe with DeepSeek...');
-      
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${deepseekApiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.8,
-          max_tokens: 4000
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      let generatedText = data.choices[0].message.content;
-      
-      // Clean and parse the JSON response
-      let cleanedText = generatedText.trim();
-      if (cleanedText.startsWith('```json')) {
-        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (cleanedText.startsWith('```')) {
-        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      result = JSON.parse(cleanedText);
-    } else if (openaiApiKey) {
-      console.log('Generating detailed recipe with OpenAI...');
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.8,
-          max_tokens: 4000
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      let generatedText = data.choices[0].message.content;
-      
-      // Clean and parse the JSON response
-      let cleanedText = generatedText.trim();
-      if (cleanedText.startsWith('```json')) {
-        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (cleanedText.startsWith('```')) {
-        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      result = JSON.parse(cleanedText);
-    } else {
-      throw new Error('No API key configured');
+    // Clean and parse the JSON response
+    let cleanedText = generatedText.trim();
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
     
+    const result = JSON.parse(cleanedText);
     console.log('Successfully generated detailed single recipe');
+    
     return result;
   } catch (error) {
     console.error('Error generating detailed recipe:', error);
